@@ -9,7 +9,7 @@ class InvoicesController < ApplicationController
     def receive
         # We receive the invoice ID from the provider.  Recibimos la cuenta a la cual tenemos que transferir.
         @invoice = Invoice.create!(invoice_params)
-        render json: {ok: "notificación recibida exitosamente"}
+        render json: {ok: "notificación recibida exitosamente"} , status: 201
     end
 
 

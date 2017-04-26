@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170426232906) do
+ActiveRecord::Schema.define(version: 20170426234219) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -34,6 +34,12 @@ ActiveRecord::Schema.define(version: 20170426232906) do
     t.integer  "purchase_order_id"
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
+    t.string   "invoiceid"
+    t.boolean  "accepted"
+    t.boolean  "rejected"
+    t.boolean  "delivered"
+    t.boolean  "paid"
+    t.string   "account"
     t.index ["purchase_order_id"], name: "index_invoices_on_purchase_order_id", using: :btree
   end
 
@@ -68,7 +74,7 @@ ActiveRecord::Schema.define(version: 20170426232906) do
     t.integer  "unit_price"
     t.datetime "created_at",     null: false
     t.datetime "updated_at",     null: false
-    t.string   "poid" 
+    t.string   "poid"
     t.string   "rejection"
     t.index ["client_id"], name: "index_purchase_orders_on_client_id", using: :btree
   end
