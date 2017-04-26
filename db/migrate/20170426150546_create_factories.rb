@@ -1,4 +1,5 @@
 class CreateFactories < ActiveRecord::Migration[5.0]
+
   def change
     create_table :factories do |t|
       t.integer :status

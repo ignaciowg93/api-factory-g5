@@ -57,13 +57,13 @@ ActiveRecord::Schema.define(version: 20170426212132) do
   end
 
   create_table "purchase_orders", force: :cascade do |t|
-    t.integer  "payment_method"
-    t.integer  "payment_option"
+    t.string   "payment_method"
+    t.string   "payment_option"
     t.datetime "date"
     t.integer  "client_id"
     t.string   "sku"
     t.integer  "amount"
-    t.boolean  "status"
+    t.string  "status"
     t.datetime "delivery_date"
     t.integer  "unit_price"
     t.datetime "created_at",     null: false
