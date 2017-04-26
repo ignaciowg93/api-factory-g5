@@ -1,5 +1,13 @@
 class PurchaseOrdersController < ApplicationController
 
+
+##BUYING
+    def accept
+        #The provider accepts a PO that we created. 
+    end
+    def reject
+        # The provider rejects a PO created by us. Check its existance.
+    end
     def new
         @purchase_order=PurchaseOrder.new
     end
@@ -11,10 +19,14 @@ class PurchaseOrdersController < ApplicationController
       rescue ActiveRecord::RecordInvalid
         render json:{error: "no se pudo enviar OC"}, status: 500
       end
-
-
-
-
+    end
+    
+###SELLING
+    def receive
+        #we receive a PO created by someone else, for us to sell. Check if it exists in the PO system.
+    end
+    
+    
 private 
 
     def purchase_order_params
