@@ -7,9 +7,9 @@ class PurchaseOrdersController < ApplicationController
         begin
             @purchase_order = set_purchase_order
             @purchase_order.status = "accepted"
-            render json: {ok: "Respuesta Recibida " }, status: 201
+            render json: {ok: "Resolución recibida exitosamente " }, status: 201
         rescue ActiveRecord::RecordNotFound 
-            render json:{error: "No se encontró u a orden con el id"}, status: 404
+            render json:{error: "Id no asociado a OC por resolver"}, status: 404
         end
 
     end
@@ -17,9 +17,9 @@ class PurchaseOrdersController < ApplicationController
          begin
             @purchase_order = set_purchase_order
             @purchase_order.status = "rejected"
-            render json: {ok: "Respuesta Recibida " }, status: 201
+            render json: {ok: "Resolución recibida exitosamente" }, status: 201
         rescue ActiveRecord::RecordNotFound 
-            render json:{error: "No se encontró u a orden con el id"}, status: 404
+            render json:{error: "Id no asociado a OC por resolver"}, status: 404
         end
         
         # The provider rejects a PO created by us. Check its existance.
@@ -33,7 +33,8 @@ class PurchaseOrdersController < ApplicationController
     def receive
         #we receive a PO created by someone else, for us to sell. Check if it exists in the PO system.
        begin
-        @purchase_order = PurchaseOrder.create!(purchase_order_params)
+        @purchase_order = PurchaseOrder.create!(purchase_order_params)  
+        @purchase_order.poid = params(:id)
         render json:{ok: "OC recibida exitosamente"} , status:201
       rescue ActiveRecord::RecordInvalid
         render json:{error: "no se pudo enviar OC"}, status: 500
@@ -44,11 +45,11 @@ class PurchaseOrdersController < ApplicationController
 private 
 
     def purchase_order_params
-        params.permit(:purchase_order, :payment_method , :payment_option)
+        params.permit(:purchase_order, :payment_method , :payment_option, :rejection, :poid)
     end
 
     def set_purchase_order
-        @purchase_order = PurchaseOrder.find(params[:id])
+        @purchase_order = PurchaseOrder.find(params[:poid])
     end
 
     #TODO
