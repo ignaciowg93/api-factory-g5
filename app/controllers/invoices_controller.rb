@@ -8,6 +8,8 @@ class InvoicesController < ApplicationController
 
     def receive
         # We receive the invoice ID from the provider.  Recibimos la cuenta a la cual tenemos que transferir.
+        @invoice = Invoice.create!(invoice_params)
+        render json: {ok: "notificación recibida exitosamente"}
     end
 
 
@@ -32,9 +34,10 @@ class InvoicesController < ApplicationController
 private
 
     def invoice_params
+        params.permit(:rejected,:accepted, :paid, :invoiceid,:delivered, :account )
     end
 
     def set_invoice
-        @invoice = Invoice.find(params[:id])
+        @invoice = Invoice.find(params[:invoiceid])
     end
 end

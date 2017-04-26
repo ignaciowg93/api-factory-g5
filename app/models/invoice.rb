@@ -10,4 +10,6 @@
 
 class Invoice < ApplicationRecord
   belongs_to :purchase_order
+
+  validates :invoiceid, uniqueness: true
 end
