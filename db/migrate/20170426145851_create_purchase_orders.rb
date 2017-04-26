@@ -8,7 +8,7 @@ class CreatePurchaseOrders < ActiveRecord::Migration[5.0]
       t.string :sku
       t.integer :amount
       t.boolean :status
-      t.datetima :delivery_date
+      t.datetime :delivery_date
       t.integer :unit_price
 
       t.timestamps
