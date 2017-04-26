@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  payment_method: 1
+  payment_option: 1
+  date: 2017-04-26 11:58:51
+  client: one
+  sku: MyString
+  amount: 1
+  status: false
+  delivery_date: 
+  unit_price: 1
+
+two:
+  payment_method: 1
+  payment_option: 1
+  date: 2017-04-26 11:58:51
+  client: two
+  sku: MyString
+  amount: 1
+  status: false
+  delivery_date: 
+  unit_price: 1
