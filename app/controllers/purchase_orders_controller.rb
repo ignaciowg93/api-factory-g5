@@ -11,6 +11,7 @@ class PurchaseOrdersController < ApplicationController
       rescue ActiveRecord::RecordInvalid
         render json:{error: "no se pudo enviar OC"}, status: 500
       end
+    end
 
 
 
