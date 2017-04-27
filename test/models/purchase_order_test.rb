@@ -3,10 +3,9 @@
 # Table name: purchase_orders
 #
 #  id             :integer          not null, primary key
-#  payment_method :integer
-#  payment_option :integer
+#  payment_method :string
+#  payment_option :string
 #  date           :datetime
-#  client_id      :integer
 #  sku            :string
 #  amount         :integer
 #  status         :boolean
@@ -14,6 +13,8 @@
 #  unit_price     :integer
 #  created_at     :datetime         not null
 #  updated_at     :datetime         not null
+#  poid           :string
+#  rejection      :string
 #
 
 require 'test_helper'
