@@ -63,8 +63,8 @@ ActiveRecord::Schema.define(version: 20170427004647) do
   end
 
   create_table "purchase_orders", force: :cascade do |t|
-    t.string   "payment_method"
-    t.string   "payment_option"
+    t.integer  "payment_method"
+    t.integer  "payment_option"
     t.datetime "date"
     t.string   "sku"
     t.integer  "amount"
