@@ -40,8 +40,7 @@ class PurchaseOrdersController < ApplicationController
         render json:{error: "no se pudo enviar OC"}, status: 500
       end
     end
-    
-    
+
 private 
 
     def purchase_order_params
