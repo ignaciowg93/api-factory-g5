@@ -17,7 +17,6 @@
 #
 
 class PurchaseOrder < ApplicationRecord
-  belongs_to :client
   validates :poid, uniqueness: true
 
 end
