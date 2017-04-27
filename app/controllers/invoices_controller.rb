@@ -8,10 +8,18 @@ class InvoicesController < ApplicationController
 
     def receive
         # We receive the invoice ID from the provider.  Recibimos la cuenta a la cual tenemos que transferir.
-        @invoice = Invoice.new(invoice_params)
-        @invoice.invoiceid = params[:id]
-        @invoice.save!
-        render json: {ok: "notificación recibida exitosamente"} , status: 201
+        begin
+            @invoice = Invoice.new(invoice_params)
+            @invoice.invoiceid = params[:id]
+            if @invoice.save
+                @invoice.save!
+                render json: {ok: "notificación recibida exitosamente"} , status: 201    
+            else
+                render json: {error: "No se pudo enviar resolución"}, status: 500    
+            end
+         rescue ActiveRecord::RecordNotFound 
+            render json:{error: "Id no asociado a OC por resolver"}, status: 404
+         end
     end
 
 
