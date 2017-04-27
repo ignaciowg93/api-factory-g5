@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170427004647) do
+ActiveRecord::Schema.define(version: 20170427030924) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -40,6 +40,13 @@ ActiveRecord::Schema.define(version: 20170427004647) do
     t.boolean  "delivered"
     t.boolean  "paid"
     t.string   "account"
+    t.integer  "price"
+    t.integer  "tax"
+    t.integer  "total_price"
+    t.string   "proveedor"
+    t.string   "cliente"
+    t.datetime "date"
+    t.string   "po_idtemp"
     t.index ["purchase_order_id"], name: "index_invoices_on_purchase_order_id", using: :btree
   end
 
