@@ -15,15 +15,15 @@ Rails.application.routes.draw do
 
 #Facturas
 
-  put 'invoices/:id' , to: 'invoice#receive'
+  put 'invoices/:id' , to: 'invoices#receive'
 
-  patch 'invoices/:id/accepted' , to: 'invoice#recieve'
+  patch 'invoices(/:id(/accepted))' , to: 'invoice#accepted'
   
-  patch 'invoices/:id/rejected' , to: 'invoice#recieve'
+  patch 'invoices(/:id(/rejected))' , to: 'invoice#rejected'
   
-  patch 'invoices/:id/delivered' , to: 'invoice#recieve'
+  patch 'invoices(/:id(/delivered))' , to: 'invoice#delivered'
 
-  patch 'invoices/:id/paid' , to: 'invoice#recieve'
+  patch 'invoices(/:id(/paid))' , to: 'invoice#paid'
 
 
 end
