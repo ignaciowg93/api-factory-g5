@@ -13,6 +13,7 @@ class InvoicesController < ApplicationController
             render json: {ok: "notificación recibida exitosamente"} , status: 201
         rescue
             render json:{error: "no se pudo enviar notificacion"}, status: 500
+        end
     end
 
 
@@ -63,6 +64,7 @@ class InvoicesController < ApplicationController
             render json: {ok: "Notificacion recibida exitosamente"}, status:201
         rescue ActiveRecord::RecordInvalid
             render json: {error: "No se pudo enviar notificacion"}, status: 500
+        end
 
     end
 
