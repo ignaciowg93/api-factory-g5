@@ -47,7 +47,7 @@ class InvoicesController < ApplicationController
 private
 
     def invoice_params
-        params.require(:invoice).permit(:id,:rejected,:accepted, :paid,:delivered, :account,:date,:proveedor,:cliente,:price, :tax, :total_price , :purchase_order_id,:invoiceid )
+        params.require(:invoice).permit(:id,:rejected,:accepted, :paid,:delivered, :account,:date,:proveedor,:cliente,:price, :tax, :total_price ,:po_idtemp,:invoiceid )
     end
 
     def set_invoice
