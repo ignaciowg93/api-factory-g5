@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170426234219) do
+ActiveRecord::Schema.define(version: 20170427004647) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -66,7 +66,6 @@ ActiveRecord::Schema.define(version: 20170426234219) do
     t.string   "payment_method"
     t.string   "payment_option"
     t.datetime "date"
-    t.integer  "client_id"
     t.string   "sku"
     t.integer  "amount"
     t.boolean  "status"
@@ -76,7 +75,6 @@ ActiveRecord::Schema.define(version: 20170426234219) do
     t.datetime "updated_at",     null: false
     t.string   "poid"
     t.string   "rejection"
-    t.index ["client_id"], name: "index_purchase_orders_on_client_id", using: :btree
   end
 
   create_table "warehouses", force: :cascade do |t|
@@ -89,5 +87,4 @@ ActiveRecord::Schema.define(version: 20170426234219) do
   add_foreign_key "invoices", "purchase_orders"
   add_foreign_key "messages", "clients"
   add_foreign_key "products", "warehouses"
-  add_foreign_key "purchase_orders", "clients"
 end
