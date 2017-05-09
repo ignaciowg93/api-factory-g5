@@ -12,4 +12,10 @@
 #
 
 class Product < ApplicationRecord
+
+   
+    #TODO Referencia a otros productos ( has_many or null).
+    #TODO REferencia a clientes y proveedores.( Has_mny o null).
+    #JOINT tabla de productos con productos. 
+    # Usar el trough. 
 end

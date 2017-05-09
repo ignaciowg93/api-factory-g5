@@ -67,4 +67,20 @@ private
 
     #TODO
     #When a Oc is creaed we have to check its existance in the OC server. If not return a 404.
+
+
+
+
+    #TODOS2
+    #Crear orden de compra, basado en el Cliente recibido por ApplicationController.Máximo 5000 por orden de compra. 
+    #Decidir loop de ordenes de compra. Ver errores de rechazos con la ordenes de compra.
+    #Crear orden de compra ( Sistem Orden de compra). // Crear Orden De Compra 
+    #Mandar orden de compra al cliente (B2B). //Enviar Orden De Compra
+    #Recibir apruebo o rechazo de la orden  //
+    # Frente a rechazo mapear los proveedores para budcar siguiente posible proveedor Y volver a tratar.
+    #Una vez creada y aceptada ,Devolverte a API, con el id de OC.
+    #Desde la APi de marca como despachada
+
+
+
 end
