@@ -1,3 +1,5 @@
+require "http"
+
 class ApplicationController < ActionController::API
     rescue_from ActiveRecord::RecordNotFound, with: :record_not_found_exception
     rescue_from ActiveRecord::RecordNotUnique, with: :record_not_unique_exception
@@ -57,9 +59,9 @@ class ApplicationController < ActionController::API
 
 
     # Cotizar productos. en este sprint es solo ver el stock.
-    
+
     # Hacer un for de búsqueda, por lo productos.
-    #Elegir proveedor de compra. Mandar esta elección a orden de compra. 
+    #Elegir proveedor de compra. Mandar esta elección a orden de compra.
     #Después de aceptada la OC,
     #Mandar al proveedor el Id del alamcen a recepcionar los productos de la OC asociada.
     #Esperar notificación de despacho desde proveedor.
@@ -68,7 +70,7 @@ class ApplicationController < ActionController::API
     #Mandar a la bodega. Get sku de stock.
     #Te devuelve un SKU con todos los totales
     #Verificar stock mínimo de producción.
-    #Si no 
+    #Si no
         #Llamar al abastecimiento de MP.(Block anterior)
     #Una vez con las materias primas, mover desde stock. Con el product id
 
@@ -83,7 +85,7 @@ class ApplicationController < ActionController::API
 
     #Si la aceptamos//recepcionarOC(Api --> Sistema de OC)
     #Informa aceptación de OC al cliente//
-    #Se llama a rpoduccion y abastecimiento. // producir OC. 
+    #Se llama a rpoduccion y abastecimiento. // producir OC.
     #Despacho de producto.
         #Muevo Stock a Bodega de despacho.
         #For para todos los productos. Máximo de capacidad

@@ -68,7 +68,7 @@ ActiveRecord::Schema.define(version: 20170427004647) do
     t.datetime "date"
     t.string   "sku"
     t.integer  "amount"
-    t.boolean  "status"
+    t.string   "status"
     t.datetime "delivery_date"
     t.integer  "unit_price"
     t.datetime "created_at",     null: false

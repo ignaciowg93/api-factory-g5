@@ -14,6 +14,7 @@ gem 'gmaps4rails'
 gem 'underscore-rails'
 gem 'listen', '~> 3.0.5'
 gem 'bootstrap-sass', '3.3.6'
+gem "http"  #https://github.com/httprb/http/tree/2-x-stable
 
 
 group :development, :test do
