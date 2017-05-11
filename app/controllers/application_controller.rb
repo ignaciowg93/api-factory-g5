@@ -59,13 +59,13 @@ class ApplicationController < ActionController::API
 
 
     # Cotizar productos. en este sprint es solo ver el stock.
-
+    def quote_a_price
     # Hacer un for de búsqueda, por lo productos.
     #Elegir proveedor de compra. Mandar esta elección a orden de compra.
     #Después de aceptada la OC,
     #Mandar al proveedor el Id del alamcen a recepcionar los productos de la OC asociada.
     #Esperar notificación de despacho desde proveedor.
-
+    end
 
     #Mandar a la bodega. Get sku de stock.
     #Te devuelve un SKU con todos los totales

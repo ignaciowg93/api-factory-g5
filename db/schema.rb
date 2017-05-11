@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170427004647) do
+ActiveRecord::Schema.define(version: 20170511213333) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -59,6 +59,11 @@ ActiveRecord::Schema.define(version: 20170427004647) do
     t.datetime "created_at",                             null: false
     t.datetime "updated_at",                             null: false
     t.integer  "warehouse_id"
+    t.integer  "processed"
+    t.integer  "lot"
+    t.integer  "ingredients"
+    t.integer  "dependent"
+    t.decimal  "time"
     t.index ["warehouse_id"], name: "index_products_on_warehouse_id", using: :btree
   end
 
@@ -77,6 +82,17 @@ ActiveRecord::Schema.define(version: 20170427004647) do
     t.string   "rejection"
   end
 
+  create_table "supplies", force: :cascade do |t|
+    t.string   "sku"
+    t.integer  "requierment"
+    t.integer  "seller1"
+    t.integer  "seller2"
+    t.integer  "product_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+    t.index ["product_id"], name: "index_supplies_on_product_id", using: :btree
+  end
+
   create_table "warehouses", force: :cascade do |t|
     t.integer  "type"
     t.integer  "capacity"
@@ -87,4 +103,5 @@ ActiveRecord::Schema.define(version: 20170427004647) do
   add_foreign_key "invoices", "purchase_orders"
   add_foreign_key "messages", "clients"
   add_foreign_key "products", "warehouses"
+  add_foreign_key "supplies", "products"
 end
