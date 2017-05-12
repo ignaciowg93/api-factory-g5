@@ -59,12 +59,52 @@ class ApplicationController < ActionController::API
 
 
     # Cotizar productos. en este sprint es solo ver el stock.
-    def quote_a_price
-    # Hacer un for de búsqueda, por lo productos.
-    #Elegir proveedor de compra. Mandar esta elección a orden de compra.
-    #Después de aceptada la OC,
-    #Mandar al proveedor el Id del alamcen a recepcionar los productos de la OC asociada.
-    #Esperar notificación de despacho desde proveedor.
+    def quote_a_price(sku)
+      # Hacer un for de búsqueda, por lo productos.
+      my_supplies = (Product.find_by sku: sku).supplies
+      current_supply_sku = ""
+      current_min_price = 0
+      supplier = ""
+      my_supplies.each do |supply|
+        #para saber que comparo para el mismo sku de insumo
+        if current_supply_sku == supply.sku
+        else
+          #crear orden de compra
+          proveedor = "5910c0910e42840004f6e685"
+          punit = 5 # ¿nos entregan los precios unitarios o por lotes? -> debiera ser unitario pq no les compramos lotes
+          cant = 5
+          tiempo = Time.new(2017, 8, 31, 2, 2, 2).to_f * 1000
+          oc = HTTP.headers(:accept => "application/json").put('https://integracion-2017-dev.herokuapp.com/oc/crear', :json => { :cliente => "5910c0910e42840004f6e684", :proveedor => proveedor, :sku => 17, :fechaEntrega => tiempo, :cantidad => cant, :precioUnitario => punit, :canal => "b2b" })
+          if oc.code == 200
+            oc_id = oc.parse["_id"]
+            #mandar OC al proveedor escogido
+            route_put = 'http://integra17-' + supplier + '.ing.puc.cl/purchase_orders/' + oc_id
+            HTTP.put(route_put, :json => { :payment_method => "contado" })
+            # revisar status code respuesta
+          end
+          # pasar a cotizar el siguiente insumo
+          current_supply_sku = supply.sku
+        end
+        seller = supply.seller
+        route = 'http://integra17-' + seller + '.ing.puc.cl/products'
+        response = HTTP.get(route)
+        if response.code == 200
+          products_list = reponse.parse["productos"]
+          # obtengo la lista de productos del seller y cotizo
+          products_list.each do |prod|
+            if prod["sku"] == current_supply_sku
+              if prod["price"] < current_min_price
+                current_min_price = prod["precio"]
+                supplier = seller # se selecciona el más barato actual
+              end
+            end
+          end
+        end
+      end
+      #Elegir proveedor de compra. Mandar esta elección a orden de compra.
+      #Después de aceptada la OC,
+      #Mandar al proveedor el Id del alamcen a recepcionar los productos de la OC asociada.
+      #Esperar notificación de despacho desde proveedor.
     end
 
     #Mandar a la bodega. Get sku de stock.
