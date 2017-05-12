@@ -3,13 +3,13 @@
 one:
   sku: MyString
   requierment: 1
-  sellers: 
-  times: 
+  seller: MyString
+  time: 9.99
   product: one
 
 two:
   sku: MyString
   requierment: 1
-  sellers: 
-  times: 
+  seller: MyString
+  time: 9.99
   product: two
