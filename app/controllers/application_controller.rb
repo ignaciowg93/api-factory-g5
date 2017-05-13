@@ -73,6 +73,7 @@ class ApplicationController < ActionController::API
           #crear orden de compra
           proveedor = "5910c0910e42840004f6e685"  # esto debiéramos sacarlo de una base de datos previa
           punit = current_min_price # ¿nos entregan los precios unitarios o por lotes? -> debiera ser unitario pq no les compramos lotes
+          #arreglar las sgtes. 2 líneas
           tiempo = Time.new(2017, 8, 31, 2, 2, 2).to_f * 1000
           oc = HTTP.headers(:accept => "application/json").put('https://integracion-2017-dev.herokuapp.com/oc/crear', :json => { :cliente => "5910c0910e42840004f6e684", :proveedor => proveedor, :sku => 17, :fechaEntrega => tiempo, :cantidad => cant, :precioUnitario => punit, :canal => "b2b" })
           if oc.code == 200
@@ -89,6 +90,7 @@ class ApplicationController < ActionController::API
         route = 'http://integra17-' + seller + '.ing.puc.cl/products'
         @response = HTTP.get(route)
         if @response.code == 200
+          #VER POR CADA GRUPO
           products_list = @response.parse["productos"]
           # obtengo la lista de productos del seller y cotizo
           products_list.each do |prod|
@@ -117,7 +119,7 @@ class ApplicationController < ActionController::API
       my_supplies_r.each do |supply|
         if current_supply_sku != supply.sku
           #agregar al arreglo
-          my_supplies.push([supply.sku, supply.requierment)
+          my_supplies.push([supply.sku, supply.requierment])
 
           current_supply_sku = supply.sku
         end
@@ -132,21 +134,33 @@ class ApplicationController < ActionController::API
       # pedimos el arreglo de almacenes
       almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/almacenes")
       if almacenes.code == 200
+        #armo lista ordenada de almacenes
         almacenes.parse.each do |almacen|
           #busco en cada almacen
           data = "GET" + almacen["_id"]
           hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
           signature = Base64.encode64(hmac).chomp
           auth_header = "INTEGRACION grupo5:" + signature
-          products_array = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/skusWithStock", :json => { :almacenId => almacen["_id"] })
-          if products_array.code == 200 # estoy asumiendo que 200 es el ok aquí
+          route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/skusWithStock?almacenId=" + almacen["_id"]
+          products_array = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
+          if products_array.code == 200
             # comparo con lo que necesito
             products_array.parse.each do |product|
               my_supplies.each do |supply|
                 if supply[1] > 0 # si todavía no he alcanzado el total necesario
                   if supply[0] == product["_id"]
-                    #lo muevo lo más posible
-                    supply[1] -= product["total"] # dcto. de los restantes
+                    #lo muevo lo más posible (falta)
+                    if almacen["despacho"] == false && almacen["recepcion"] == false && almacen["pulmon"] == false # es almacen intermedio
+                      #mover a despacho
+                    elsif almacen["despacho"] == false && almacen["recepcion"] == true # es recepción
+                      #mover a intermedio
+                      #mover a despacho
+                    elsif almacen["despacho"] == false && almacen["recepcion"] == false # es pulmón
+                      #mover a recepcion
+                      #mover a intermedio
+                      #mover a despacho
+                    end
+                    supply[1] -= product["total"] # dcto. de los restantes (me paso en la resta quizás)
                   end
                 end
               end
@@ -159,27 +173,30 @@ class ApplicationController < ActionController::API
       my_supplies.each do |supply|
         if supply[1] > 0 # no tengo todo
           #Llamar al abastecimiento de MP.(Block anterior)
+          quote_a_price(supply[0], supply[1])
         end
       end
 
       #Una vez con las materias primas, mover desde stock. Con el product id
 
       #Ir y producir stock, máximo 500 por ciclo. **Llega a Recepción y si está lleno , llega a pulmón.
-      ramaining = qty
+
+      ramaining = qty # EN VERDAD NO PRODUZCO QTY, PRODUZCO LOS MÍNIMOS LOTES PARA QTY
       #transferir $$ a fábrica
-      trid = "abc"
       while remaining >= 0
         # autenticación
-        data = "PUT" + sku + trid + remaining.to_s
+        data = "PUT" + sku + remaining.to_s
         hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
         signature = Base64.encode64(hmac).chomp
         auth_header = "INTEGRACION grupo5:" + signature
         # request de producción
-        production_order = HTTP.auth(auth_header).headers(:accept => "application/json").put(bodega_sist + "fabrica/fabricar", :json => { :sku => sku, :trxid => trid, :cantidad => remaining })
+        production_order = HTTP.auth(auth_header).headers(:accept => "application/json").put(bodega_sist + "fabrica/fabricarSinPago", :json => { :sku => sku, :cantidad => remaining })
         if production_order.code == 200
-          remaining -= 500
+          # podría quizás guardar la fecha esperada de entrega, estado despachado, etc.
+          remaining -= 5000
         elsif production_order.code == 429
           #esperar 1 minuto
+          sleep(60)
         end
       end
     end
