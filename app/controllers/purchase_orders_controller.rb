@@ -1,5 +1,6 @@
 class PurchaseOrdersController < ApplicationController
     require 'http'
+    require 'digest'
     base_route = "https://integracion-2017-dev.herokuapp.com/oc/"
 
     def new
@@ -47,7 +48,7 @@ class PurchaseOrdersController < ApplicationController
                      json: {cause: rechazo})
 
                     
-                elsif Time.now + product_time.hours >= fechaEntrega
+                elsif Time.now + product_time.hours >= fechaEntrega.to_date
                     estado = "rechazada"
                     rechazo = "No alcanza a estar la orden"
                     PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
@@ -144,8 +145,26 @@ private
         'http://integra17-' + client + '.ing.puc.cl/purchase_orders/'
     end
 
-    def get_prod_stock(prod)
-        
+    def get_stock_by_sku(sku)
+        stock_final = 0
+        secret = "W1gCjv8gpoE4JnR" # desarrollo
+        bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega/" # desarrollo
+        #Mandar a la bodega. Get sku de stock.
+        data = "GET"
+        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+        signature = Base64.encode64(hmac).chomp
+        auth_header = "INTEGRACION grupo5:" + signature
+        # pedimos el arreglo de almacenes
+        almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get(bodega_sist + "almacenes")
+        if almacenes.code == 200
+            almacenesP = JSON.parse almacenes.to_s
+            almacenesP.each do |almacen|
+                if !almacen["despacho"] && !almacen["pulmon"]
+                    data += almacen["_id"]
+                    almacenR = HTTP.auth(auth_header).headers(:accept => "application/json").get(bodega_sist + "skusWithStock?almacenId=" + almacen["_id"]) 
+
+
+
     end
 
 
