@@ -3,7 +3,7 @@ class ProductController < ApplicationController
 
     def index
         @products = Product.all
-        render json: {"productos": [
+        render json: {[
 {
       "sku": "3",
       "name": "Maíz",
