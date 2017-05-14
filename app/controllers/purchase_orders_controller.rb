@@ -161,10 +161,19 @@ private
             almacenesP.each do |almacen|
                 if !almacen["despacho"] && !almacen["pulmon"]
                     data += almacen["_id"]
-                    almacenR = HTTP.auth(auth_header).headers(:accept => "application/json").get(bodega_sist + "skusWithStock?almacenId=" + almacen["_id"]) 
-
-
-
+                    products = HTTP.auth(auth_header).headers(:accept => "application/json").get(bodega_sist + "skusWithStock?almacenId=" + almacen["_id"])
+                    if products.code == 200
+                        productsP = JSON.parse products.to_s
+                        productsP.each do |product|
+                            if product["_id"]["sku"] == sku
+                                stock_final += product["total"]
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        return stock_final
     end
 
 
