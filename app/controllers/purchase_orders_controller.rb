@@ -69,21 +69,15 @@ class PurchaseOrdersController < ApplicationController
                      json: {_id: poid})
                     HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/accepted',
                      json: {cause: rechazo})
-                    # RESERVAR STOCK
-                    if cantidad > 
-                        prod.supplies.each do |supply|
-                            create(supply.)
+                    if cantidad > get_stock_by_sku(sku)
+                        # llamar a produce(sku)
                         end
                     end
-                    reservada = stock.selledAmount + cantidad
-                    stock.update(selledAmount: reservada)
                 end
             end
-
         rescue ActiveRecord::RecordNotFound 
             render json:{error: "Id no asociado a OC por resolver"}, status: 404
         end
-
     end
     def rejected
          begin
