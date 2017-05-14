@@ -67,8 +67,7 @@ class PurchaseOrdersController < ApplicationController
                                          unit_price: precioUnitario, rejection: " ")
                     HTTP.header(accept: "application/json").put(base_route+"recepcionar/"+poid,
                      json: {_id: poid})
-                    HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/accepted',
-                     json: {cause: rechazo})
+                    HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/accepted')
                     if cantidad > get_stock_by_sku(sku)
                         # llamar a produce(sku)
                         end
