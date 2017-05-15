@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  sku: MyString
+  requierment: 1
+  seller: MyString
+  time: 9.99
+  product: one
+
+two:
+  sku: MyString
+  requierment: 1
+  seller: MyString
+  time: 9.99
+  product: two

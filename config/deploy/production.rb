@@ -1,0 +1,1 @@
+server 'integra17-5.ing.puc.cl', user: 'deploy', roles: %w{app db web}
