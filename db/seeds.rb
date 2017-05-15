@@ -61,3 +61,6 @@ p56.supplies.create(sku: '26', requierment: 65, seller: '8', time: 3.059)
 p56.supplies.create(sku: '26', requierment: 65, seller: '6', time: 1.092)
 p56.supplies.create(sku: '26', requierment: 65, seller: '4', time: 1.242)
 p56.supplies.create(sku: '26', requierment: 65, seller: '2', time: 2.609)
+
+
+# Client.create(name:, )
