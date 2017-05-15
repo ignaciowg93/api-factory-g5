@@ -12,7 +12,6 @@
 
 ActiveRecord::Schema.define(version: 20170515215905) do
 
-
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -90,7 +89,7 @@ ActiveRecord::Schema.define(version: 20170515215905) do
     t.datetime "date"
     t.string   "sku"
     t.integer  "amount"
-    t.string   "status"
+    t.boolean  "status"
     t.datetime "delivery_date"
     t.integer  "unit_price"
     t.datetime "created_at",     null: false

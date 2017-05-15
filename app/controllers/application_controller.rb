@@ -111,7 +111,7 @@ class ApplicationController < ActionController::API
           # esperar apruebo o rechazo
           while (Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 0
           end
-          if Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 1
+          if (Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 1
             # fue aceptada
             oc_this_time.push(oc.parse["_id"])
             cant_mp -= seller[3]
@@ -132,7 +132,7 @@ class ApplicationController < ActionController::API
             # esperar apruebo o rechazo
             while (Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 0
             end
-            if Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 1
+            if (Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 1
               # fue aceptada
               cant_mp -= cant_mp
             end
