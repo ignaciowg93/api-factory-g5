@@ -229,7 +229,7 @@ class ApplicationController < ActionController::API
               end
             end
           end
-        elsif production_order.code == 429
+        elsif almacenes.code == 429
           #esperar 1 minuto
           sleep(60)
         end
@@ -241,6 +241,8 @@ class ApplicationController < ActionController::API
           #Llamar al abastecimiento de MP.(Block anterior)
           oc_list = abastecimiento_mp(sku, supply[0], supply[1], fecha_max, @almacen_recep_id)
           oc_list.each do |oc|
+            # la idea es que me notifiquen que llegó, pero por ahora debiera ser un sleep del tiempo nomás
+            #sleep((oc["fechaEntrega"] - (Time.now.to_f * 1000)) + 1800)
             while (Invoice_reg.find_by oc_id: oc).delivered == 0
             end
             #mover a despacho(buscar en recepcion o pulmón)
@@ -289,7 +291,7 @@ class ApplicationController < ActionController::API
                         end
                       end
                     end
-                  elsif production_order.code == 429
+                  elsif products_array.code == 429
                     #esperar 1 minuto
                     sleep(60)
                   end
@@ -340,8 +342,8 @@ class ApplicationController < ActionController::API
         end
       end
 
-      #retorno tiempo en que todo lo fabricado debería llegar
-      return longest_time
+      #retorno fecha en que todo lo fabricado debería llegar
+      return longest_time + (60000 * 30)
     end
 
     #Despacho de producto.
