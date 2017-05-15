@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  sku: MyString
+  totalAmount: 1
+  selledAmount: 1
+
+two:
+  sku: MyString
+  totalAmount: 1
+  selledAmount: 1

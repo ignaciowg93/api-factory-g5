@@ -12,6 +12,7 @@
 
 ActiveRecord::Schema.define(version: 20170514023238) do
 
+
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -48,6 +49,13 @@ ActiveRecord::Schema.define(version: 20170514023238) do
     t.boolean  "delivered"
     t.boolean  "paid"
     t.string   "account"
+    t.integer  "price"
+    t.integer  "tax"
+    t.integer  "total_price"
+    t.string   "proveedor"
+    t.string   "cliente"
+    t.datetime "date"
+    t.string   "po_idtemp"
     t.index ["purchase_order_id"], name: "index_invoices_on_purchase_order_id", using: :btree
   end
 
@@ -88,6 +96,14 @@ ActiveRecord::Schema.define(version: 20170514023238) do
     t.datetime "updated_at",     null: false
     t.string   "poid"
     t.string   "rejection"
+  end
+
+  create_table "stocks", force: :cascade do |t|
+    t.string   "sku"
+    t.integer  "totalAmount"
+    t.integer  "selledAmount"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
   end
 
   create_table "supplies", force: :cascade do |t|
