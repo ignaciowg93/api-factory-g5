@@ -7,8 +7,8 @@ class PurchaseOrdersController < ApplicationController
         @purchase_order = PurchaseOrder.new 
     end
 
-##BUYING
-    def accepted
+
+    def receive
         #The provider accepts a PO that we created.
         poid = params["_id"]
 
@@ -80,8 +80,32 @@ class PurchaseOrdersController < ApplicationController
     end
 
 
+## BUYING
 
+    def accepted
 
+        @purchase_order = PurchaseOrder.find_by(_id: params[:id])
+        if @purchase_order.status == "creada"            
+            oc = HTTP.headers(:accept => "application/json").get('https://integracion-2017-dev.herokuapp.com/oc/obtener/' + params[:id])
+            if oc.code == 200
+                orden_compra = oc.parse
+                if orden_compra["estado"]== "aceptada"
+                    if @purchase_order
+                        @purchase_order.status = "aceptada"
+                        if @purchase_order.save!
+                            render json: {ok: "Resolución recibida exitosamente" }, status:200
+                        end
+                    end
+                else
+                    render json: {error: "ORden de compra No se encuentra aceptada en el sistema"}, status: 400
+                end
+            else
+                render json: {error: "Orden de compra no encontrada"}, status:404
+            end
+        else
+            render json: {error: "Orden de Compra ya resuelta"}, status: 403
+        # The provider rejects a PO created by us. Check its existance.
+    end
 
     def rejected
          begin
