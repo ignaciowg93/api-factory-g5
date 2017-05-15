@@ -35,7 +35,7 @@ class PurchaseOrdersController < ApplicationController
                 stock = Stock.find_by(sku: sku)
                 prod = Product.find_by(sku: sku)
 
-                if stok == nil
+                if stock == nil
                     estado = "rechazada"
                     rechazo = "sku inválido"
                     PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
@@ -78,6 +78,11 @@ class PurchaseOrdersController < ApplicationController
             render json:{error: "Id no asociado a OC por resolver"}, status: 404
         end
     end
+
+
+
+
+
     def rejected
          begin
             @purchase_order = set_purchase_order
@@ -130,7 +135,7 @@ private
                 max_t = supply.time
             end
         end
-        time += max_t + 2
+        time += max_t + 1
         time.to_i
     end
 
