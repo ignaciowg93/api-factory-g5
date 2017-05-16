@@ -1,7 +1,7 @@
 require "http"
 require 'digest'
 
-$secret = "W1gCjv8gpoE4JnR" # desarrollo
+$@secret = "W1gCjv8gpoE4JnR" # desarrollo
 class ApplicationController < ActionController::API
     rescue_from ActiveRecord::RecordNotFound, with: :record_not_found_exception
     rescue_from ActiveRecord::RecordNotUnique, with: :record_not_unique_exception
@@ -150,6 +150,19 @@ class ApplicationController < ActionController::API
     def produce_and_supplying(sku, qty, fecha_max) #producción y abastecimiento
 
       prdt = (Product.find_by sku: sku)
+      lot = prdt.lot
+      if qty <= lot
+        ramaining = lot
+        mult = 1
+      else
+        mult = 2
+        remaining = lot * mult
+        while remaining < qty
+          mult += 1
+          remaining = lot * mult
+        end
+      end
+
       if prdt.processed == 1
         #preparación para producir
         my_supplies_r = prdt.supplies
@@ -158,16 +171,16 @@ class ApplicationController < ActionController::API
         my_supplies_r.each do |supply|
           if current_supply_sku != supply.sku
             #agregar al arreglo
-            my_supplies.push([supply.sku, supply.requierment])
+            my_supplies.push([supply.sku, supply.requierment * mult])
 
             current_supply_sku = supply.sku
           end
         end
-        secret = "W1gCjv8gpoE4JnR" # desarrollo
-        bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega" # desarrollo
+        @secret = "W1gCjv8gpoE4JnR" # desarrollo
+        bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega/" # desarrollo
         #Mandar a la bodega. Get sku de stock.
         data = "GET"
-        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
         signature = Base64.encode64(hmac).chomp
         auth_header = "INTEGRACION grupo5:" + signature
         worked_st = 0
@@ -194,7 +207,7 @@ class ApplicationController < ActionController::API
             sorted_almacenes.each do |s_almacen|
               #busco en cada almacen
               data = "GET" + s_almacen[0]
-              hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+              hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
               signature = Base64.encode64(hmac).chomp
               auth_header = "INTEGRACION grupo5:" + signature
               route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/skusWithStock?almacenId=" + s_almacen[0]
@@ -207,17 +220,18 @@ class ApplicationController < ActionController::API
                       if supply[0] == product["_id"]
                         #mover a despacho (muevo directo)
                         data = "GET" + s_almacen[0] + supply[0]
-                        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+                        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
                         signature = Base64.encode64(hmac).chomp
                         auth_header = "INTEGRACION grupo5:" + signature
                         route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + s_almacen[0] + "&sku=" + supply[0] + "&limit=200"
-                        quedan = product["total"]
+                        #quedan = product["total"]
+                        quedan = supply[1]
                         while quedan > 0
                           prod_ids = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
                           #mover a ID DESPACHO y restarle a quedan
                           prod_ids.each do |prod|
                             data = "POST" + prod["_id"] + sorted_almacenes.last[0]
-                            hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+                            hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
                             signature = Base64.encode64(hmac).chomp
                             auth_header = "INTEGRACION grupo5:" + signature
                             route_to_post = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
@@ -255,7 +269,7 @@ class ApplicationController < ActionController::API
                 #busco en cada almacen
                 if s_almacen[1] == 2 || s_almacen[1] == 3 #solo en recepción y pulmón
                   data = "GET" + s_almacen[0]
-                  hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+                  hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
                   signature = Base64.encode64(hmac).chomp
                   auth_header = "INTEGRACION grupo5:" + signature
                   route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/skusWithStock?almacenId=" + s_almacen[0]
@@ -271,7 +285,7 @@ class ApplicationController < ActionController::API
                             if supply[0] == product["_id"]
                               #mover a despacho (muevo directo)
                               data = "GET" + s_almacen[0] + supply[0]
-                              hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+                              hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
                               signature = Base64.encode64(hmac).chomp
                               auth_header = "INTEGRACION grupo5:" + signature
                               route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + s_almacen[0] + "&sku=" + supply[0] + "&limit=200"
@@ -281,7 +295,7 @@ class ApplicationController < ActionController::API
                                 #mover a ID DESPACHO y restarle a quedan
                                 prod_ids.each do |prod|
                                   data = "POST" + prod["_id"] + sorted_almacenes.last[0]
-                                  hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+                                  hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
                                   signature = Base64.encode64(hmac).chomp
                                   auth_header = "INTEGRACION grupo5:" + signature
                                   route_to_post = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
@@ -311,30 +325,21 @@ class ApplicationController < ActionController::API
       end
       #Ir y producir stock, máximo 5000 por ciclo. **Llega a Recepción y si está lleno , llega a pulmón.
 
-      lot = (Product.find_by sku: sku).lot
-      if qty <= lot
-        ramaining = lot
-      else
-        remaining = lot * 2
-        while remaining < qty
-          remaining += lot
-        end
-      end
 
       #transferir $$ a fábrica
-      longest_time = 0
+      longest_time = Time.now
       while remaining >= 0
-        # autenticación
-        data = "PUT" + sku + remaining.to_s
-        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
-        signature = Base64.encode64(hmac).chomp
-        auth_header = "INTEGRACION grupo5:" + signature
         # request de producción
         if remaining > 5000
           to_produce = 5000
         else
           to_produce = remaining
         end
+        # autenticación
+        data = "PUT" + sku + to_produce.to_s
+        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
+        signature = Base64.encode64(hmac).chomp
+        auth_header = "INTEGRACION grupo5:" + signature
         production_order = HTTP.auth(auth_header).headers(:accept => "application/json").put(bodega_sist + "fabrica/fabricarSinPago", :json => { :sku => sku, :cantidad => to_produce })
         if production_order.code == 200
           # podría quizás guardar la fecha esperada de entrega, estado despachado, etc.
@@ -354,9 +359,9 @@ class ApplicationController < ActionController::API
 
     #Despacho de producto.
     def delivery(sku, quantity, almacen_recepcion, ordenId, precio)
-      secret = "W1gCjv8gpoE4JnR" # desarrollo
+      @secret = "W1gCjv8gpoE4JnR" # desarrollo
       bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega"
-      hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"))
+      hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"))
       signature = Base64.encode64(hmac).chomp
       auth_header = "INTEGRACION grupo5:" + signature
       orden = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/obtener/#{ordenId}")
@@ -371,7 +376,7 @@ class ApplicationController < ActionController::API
         limit = (quantity if quantity < 200) || 200
         url = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=#{almacenId}&sku=#{sku}&limit=#{limit}"
         data = "GET#{almacenId}#{sku}"
-        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
         signature = Base64.encode64(hmac).chomp
         auth_header = "INTEGRACION grupo5:" + signature
 
@@ -388,7 +393,7 @@ class ApplicationController < ActionController::API
           products.parse.each do |product|
             productoId = product["_id"]
             data = "POST#{productoId}#{almacen_recepcion}" # Almacen de recepcion comprador?
-            hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+            hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
             signature = Base64.encode64(hmac).chomp
             auth_header = "INTEGRACION grupo5:" + signature
             url = "https://integracion-2017-dev.herokuapp.com/bodega/moveStockBodega"
@@ -417,7 +422,7 @@ class ApplicationController < ActionController::API
             elsif params[:id_store_reception] = "" || params[:id_store_reception].nil?
                 render json: {error: "Falta bodega de recepción"}, status:400
             else
-                poid = params["_id"]        
+                poid = params["_id"]
                 orden = HTTP.get(base_route+"obtener/"+poid)
                 if orden.status.code != 200
                     render json: {error: "Orden de compra inexistente"}, status:404
@@ -446,31 +451,31 @@ class ApplicationController < ActionController::API
                         rechazo = "sku inválido"
                         PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
                                              date: DateTime.now ,sku: sku, amount: cantidad,
-                                             status: estado, delivery_date: fechaEntrega, 
+                                             status: estado, delivery_date: fechaEntrega,
                                              unit_price: precioUnitario, rejection: rechazo)
                         HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
                          json: {_id: poid, rechazo: rechazo})
                         HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/rejected',
                          json: {cause: rechazo})
 
-                        
+
                     elsif Time.now.to_f*1000 + product_time*60000*60 >= fechaEntrega
                         estado = "rechazada"
                         rechazo = "No alcanza a estar la orden"
                         PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
                                              date: DateTime.now ,sku: sku, amount: cantidad,
-                                             status: estado, delivery_date: fechaEntrega, 
+                                             status: estado, delivery_date: fechaEntrega,
                                              unit_price: precioUnitario, rejection: rechazo)
                         HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
                          json: {_id: poid, rechazo: rechazo})
                         HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/rejected',
                          json: {cause: rechazo})
-                        
+
                     else
                         estado = "aceptada"
                         PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
                                              date: DateTime.now ,sku: sku, amount: cantidad,
-                                             status: estado, delivery_date: fechaEntrega, 
+                                             status: estado, delivery_date: fechaEntrega,
                                              unit_price: precioUnitario, rejection: " ")
                         HTTP.header(accept: "application/json").put(base_route+"recepcionar/"+poid,
                          json: {_id: poid})
@@ -491,7 +496,7 @@ class ApplicationController < ActionController::API
                     end
                 end
             end
-        end        
+        end
     end
 
     private
@@ -514,11 +519,11 @@ class ApplicationController < ActionController::API
 
     def get_stock_by_sku(sku)
         stock_final = 0
-        secret = "W1gCjv8gpoE4JnR" # desarrollo
+        @secret = "W1gCjv8gpoE4JnR" # desarrollo
         bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega/" # desarrollo
         #Mandar a la bodega. Get sku de stock.
         data = "GET"
-        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
         signature = Base64.encode64(hmac).chomp
         auth_header = "INTEGRACION grupo5:" + signature
         # pedimos el arreglo de almacenes
