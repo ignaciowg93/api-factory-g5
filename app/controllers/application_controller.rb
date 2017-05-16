@@ -111,7 +111,7 @@ class ApplicationController < ActionController::API
           # esperar apruebo o rechazo
           while (Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 0
           end
-          if Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 1
+          if (Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 1
             # fue aceptada
             oc_this_time.push(oc.parse["_id"])
             cant_mp -= seller[3]
@@ -132,7 +132,7 @@ class ApplicationController < ActionController::API
             # esperar apruebo o rechazo
             while (Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 0
             end
-            if Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 1
+            if (Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 1
               # fue aceptada
               cant_mp -= cant_mp
             end
@@ -229,7 +229,7 @@ class ApplicationController < ActionController::API
               end
             end
           end
-        elsif production_order.code == 429
+        elsif almacenes.code == 429
           #esperar 1 minuto
           sleep(60)
         end
@@ -241,6 +241,8 @@ class ApplicationController < ActionController::API
           #Llamar al abastecimiento de MP.(Block anterior)
           oc_list = abastecimiento_mp(sku, supply[0], supply[1], fecha_max, @almacen_recep_id)
           oc_list.each do |oc|
+            # la idea es que me notifiquen que llegó, pero por ahora debiera ser un sleep del tiempo nomás
+            #sleep((oc["fechaEntrega"] - (Time.now.to_f * 1000)) + 1800)
             while (Invoice_reg.find_by oc_id: oc).delivered == 0
             end
             #mover a despacho(buscar en recepcion o pulmón)
@@ -289,7 +291,7 @@ class ApplicationController < ActionController::API
                         end
                       end
                     end
-                  elsif production_order.code == 429
+                  elsif products_array.code == 429
                     #esperar 1 minuto
                     sleep(60)
                   end
@@ -340,8 +342,59 @@ class ApplicationController < ActionController::API
         end
       end
 
-      #retorno tiempo en que todo lo fabricado debería llegar
-      return longest_time
+      #retorno fecha en que todo lo fabricado debería llegar
+      return longest_time + (60000 * 30)
+    end
+
+    #Despacho de producto.
+    def delivery(sku, quantity, almacen_recepcion, ordenId, precio)
+      secret = "W1gCjv8gpoE4JnR" # desarrollo
+      bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega"
+      hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"))
+      signature = Base64.encode64(hmac).chomp
+      auth_header = "INTEGRACION grupo5:" + signature
+      orden = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/obtener/#{ordenId}")
+      # buscar precio correspondiente a la orden de compra
+      precio = orden["precioUnitario"]
+
+      # Unidades a despachar, ya han sido transferidas al almacén de despacho.
+      almacenId = "590baa76d6b4ec00049028b2"
+
+      #Hacer la request la cantidad de veces necesaria
+      while quantity > 0 do
+        limit = (quantity if quantity < 200) || 200
+        url = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=#{almacenId}&sku=#{sku}&limit=#{limit}"
+        data = "GET#{almacenId}#{sku}"
+        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+        signature = Base64.encode64(hmac).chomp
+        auth_header = "INTEGRACION grupo5:" + signature
+
+        # Obtener productos
+        products = HTTP.auth(auth_header).headers(:accept => "application/json").get(url)
+        if (products.parse.length < 200) && (products.parse.length < quantity)
+           render ({json: "Faltan #{quantity-products.parse.length} productos en almacen despacho, para completar pedido", status: 422})
+           return
+        end
+        quantity -= products.parse.length
+
+        # Request moveStockBodega
+        if products.code == 200
+          products.parse.each do |product|
+            productoId = product["_id"]
+            data = "POST#{productoId}#{almacen_recepcion}" # Almacen de recepcion comprador?
+            hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+            signature = Base64.encode64(hmac).chomp
+            auth_header = "INTEGRACION grupo5:" + signature
+            url = "https://integracion-2017-dev.herokuapp.com/bodega/moveStockBodega"
+            deliver = HTTP.auth(auth_header).headers(:accept => "application/json").post(url, json: { productoId: productoId, almacenId: almacen_recepcion, oc: ordenId, precio: precio})
+            if deliver.code != 200
+              render ({json: "No se pudo procesar despacho", status: 422})
+              return
+            end
+          end
+        end
+      end
+      render ({json: "Orden despachada", status: 200})
     end
 
     #B2B

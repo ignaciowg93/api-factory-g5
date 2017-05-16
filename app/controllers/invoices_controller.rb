@@ -1,6 +1,7 @@
 class InvoicesController < ApplicationController
 
 
+
     def new
         @invoice = Invoice.new
     end
@@ -19,6 +20,8 @@ class InvoicesController < ApplicationController
             end
          rescue ActiveRecord::RecordNotFound 
             render json:{error: "Id no asociado a OC por resolver"}, status: 404
+         #rescue ActionController::ParameterMissing
+          #   render json:{error:"Falta algún parámetro"}, status: 422
          end
     end
 
@@ -77,7 +80,7 @@ class InvoicesController < ApplicationController
 private
 
     def invoice_params
-        params.permit(:id,:rejected,:accepted, :paid, :invoiceid,:delivered, :account )
+        params.require(:invoice).permit(:id,:rejected,:accepted, :paid,:delivered, :account,:date,:proveedor,:cliente,:price, :tax, :total_price ,:po_idtemp,:invoiceid )
     end
 
     def set_invoice

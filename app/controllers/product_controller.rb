@@ -1,70 +1,61 @@
 class ProductController < ApplicationController
-
+    almacen_base_url = "https://integracion-2017-dev.herokuapp.com/bodega/almacenes"
+    stock_productos = Hash.new(0)
 
     def index
         @products = Product.all
-        render json: {[
-{
-      "sku": "3",
-      "name": "Maíz",
-      "price": "117",
-      "stock": "0"},
-    {
-      "sku": "5",
-      "name": "Yogur",
-      "price": "428",
-      "stock": "0"},
-    {
-      "sku": "7",
-      "name": "Leche",
-      "price": "290",
-      "stock": "0"},
-    {
-      "sku": "9",
-      "name": "Carne",
-      "price": "350",
-      "stock": "0"},
-    {
-      "sku": "11",
-      "name": "Margarina",
-      "price": "247",
-      "stock": "0"},
-    {
-      "sku": "15",
-      "name": "Avena",
-      "price": "276",
-      "stock": "0"},
-    {
-      "sku": "17",
-      "name": "Cereal arroz",
-      "price": "821",
-      "stock": "0"},
-    {
-      "sku": "22",
-      "name": "Mantequilla",
-      "price": "336",
-      "stock": "0"},
-    {
-      "sku": "25",
-      "name": "Azúcar",
-      "price": "93",
-      "stock": "0"},
-    {
-      "sku": "52",
-      "name": "Harina Integral",
-      "price": "410",
-      "stock": "0"},
-    {
-      "sku": "56",
-      "name": "Hamburguesas de Pollo",
-      "price": "479",
-      "stock": "0"}
-      ]
-    }
+        @stock = find_qt_by_sku
+        arreglo = Array.new
+        @products.each do |p|
+            temp = {:sku => p.sku , :name => p.name , :price=> p.price , :stock=> @stock[p.sku] }
+            p(temp)
+            arreglo.push(temp)
+        end
 
+        render :json => arreglo
+
+        
     end
 
 
+private
+    def find_qt_by_sku
+        #PEidr los almacenes
+        #Iterar sobre los almacenes
+        #Cada almacen pedir lista de productos con Stock
+        #Busco el sku que necesito
+        #Entregar elk Total
+      stock_productos = Hash.new(0)
+      secret = "W1gCjv8gpoE4JnR" # desarrollo
+      #Mandar a la bodega. Get sku de stock.
+      data = "GET"
+      hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+      signature = Base64.encode64(hmac).chomp
+      auth_header = "INTEGRACION grupo5:" + signature
+      # pedimos el arreglo de almacenes
+      almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/almacenes")
+      if almacenes.code == 200
+          almacenes.parse.each do |almacen|
+              if(!almacen["despacho"] && !almacen["pulmon"])
+                    data = "GET" + almacen["_id"]
+                    hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+                    signature = Base64.encode64(hmac).chomp
+                    auth_header = "INTEGRACION grupo5:" + signature
+                    route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/skusWithStock?almacenId=" + almacen["_id"]
+                    products_array = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
+                    if products_array.code == 200
+                        products_array.parse.each do |product|
+                            stock_productos[product["_id"]] += product["total"]
+                        end
+                    end
+                end
+            end
+        end
+
+        return stock_productos
+    end
 
 
 end
+
+
