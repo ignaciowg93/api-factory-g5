@@ -460,7 +460,7 @@ class ApplicationController < ActionController::API
                          json: {cause: rechazo})
 
 
-                    elsif Time.now.to_f*1000 + product_time*60000*60 >= fechaEntrega
+                    elsif (Time.now + product_time(prod)*3600) >= fechaEntrega
                         estado = "rechazada"
                         rechazo = "No alcanza a estar la orden"
                         PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
