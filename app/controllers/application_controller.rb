@@ -70,8 +70,10 @@ class ApplicationController < ActionController::API
       sorted_suppliers = Array.new
       #iterar sobre los distintos vendedores
       supplier_list.each do |supplier|
-        seller = supplier.seller
-        route = 'http://integra17-' + seller + '.ing.puc.cl/products'
+        #seller = supplier.seller
+        seller = (Client.find_by gnumber: supplier.seller)
+        #route = 'http://integra17-' + seller + '.ing.puc.cl/products'
+        route = seller.url
         @response = HTTP.get(route)
         if @response.code == 200
           #VER POR CADA GRUPO
@@ -79,7 +81,7 @@ class ApplicationController < ActionController::API
           # obtengo la lista de productos del seller y cotizo
           products_list.each do |prod|
             if prod["sku"] == sku_insumo
-              sorted_suppliers.push([seller, prod["price"], supplier.time, prod["stock"]])
+              sorted_suppliers.push([seller.name, prod["price"], supplier.time, prod["stock"]])
             end
           end
         end
@@ -101,17 +103,16 @@ class ApplicationController < ActionController::API
       sellers = quote_a_price(sku_prod, sku_insumo, cant_mp)
       # mandar OC hasta cubrir cant_mp confirmada
       sellers.each do |seller|
-        #proveedor no debiera ser seller[0] si no el id
         oc = HTTP.headers(:accept => "application/json").put('https://integracion-2017-dev.herokuapp.com/oc/crear', :json => { :cliente => "5910c0910e42840004f6e684", :proveedor => seller[0], :sku => sku_insumo, :fechaEntrega => fecha_max, :cantidad => seller[3], :precioUnitario => seller[1], :canal => "b2b" })
         if oc.code == 200
-          # agrgo entrada en la tabla (inicializada en id ) y notifico
-          seller_addr = "ruta" + "/purchase_orders/" + oc.parse["_id"] # ruta debiera sacarse de una base de datos
+          # agrego entrada (nueva OC) en la tabla y notifico
+          seller_addr =  (Client.find_by name: seller[0]).url + "purchase_orders/" + oc.parse["_id"] # ruta debiera sacarse de una base de datos
           notification = HTTP.headers(:accept => "application/json").put(seller_addr, :json => { :payment_method => "contra_factura", :id_store_reception  => alm_recep_id})
-          Invoice_reg.create(oc_id: oc.parse["_id"], status: 0, delivered: 0)
+          PurchaseOrder.create(_id: oc.parse["_id"], client: oc.parse["cliente"], supplier: oc.parse["proveedor"], sku: oc.parse["sku"], delivery_date: oc.parse["fechaEntrega"], amount: oc.parse["cantidad"], delivered_qt: oc.parse["cantidadDespachada"], unit_price: oc.parse["precioUnitario"], channel: oc.parse["canal"], status: oc.parse["estado"])
           # esperar apruebo o rechazo
-          while (Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 0
+          while (PurchaseOrder.find_by _id: oc.parse["_id"]).status == "creada"
           end
-          if (Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 1
+          if (PurchaseOrder.find_by _id: oc.parse["_id"]).status == "aceptada"
             # fue aceptada
             oc_this_time.push(oc.parse["_id"])
             cant_mp -= seller[3]
@@ -126,13 +127,13 @@ class ApplicationController < ActionController::API
           oc = HTTP.headers(:accept => "application/json").put('https://integracion-2017-dev.herokuapp.com/oc/crear', :json => { :cliente => "5910c0910e42840004f6e684", :proveedor => seller[0], :sku => sku_insumo, :fechaEntrega => fecha_max, :cantidad => cant_mp, :precioUnitario => seller[1], :canal => "b2b" })
           if oc.code == 200
             # agrgo entrada en la tabla (inicializada en id ) y notifico
-            seller_addr = "ruta" + "/purchase_orders/" + oc.parse["_id"] # ruta debiera sacarse de una base de datos
+            seller_addr = (Client.find_by name: seller[0]).url + "purchase_orders/" + oc.parse["_id"] # ruta debiera sacarse de una base de datos
             notification = HTTP.headers(:accept => "application/json").put(seller_addr, :json => { :payment_method => "contra_factura", :id_store_reception  => alm_recep_id})
-            Invoice_reg.create(oc_id: oc.parse["_id"], status: 0, delivered: 0)
+            PurchaseOrder.create(_id: oc.parse["_id"], client: oc.parse["cliente"], supplier: oc.parse["proveedor"], sku: oc.parse["sku"], delivery_date: oc.parse["fechaEntrega"], amount: oc.parse["cantidad"], delivered_qt: oc.parse["cantidadDespachada"], unit_price: oc.parse["precioUnitario"], channel: oc.parse["canal"], status: oc.parse["estado"])
             # esperar apruebo o rechazo
-            while (Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 0
+            while (PurchaseOrder.find_by _id: oc.parse["_id"]).status == "creada"
             end
-            if (Invoice_reg.find_by oc_id: oc.parse["_id"]).status == 1
+            if (PurchaseOrder.find_by _id: oc.parse["_id"]).status == "aceptada"
               # fue aceptada
               cant_mp -= cant_mp
             end
@@ -242,9 +243,9 @@ class ApplicationController < ActionController::API
           oc_list = abastecimiento_mp(sku, supply[0], supply[1], fecha_max, @almacen_recep_id)
           oc_list.each do |oc|
             # la idea es que me notifiquen que llegó, pero por ahora debiera ser un sleep del tiempo nomás
-            #sleep((oc["fechaEntrega"] - (Time.now.to_f * 1000)) + 1800)
-            while (Invoice_reg.find_by oc_id: oc).delivered == 0
-            end
+            sleep((oc["fechaEntrega"] - (Time.now.to_f * 1000))/1000 + 1800)
+            #while (Invoice_reg.find_by oc_id: oc).delivered == 0
+            #end
             #mover a despacho(buscar en recepcion o pulmón)
             sorted_almacenes.each do |s_almacen|
               #busco en cada almacen

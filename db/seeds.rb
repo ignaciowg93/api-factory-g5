@@ -62,5 +62,11 @@ p56.supplies.create(sku: '26', requierment: 65, seller: '6', time: 1.092)
 p56.supplies.create(sku: '26', requierment: 65, seller: '4', time: 1.242)
 p56.supplies.create(sku: '26', requierment: 65, seller: '2', time: 2.609)
 
-
-# Client.create(name:, )
+Client.create(name: "5910c0910e42840004f6e680", url: "http://integra17-1.ing.puc.cl/", token: "", gnumber: "1") #prod
+Client.create(name: "590baa00d6b4ec0004902463", url: "http://integra17-2.ing.puc.cl/apipie/", token: "", gnumber: "2")
+Client.create(name: "", url: "http://integra17-3.ing.puc.cl/", token: "", gnumber: "3")
+Client.create(name: "", url: "http://integra17-4.ing.puc.cl/", token: "", gnumber: "4")
+Client.create(name: "590baa00d6b4ec0004902466", url: "http://integra17-5.ing.puc.cl/", token: "", gnumber: "5")
+Client.create(name: "", url: "http://integra17-6.ing.puc.cl/", token: "", gnumber: "6")
+Client.create(name: "590baa00d6b4ec0004902468", url: "http://dev.integra17-7.ing.puc.cl/api/", token: "", gnumber: "7")
+Client.create(name: "", url: "http://integra17-8.ing.puc.cl/", token: "", gnumber: "8")
