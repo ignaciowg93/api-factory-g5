@@ -10,73 +10,84 @@ class PurchaseOrdersController < ApplicationController
 
     def receive
         #The provider accepts a PO that we created.
-        poid = params["_id"]
-
-        begin
-            orden = HTTP.get(base_route+"obtener/"+poid)
-            if orden.status.code != 200
-                "do something"
+        if !(params.has_key?(:payment_method) || params.has_key?(:id_store_reception))
+            render json: {error: "Formato de Body incorrecto"}, status:400
+            if !(params.has_key?(:payment_method))
+                render json: {error: "Falta método de pago"}, status:400
+            elsif !(params.has_key?(:id_store_reception))
+                render json: {error: "Falta bodega de recepción"}, status:400
+        else
+            if params[:payment_method] = "" || params[:payment_method].nil?
+                render json: {error: "Falta método de pago"}, status:400
+            elsif params[:id_store_reception] = "" || params[:id_store_reception].nil?
+                render json: {error: "Falta bodega de recepción"}, status:400
             else
-                ordenParseada = JSON.parse orden.to_s
-                id = ordenParseada[0]["_id"]
-                cliente = ordenParseada[0]["cliente"]
-                proveedor = ordenParseada[0]["proveedor"]
-                sku = ordenParseada[0]["sku"]
-                fechaEntrega = ordenParseada[0]["fechaEntrega"]
-                cantidad = ordenParseada[0]["cantidad"]
-                cantidadDespachada = ordenParseada[0]["cantidadDespachada"]
-                precioUnitario = ordenParseada[0]["precioUnitario"]
-                canal = ordenParseada[0]["canal"]
-                estado = ordenParseada[0]["estado"]
-                notas = ordenParseada[0]["notas"]
-                rechazo = ordenParseada[0]["rechazo"]
-                anulacion = ordenParseada[0]["anulacion"]
-                created_at = ordenParseada[0]["created_at"]
-                stock = Stock.find_by(sku: sku)
-                prod = Product.find_by(sku: sku)
-
-                if stock == nil
-                    estado = "rechazada"
-                    rechazo = "sku inválido"
-                    PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
-                                         date: DateTime.now ,sku: sku, amount: cantidad,
-                                         status: estado, delivery_date: fechaEntrega, 
-                                         unit_price: precioUnitario, rejection: rechazo)
-                    HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
-                     json: {_id: poid, rechazo: rechazo})
-                    HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/rejected',
-                     json: {cause: rechazo})
-
-                    
-                elsif Time.now + product_time.hours >= fechaEntrega.to_date
-                    estado = "rechazada"
-                    rechazo = "No alcanza a estar la orden"
-                    PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
-                                         date: DateTime.now ,sku: sku, amount: cantidad,
-                                         status: estado, delivery_date: fechaEntrega, 
-                                         unit_price: precioUnitario, rejection: rechazo)
-                    HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
-                     json: {_id: poid, rechazo: rechazo})
-                    HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/rejected',
-                     json: {cause: rechazo})
+                poid = params["_id"]        
+                orden = HTTP.get(base_route+"obtener/"+poid)
+                if orden.status.code != 200
+                    render json: {error: "Orden de compra inexistente"}, status:404
                 else
-                    estado = "aceptada"
-                    PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
-                                         date: DateTime.now ,sku: sku, amount: cantidad,
-                                         status: estado, delivery_date: fechaEntrega, 
-                                         unit_price: precioUnitario, rejection: " ")
-                    HTTP.header(accept: "application/json").put(base_route+"recepcionar/"+poid,
-                     json: {_id: poid})
-                    HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/accepted')
-                    if cantidad > get_stock_by_sku(sku)
-                        # llamar a produce(sku)
+                    render json:{ok: "OC recibida exitosamente"} , status:201
+
+                    ordenParseada = JSON.parse orden.to_s
+                    id = ordenParseada[0]["_id"]
+                    cliente = ordenParseada[0]["cliente"]
+                    proveedor = ordenParseada[0]["proveedor"]
+                    sku = ordenParseada[0]["sku"]
+                    fechaEntrega = ordenParseada[0]["fechaEntrega"]
+                    cantidad = ordenParseada[0]["cantidad"]
+                    cantidadDespachada = ordenParseada[0]["cantidadDespachada"]
+                    precioUnitario = ordenParseada[0]["precioUnitario"]
+                    canal = ordenParseada[0]["canal"]
+                    estado = ordenParseada[0]["estado"]
+                    notas = ordenParseada[0]["notas"]
+                    rechazo = ordenParseada[0]["rechazo"]
+                    anulacion = ordenParseada[0]["anulacion"]
+                    created_at = ordenParseada[0]["created_at"]
+                    stock = Stock.find_by(sku: sku)
+                    prod = Product.find_by(sku: sku)
+
+                    if stock == nil
+                        estado = "rechazada"
+                        rechazo = "sku inválido"
+                        PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
+                                             date: DateTime.now ,sku: sku, amount: cantidad,
+                                             status: estado, delivery_date: fechaEntrega, 
+                                             unit_price: precioUnitario, rejection: rechazo)
+                        HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
+                         json: {_id: poid, rechazo: rechazo})
+                        HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/rejected',
+                         json: {cause: rechazo})
+
+                        
+                    elsif Time.now + product_time.hours >= fechaEntrega.to_date
+                        estado = "rechazada"
+                        rechazo = "No alcanza a estar la orden"
+                        PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
+                                             date: DateTime.now ,sku: sku, amount: cantidad,
+                                             status: estado, delivery_date: fechaEntrega, 
+                                             unit_price: precioUnitario, rejection: rechazo)
+                        HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
+                         json: {_id: poid, rechazo: rechazo})
+                        HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/rejected',
+                         json: {cause: rechazo})
+                    else
+                        estado = "aceptada"
+                        PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
+                                             date: DateTime.now ,sku: sku, amount: cantidad,
+                                             status: estado, delivery_date: fechaEntrega, 
+                                             unit_price: precioUnitario, rejection: " ")
+                        HTTP.header(accept: "application/json").put(base_route+"recepcionar/"+poid,
+                         json: {_id: poid})
+                        HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/accepted')
+                        if cantidad > get_stock_by_sku(sku)
+                            # llamar a produce(sku)
+                            end
                         end
                     end
                 end
             end
-        rescue ActiveRecord::RecordNotFound 
-            render json:{error: "Id no asociado a OC por resolver"}, status: 404
-        end
+        end        
     end
 
 
@@ -148,19 +159,6 @@ class PurchaseOrdersController < ApplicationController
    
     def create(sku)
         ## Tenemos que generarla nosotros , por lo tanto los parametros entrar desde nuestra BDD
-    end
-    
-###SELLING
-    def receive
-        #we receive a PO created by someone else, for us to sell. Check if it exists in the PO system.
-       begin
-        @purchase_order = PurchaseOrder.new(purchase_order_params)  
-        @purchase_order.poid = params[:id]  
-        @purchase_order.save
-        render json:{ok: "OC recibida exitosamente"} , status:201
-      rescue ActiveRecord::RecordInvalid
-        render json:{error: "no se pudo enviar OC"}, status: 500
-      end
     end
     
     

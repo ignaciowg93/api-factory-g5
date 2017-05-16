@@ -403,6 +403,146 @@ class ApplicationController < ActionController::API
       render ({json: "Orden despachada", status: 200})
     end
 
+    def receive
+        #The provider accepts a PO that we created.
+        if !(params.has_key?(:payment_method) || params.has_key?(:id_store_reception))
+            render json: {error: "Formato de Body incorrecto"}, status:400
+            if !(params.has_key?(:payment_method))
+                render json: {error: "Falta método de pago"}, status:400
+            elsif !(params.has_key?(:id_store_reception))
+                render json: {error: "Falta bodega de recepción"}, status:400
+        else
+            if params[:payment_method] = "" || params[:payment_method].nil?
+                render json: {error: "Falta método de pago"}, status:400
+            elsif params[:id_store_reception] = "" || params[:id_store_reception].nil?
+                render json: {error: "Falta bodega de recepción"}, status:400
+            else
+                poid = params["_id"]        
+                orden = HTTP.get(base_route+"obtener/"+poid)
+                if orden.status.code != 200
+                    render json: {error: "Orden de compra inexistente"}, status:404
+                else
+
+                    ordenParseada = JSON.parse orden.to_s
+                    id = ordenParseada[0]["_id"]
+                    cliente = ordenParseada[0]["cliente"]
+                    proveedor = ordenParseada[0]["proveedor"]
+                    sku = ordenParseada[0]["sku"]
+                    fechaEntrega = ordenParseada[0]["fechaEntrega"]
+                    cantidad = ordenParseada[0]["cantidad"]
+                    cantidadDespachada = ordenParseada[0]["cantidadDespachada"]
+                    precioUnitario = ordenParseada[0]["precioUnitario"]
+                    canal = ordenParseada[0]["canal"]
+                    estado = ordenParseada[0]["estado"]
+                    notas = ordenParseada[0]["notas"]
+                    rechazo = ordenParseada[0]["rechazo"]
+                    anulacion = ordenParseada[0]["anulacion"]
+                    created_at = ordenParseada[0]["created_at"]
+                    stock = Stock.find_by(sku: sku)
+                    prod = Product.find_by(sku: sku)
+
+                    if stock == nil
+                        estado = "rechazada"
+                        rechazo = "sku inválido"
+                        PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
+                                             date: DateTime.now ,sku: sku, amount: cantidad,
+                                             status: estado, delivery_date: fechaEntrega, 
+                                             unit_price: precioUnitario, rejection: rechazo)
+                        HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
+                         json: {_id: poid, rechazo: rechazo})
+                        HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/rejected',
+                         json: {cause: rechazo})
+
+                        
+                    elsif Time.now.to_f*1000 + product_time*60000*60 >= fechaEntrega
+                        estado = "rechazada"
+                        rechazo = "No alcanza a estar la orden"
+                        PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
+                                             date: DateTime.now ,sku: sku, amount: cantidad,
+                                             status: estado, delivery_date: fechaEntrega, 
+                                             unit_price: precioUnitario, rejection: rechazo)
+                        HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
+                         json: {_id: poid, rechazo: rechazo})
+                        HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/rejected',
+                         json: {cause: rechazo})
+                        
+                    else
+                        estado = "aceptada"
+                        PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
+                                             date: DateTime.now ,sku: sku, amount: cantidad,
+                                             status: estado, delivery_date: fechaEntrega, 
+                                             unit_price: precioUnitario, rejection: " ")
+                        HTTP.header(accept: "application/json").put(base_route+"recepcionar/"+poid,
+                         json: {_id: poid})
+                        HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/accepted')
+                        en_stock = get_stock_by_sku(sku)
+                        faltante = cantidad-en_stock
+                        if faltante > 0
+                            # mover stock a despacho para reservar
+                            tiempo_espera = produce_and_supplying(sku, faltante, fechaEntrega)
+                            sleep((tiempo_espera-Time.now.to_f*1000)/1000)
+                            # mover lo que faltaba a despacho
+                            delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario)
+                        else
+                            # mover cantidad a despacho
+                            delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario)
+                        end
+
+                    end
+                end
+            end
+        end        
+    end
+
+    private
+
+    def product_time(prod)
+        time = prod.time
+        max_t = 0
+        prod.supplies.each do |supply|
+            if supply.time > max_t
+                max_t = supply.time
+            end
+        end
+        time += max_t + 1
+        time.to_i
+    end
+
+    def group_route(client)
+        'http://integra17-' + client + '.ing.puc.cl/purchase_orders/'
+    end
+
+    def get_stock_by_sku(sku)
+        stock_final = 0
+        secret = "W1gCjv8gpoE4JnR" # desarrollo
+        bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega/" # desarrollo
+        #Mandar a la bodega. Get sku de stock.
+        data = "GET"
+        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+        signature = Base64.encode64(hmac).chomp
+        auth_header = "INTEGRACION grupo5:" + signature
+        # pedimos el arreglo de almacenes
+        almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get(bodega_sist + "almacenes")
+        if almacenes.code == 200
+            almacenesP = JSON.parse almacenes.to_s
+            almacenesP.each do |almacen|
+                if !almacen["despacho"] && !almacen["pulmon"]
+                    data += almacen["_id"]
+                    products = HTTP.auth(auth_header).headers(:accept => "application/json").get(bodega_sist + "skusWithStock?almacenId=" + almacen["_id"])
+                    if products.code == 200
+                        productsP = JSON.parse products.to_s
+                        productsP.each do |product|
+                            if product["_id"]["sku"] == sku
+                                stock_final += product["total"]
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        return stock_final
+    end
+
     #B2B
     #CLiente te manda una orden de compra.(POController)
     #Getskuwithstock en bodega.
