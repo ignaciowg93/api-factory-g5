@@ -185,6 +185,7 @@ private
     end
 
     def group_route(client)
+        
         'http://integra17-' + client + '.ing.puc.cl/purchase_orders/'
     end
 
