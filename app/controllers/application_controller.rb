@@ -148,162 +148,167 @@ class ApplicationController < ActionController::API
     end
 
     def produce_and_supplying(sku, qty, fecha_max) #producción y abastecimiento
-      my_supplies_r = (Product.find_by sku: sku).supplies
-      current_supply_sku = ""
-      my_supplies = Array.new
-      my_supplies_r.each do |supply|
-        if current_supply_sku != supply.sku
-          #agregar al arreglo
-          my_supplies.push([supply.sku, supply.requierment])
 
-          current_supply_sku = supply.sku
-        end
-      end
-      secret = "W1gCjv8gpoE4JnR" # desarrollo
-      bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega" # desarrollo
-      #Mandar a la bodega. Get sku de stock.
-      data = "GET"
-      hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
-      signature = Base64.encode64(hmac).chomp
-      auth_header = "INTEGRACION grupo5:" + signature
-      worked_st = 0
-      # pedimos el arreglo de almacenes
-      while worked_st == 0
-        almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/almacenes")
-        if almacenes.code == 200
-          worked_st = 1 # (no es necesario intentarlo de nuevo)
-          #armo lista ordenada de almacenes
-          sorted_almacenes = Array.new
-          almacenes.parse.each do |almacen|
-            if almacen["despacho"] == false && almacen["recepcion"] == false && almacen["pulmon"] == false # es almacen intermedio
-              sorted_almacenes.push([almacen["_id"], 1])
-            elsif almacen["despacho"] == false && almacen["recepcion"] == true # es recepción
-              sorted_almacenes.push([almacen["_id"], 2])
-              @almacen_recep_id = almacen["_id"]
-            elsif almacen["despacho"] == false && almacen["recepcion"] == false # es pulmón
-              sorted_almacenes.push([almacen["_id"], 3])
-            else # es despacho
-              sorted_almacenes.push([almacen["_id"], 4])
-            end
+      prdt = (Product.find_by sku: sku)
+      if prdt.processed == 1
+        #preparación para producir
+        my_supplies_r = prdt.supplies
+        current_supply_sku = ""
+        my_supplies = Array.new
+        my_supplies_r.each do |supply|
+          if current_supply_sku != supply.sku
+            #agregar al arreglo
+            my_supplies.push([supply.sku, supply.requierment])
+
+            current_supply_sku = supply.sku
           end
-          sorted_almacenes.sort!{|a,b| a[1] <=> b[1]}
-          sorted_almacenes.each do |s_almacen|
-            #busco en cada almacen
-            data = "GET" + s_almacen[0]
-            hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
-            signature = Base64.encode64(hmac).chomp
-            auth_header = "INTEGRACION grupo5:" + signature
-            route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/skusWithStock?almacenId=" + s_almacen[0]
-            products_array = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
-            if products_array.code == 200
-              # comparo con lo que necesito
-              products_array.parse.each do |product|
-                my_supplies.each do |supply|
-                  if supply[1] > 0 # si todavía no he alcanzado el total necesario
-                    if supply[0] == product["_id"]
-                      #mover a despacho (muevo directo)
-                      data = "GET" + s_almacen[0] + supply[0]
-                      hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
-                      signature = Base64.encode64(hmac).chomp
-                      auth_header = "INTEGRACION grupo5:" + signature
-                      route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + s_almacen[0] + "&sku=" + supply[0] + "&limit=200"
-                      quedan = product["total"]
-                      while quedan > 0
-                        prod_ids = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
-                        #mover a ID DESPACHO y restarle a quedan
-                        prod_ids.each do |prod|
-                          data = "POST" + prod["_id"] + sorted_almacenes.last[0]
-                          hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
-                          signature = Base64.encode64(hmac).chomp
-                          auth_header = "INTEGRACION grupo5:" + signature
-                          route_to_post = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
-                          move = HTTP.auth(auth_header).headers(:accept => "application/json").post(route_to_post, :json => { :productoId => prod["_id"], :almacenId => sorted_almacenes.last[0] })
-                          if move.code = 200
-                            quedan -= 1
-                          end
-                        end
-                      end
-                      supply[1] -= product["total"] # dcto. de los restantes (me paso en la resta quizás)
-                    end
-                  end
-                end
+        end
+        secret = "W1gCjv8gpoE4JnR" # desarrollo
+        bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega" # desarrollo
+        #Mandar a la bodega. Get sku de stock.
+        data = "GET"
+        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+        signature = Base64.encode64(hmac).chomp
+        auth_header = "INTEGRACION grupo5:" + signature
+        worked_st = 0
+        # pedimos el arreglo de almacenes
+        while worked_st == 0
+          almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/almacenes")
+          if almacenes.code == 200
+            worked_st = 1 # (no es necesario intentarlo de nuevo)
+            #armo lista ordenada de almacenes
+            sorted_almacenes = Array.new
+            almacenes.parse.each do |almacen|
+              if almacen["despacho"] == false && almacen["recepcion"] == false && almacen["pulmon"] == false # es almacen intermedio
+                sorted_almacenes.push([almacen["_id"], 1])
+              elsif almacen["despacho"] == false && almacen["recepcion"] == true # es recepción
+                sorted_almacenes.push([almacen["_id"], 2])
+                @almacen_recep_id = almacen["_id"]
+              elsif almacen["despacho"] == false && almacen["recepcion"] == false # es pulmón
+                sorted_almacenes.push([almacen["_id"], 3])
+              else # es despacho
+                sorted_almacenes.push([almacen["_id"], 4])
               end
             end
-          end
-        elsif almacenes.code == 429
-          #esperar 1 minuto
-          sleep(60)
-        end
-      end
-
-      #Verificar stock mínimo de producción.
-      my_supplies.each do |supply|
-        if supply[1] > 0 # no tengo todo
-          #Llamar al abastecimiento de MP.(Block anterior)
-          oc_list = abastecimiento_mp(sku, supply[0], supply[1], fecha_max, @almacen_recep_id)
-          oc_list.each do |oc|
-            # la idea es que me notifiquen que llegó, pero por ahora debiera ser un sleep del tiempo nomás
-            sleep((oc["fechaEntrega"] - (Time.now.to_f * 1000))/1000 + 1800)
-            #while (Invoice_reg.find_by oc_id: oc).delivered == 0
-            #end
-            #mover a despacho(buscar en recepcion o pulmón)
+            sorted_almacenes.sort!{|a,b| a[1] <=> b[1]}
             sorted_almacenes.each do |s_almacen|
               #busco en cada almacen
-              if s_almacen[1] == 2 || s_almacen[1] == 3 #solo en recepción y pulmón
-                data = "GET" + s_almacen[0]
-                hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
-                signature = Base64.encode64(hmac).chomp
-                auth_header = "INTEGRACION grupo5:" + signature
-                route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/skusWithStock?almacenId=" + s_almacen[0]
-                worked_st2 = 0
-                while worked_st2 == 0
-                  products_array = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
-                  if products_array.code == 200
-                    worked_st2 = 1
-                    # comparo con lo que necesito
-                    products_array.parse.each do |product|
-                      my_supplies.each do |supply|
-                        if supply[1] > 0 # si todavía no he alcanzado el total necesario
-                          if supply[0] == product["_id"]
-                            #mover a despacho (muevo directo)
-                            data = "GET" + s_almacen[0] + supply[0]
+              data = "GET" + s_almacen[0]
+              hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+              signature = Base64.encode64(hmac).chomp
+              auth_header = "INTEGRACION grupo5:" + signature
+              route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/skusWithStock?almacenId=" + s_almacen[0]
+              products_array = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
+              if products_array.code == 200
+                # comparo con lo que necesito
+                products_array.parse.each do |product|
+                  my_supplies.each do |supply|
+                    if supply[1] > 0 # si todavía no he alcanzado el total necesario
+                      if supply[0] == product["_id"]
+                        #mover a despacho (muevo directo)
+                        data = "GET" + s_almacen[0] + supply[0]
+                        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+                        signature = Base64.encode64(hmac).chomp
+                        auth_header = "INTEGRACION grupo5:" + signature
+                        route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + s_almacen[0] + "&sku=" + supply[0] + "&limit=200"
+                        quedan = product["total"]
+                        while quedan > 0
+                          prod_ids = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
+                          #mover a ID DESPACHO y restarle a quedan
+                          prod_ids.each do |prod|
+                            data = "POST" + prod["_id"] + sorted_almacenes.last[0]
                             hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
                             signature = Base64.encode64(hmac).chomp
                             auth_header = "INTEGRACION grupo5:" + signature
-                            route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + s_almacen[0] + "&sku=" + supply[0] + "&limit=200"
-                            quedan = product["total"]
-                            while quedan > 0
-                              prod_ids = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
-                              #mover a ID DESPACHO y restarle a quedan
-                              prod_ids.each do |prod|
-                                data = "POST" + prod["_id"] + sorted_almacenes.last[0]
-                                hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
-                                signature = Base64.encode64(hmac).chomp
-                                auth_header = "INTEGRACION grupo5:" + signature
-                                route_to_post = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
-                                move = HTTP.auth(auth_header).headers(:accept => "application/json").post(route_to_post, :json => { :productoId => prod["_id"], :almacenId => sorted_almacenes.last[0] })
-                                if move.code = 200
-                                  quedan -= 1
-                                end
-                              end
+                            route_to_post = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
+                            move = HTTP.auth(auth_header).headers(:accept => "application/json").post(route_to_post, :json => { :productoId => prod["_id"], :almacenId => sorted_almacenes.last[0] })
+                            if move.code = 200
+                              quedan -= 1
                             end
-                            supply[1] -= product["total"] # dcto. de los restantes (me paso en la resta quizás)
                           end
                         end
+                        supply[1] -= product["total"] # dcto. de los restantes (me paso en la resta quizás)
                       end
                     end
-                  elsif products_array.code == 429
-                    #esperar 1 minuto
-                    sleep(60)
                   end
                 end
               end
             end
-            ##hasta aquí pegué
+          elsif almacenes.code == 429
+            #esperar 1 minuto
+            sleep(60)
           end
         end
-      end
 
+        #Verificar stock mínimo de producción.
+        my_supplies.each do |supply|
+          if supply[1] > 0 # no tengo todo
+            #Llamar al abastecimiento de MP.(Block anterior)
+            oc_list = abastecimiento_mp(sku, supply[0], supply[1], fecha_max, @almacen_recep_id)
+            oc_list.each do |oc|
+              # la idea es que me notifiquen que llegó, pero por ahora debiera ser un sleep del tiempo nomás
+              sleep((oc["fechaEntrega"] - (Time.now.to_f * 1000))/1000 + 1800)
+              #while (Invoice_reg.find_by oc_id: oc).delivered == 0
+              #end
+              #mover a despacho(buscar en recepcion o pulmón)
+              sorted_almacenes.each do |s_almacen|
+                #busco en cada almacen
+                if s_almacen[1] == 2 || s_almacen[1] == 3 #solo en recepción y pulmón
+                  data = "GET" + s_almacen[0]
+                  hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+                  signature = Base64.encode64(hmac).chomp
+                  auth_header = "INTEGRACION grupo5:" + signature
+                  route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/skusWithStock?almacenId=" + s_almacen[0]
+                  worked_st2 = 0
+                  while worked_st2 == 0
+                    products_array = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
+                    if products_array.code == 200
+                      worked_st2 = 1
+                      # comparo con lo que necesito
+                      products_array.parse.each do |product|
+                        my_supplies.each do |supply|
+                          if supply[1] > 0 # si todavía no he alcanzado el total necesario
+                            if supply[0] == product["_id"]
+                              #mover a despacho (muevo directo)
+                              data = "GET" + s_almacen[0] + supply[0]
+                              hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+                              signature = Base64.encode64(hmac).chomp
+                              auth_header = "INTEGRACION grupo5:" + signature
+                              route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + s_almacen[0] + "&sku=" + supply[0] + "&limit=200"
+                              quedan = product["total"]
+                              while quedan > 0
+                                prod_ids = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
+                                #mover a ID DESPACHO y restarle a quedan
+                                prod_ids.each do |prod|
+                                  data = "POST" + prod["_id"] + sorted_almacenes.last[0]
+                                  hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+                                  signature = Base64.encode64(hmac).chomp
+                                  auth_header = "INTEGRACION grupo5:" + signature
+                                  route_to_post = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
+                                  move = HTTP.auth(auth_header).headers(:accept => "application/json").post(route_to_post, :json => { :productoId => prod["_id"], :almacenId => sorted_almacenes.last[0] })
+                                  if move.code = 200
+                                    quedan -= 1
+                                  end
+                                end
+                              end
+                              supply[1] -= product["total"] # dcto. de los restantes (me paso en la resta quizás)
+                            end
+                          end
+                        end
+                      end
+                    elsif products_array.code == 429
+                      #esperar 1 minuto
+                      sleep(60)
+                    end
+                  end
+                end
+              end
+              ##hasta aquí pegué
+            end
+          end
+        end
+        # fin preparación para producir
+      end
       #Ir y producir stock, máximo 5000 por ciclo. **Llega a Recepción y si está lleno , llega a pulmón.
 
       lot = (Product.find_by sku: sku).lot
