@@ -446,17 +446,18 @@ class ApplicationController < ActionController::API
                     created_at = ordenParseada[0]["created_at"]
                     stock = Stock.find_by(sku: sku)
                     prod = Product.find_by(sku: sku)
+                    grupo = Cliente.find_by(name: cliente)
 
-                    if stock == nil
+                    if grupo == nil
                         estado = "rechazada"
-                        rechazo = "sku inválido"
+                        rechazo = "cliente inválido"
                         PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
                                              date: DateTime.now ,sku: sku, amount: cantidad,
                                              status: estado, delivery_date: fechaEntrega,
                                              unit_price: precioUnitario, rejection: rechazo)
                         HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
                          json: {_id: poid, rechazo: rechazo})
-                        HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/rejected',
+                        HTTP.header(accept: "application/json").patch(group_route(grupo) +poid + '/rejected',
                          json: {cause: rechazo})
 
 
@@ -469,7 +470,7 @@ class ApplicationController < ActionController::API
                                              unit_price: precioUnitario, rejection: rechazo)
                         HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
                          json: {_id: poid, rechazo: rechazo})
-                        HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/rejected',
+                        HTTP.header(accept: "application/json").patch(group_route(grupo) +poid + '/rejected',
                          json: {cause: rechazo})
 
                     else
@@ -480,7 +481,7 @@ class ApplicationController < ActionController::API
                                              unit_price: precioUnitario, rejection: " ")
                         HTTP.header(accept: "application/json").put(base_route+"recepcionar/"+poid,
                          json: {_id: poid})
-                        HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/accepted')
+                        HTTP.header(accept: "application/json").patch(group_route(grupo) +poid + '/accepted')
                         en_stock = get_stock_by_sku(sku)
                         faltante = cantidad-en_stock
                         if faltante > 0
@@ -516,7 +517,14 @@ class ApplicationController < ActionController::API
     end
 
     def group_route(client)
-        'http://integra17-' + client + '.ing.puc.cl/purchase_orders/'
+      gnumber = client.gnumber
+      if gnumber == "2"
+        'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/apipie/'
+      elsif gnumber == "7"
+        'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/api/'
+      else        
+        'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/'
+      end
     end
 
     def get_stock_by_sku(sku)
