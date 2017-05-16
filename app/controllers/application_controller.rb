@@ -356,7 +356,6 @@ class ApplicationController < ActionController::API
 
       #retorno fecha en que todo lo fabricado debería llegar
       move_to_despacho(qty, sku)
-      # llamar a delivery
       return longest_time
     end
 
@@ -364,9 +363,9 @@ class ApplicationController < ActionController::API
       almacen_recepcion = "590baa76d6b4ec00049028b1"
       almacen_pulmon = "590baa76d6b4ec00049029dc"
       almacen_despacho = "590baa76d6b4ec00049028b2"
-      remain = qty
+      remaining = qty
       search_pulmon = false
-      while remain > 0 do
+      while remaining > 0 do
         # Buscar en recepcion
         if !search_pulmon
           data = "GET" + almacen_recepcion + sku #GETalmacenIdsku
@@ -375,7 +374,6 @@ class ApplicationController < ActionController::API
           auth_header = "INTEGRACION grupo5:" + signature
           url = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + almacen_recepcion + "&sku=" + sku
           products = HTTP.auth(auth_header).headers(:accept => "application/json").get(url)
-          remain -= products.parse.length
           search_pulmon = true if products.parse.empty?
         else
           # Buscar en pulmon
@@ -385,7 +383,6 @@ class ApplicationController < ActionController::API
           auth_header = "INTEGRACION grupo5:" + signature
           url = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + almacen_pulmon + "&sku=" + sku
           products = HTTP.auth(auth_header).headers(:accept => "application/json").get(url)
-          remain -= products.parse.length
         end
 
         products.parse.each do |product|
@@ -395,6 +392,9 @@ class ApplicationController < ActionController::API
           auth_header = "INTEGRACION grupo5:" + signature
           url = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
           move = HTTP.auth(auth_header).headers(:accept => "application/json").post(url, json: { productoId: product["_id"], almacenId: almacen_despacho })
+          if move == 200
+            remaining -= 1
+          end
         end
       end
     end
