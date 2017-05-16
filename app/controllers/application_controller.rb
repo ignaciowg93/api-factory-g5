@@ -1,7 +1,7 @@
 require "http"
 require 'digest'
 
-$@secret = "W1gCjv8gpoE4JnR" # desarrollo
+@secret = "W1gCjv8gpoE4JnR" # desarrollo
 class ApplicationController < ActionController::API
     rescue_from ActiveRecord::RecordNotFound, with: :record_not_found_exception
     rescue_from ActiveRecord::RecordNotUnique, with: :record_not_unique_exception
@@ -458,6 +458,7 @@ class ApplicationController < ActionController::API
                 render json: {error: "Falta método de pago"}, status:400
             elsif !(params.has_key?(:id_store_reception))
                 render json: {error: "Falta bodega de recepción"}, status:400
+            end
         else
             if params[:payment_method] = "" || params[:payment_method].nil?
                 render json: {error: "Falta método de pago"}, status:400
