@@ -6,9 +6,9 @@ Rails.application.routes.draw do
 
 
 #Ordenes de Compra
-  put 'purchase_orders/:id', to: 'purchase_orders#receive'
+  #put 'purchase_orders/:id', to: 'purchase_orders#receive'
+  put 'purchase_orders/:id', to: 'application#receive'
 
-  
   patch 'purchase_orders(/:id(/accepted))', to: 'purchase_orders#accepted'
 
   patch 'purchase_orders(/:id(/rejected))' , to: 'purchase_orders#rejected'
@@ -18,9 +18,9 @@ Rails.application.routes.draw do
   put 'invoices/:id' , to: 'invoices#receive'
 
   patch 'invoices(/:id(/accepted))' , to: 'invoice#accepted'
-  
+
   patch 'invoices(/:id(/rejected))' , to: 'invoice#rejected'
-  
+
   patch 'invoices(/:id(/delivered))' , to: 'invoice#delivered'
 
   patch 'invoices(/:id(/paid))' , to: 'invoice#paid'
