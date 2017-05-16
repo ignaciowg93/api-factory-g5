@@ -403,6 +403,7 @@ class ApplicationController < ActionController::API
     def delivery(sku, quantity, almacen_recepcion, ordenId, precio)
       @secret = "W1gCjv8gpoE4JnR" # desarrollo
       bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega"
+      data = "GET"
       hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"))
       signature = Base64.encode64(hmac).chomp
       auth_header = "INTEGRACION grupo5:" + signature
