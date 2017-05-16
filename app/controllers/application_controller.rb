@@ -160,6 +160,7 @@ class ApplicationController < ActionController::API
         while remaining < qty
           mult += 1
           remaining = lot * mult
+          #quizás queda mejor con remaining += lot
         end
       end
 
@@ -261,7 +262,7 @@ class ApplicationController < ActionController::API
             oc_list = abastecimiento_mp(sku, supply[0], supply[1], fecha_max, @almacen_recep_id)
             oc_list.each do |oc|
               # la idea es que me notifiquen que llegó, pero por ahora debiera ser un sleep del tiempo nomás
-              sleep((oc["fechaEntrega"] - (Time.now.to_f * 1000))/1000 + 1800)
+              sleep((Time.parse(oc["fechaEntrega"]) - Time.now) + 1800)
               #while (Invoice_reg.find_by oc_id: oc).delivered == 0
               #end
               #mover a despacho(buscar en recepcion o pulmón)
@@ -354,7 +355,7 @@ class ApplicationController < ActionController::API
       end
 
       #retorno fecha en que todo lo fabricado debería llegar
-      return longest_time + (60000 * 30)
+      return longest_time
     end
 
     #Despacho de producto.
@@ -485,7 +486,8 @@ class ApplicationController < ActionController::API
                         if faltante > 0
                             # mover stock a despacho para reservar
                             tiempo_espera = produce_and_supplying(sku, faltante, fechaEntrega)
-                            sleep((tiempo_espera-Time.now.to_f*1000)/1000)
+                            #sleep((tiempo_espera-Time.now.to_f*1000)/1000)
+                            sleep((Time.parse(tiempo_espera) - Time.now) + 1800) # 30 minutos de holgura
                             # mover lo que faltaba a despacho
                             delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario)
                         else
