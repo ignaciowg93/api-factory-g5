@@ -526,9 +526,11 @@ class ApplicationController < ActionController::API
                             tiempo_espera = produce_and_supplying(sku, faltante, fechaEntrega)
                             sleep((tiempo_espera-Time.now.to_f*1000)/1000)
                             # mover lo que faltaba a despacho
+                            move_to_despacho(cantidad, sku)
                             delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario)
                         else
                             # mover cantidad a despacho
+                            move_to_despacho(cantidad, sku)
                             delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario)
                         end
 
