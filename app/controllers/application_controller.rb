@@ -404,7 +404,7 @@ class ApplicationController < ActionController::API
       @secret = "W1gCjv8gpoE4JnR" # desarrollo
       bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega"
       data = "GET"
-      hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"))
+      hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
       signature = Base64.encode64(hmac).chomp
       auth_header = "INTEGRACION grupo5:" + signature
       orden = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/obtener/#{ordenId}")
