@@ -355,7 +355,48 @@ class ApplicationController < ActionController::API
       end
 
       #retorno fecha en que todo lo fabricado debería llegar
+      move_to_despacho(qty, sku)
+      # llamar a delivery
       return longest_time
+    end
+
+    def move_to_despacho(qty, sku)
+      almacen_recepcion = "590baa76d6b4ec00049028b1"
+      almacen_pulmon = "590baa76d6b4ec00049029dc"
+      almacen_despacho = "590baa76d6b4ec00049028b2"
+      remain = qty
+      search_pulmon = false
+      while remain > 0 do
+        # Buscar en recepcion
+        if !search_pulmon
+          data = "GET" + almacen_recepcion + sku #GETalmacenIdsku
+          hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+          signature = Base64.encode64(hmac).chomp
+          auth_header = "INTEGRACION grupo5:" + signature
+          url = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + almacen_recepcion + "&sku=" + sku
+          products = HTTP.auth(auth_header).headers(:accept => "application/json").get(url)
+          remain -= products.parse.length
+          search_pulmon = true if products.parse.empty?
+        else
+          # Buscar en pulmon
+          data = "GET" + almacen_pulmon + sku #GETalmacenIdsku
+          hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+          signature = Base64.encode64(hmac).chomp
+          auth_header = "INTEGRACION grupo5:" + signature
+          url = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + almacen_pulmon + "&sku=" + sku
+          products = HTTP.auth(auth_header).headers(:accept => "application/json").get(url)
+          remain -= products.parse.length
+        end
+
+        products.parse.each do |product|
+          data = "POST" + product["_id"] + almacen_despacho #POSTproductoIdalmacenId
+          hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+          signature = Base64.encode64(hmac).chomp
+          auth_header = "INTEGRACION grupo5:" + signature
+          url = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
+          move = HTTP.auth(auth_header).headers(:accept => "application/json").post(url, json: { productoId: product["_id"], almacenId: almacen_despacho })
+        end
+      end
     end
 
     #Despacho de producto.
@@ -490,9 +531,11 @@ class ApplicationController < ActionController::API
                             #sleep((tiempo_espera-Time.now.to_f*1000)/1000)
                             sleep((Time.parse(tiempo_espera) - Time.now) + 1800) # 30 minutos de holgura
                             # mover lo que faltaba a despacho
+                            move_to_despacho(cantidad, sku)
                             delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario)
                         else
                             # mover cantidad a despacho
+                            move_to_despacho(cantidad, sku)
                             delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario)
                         end
 
@@ -522,7 +565,7 @@ class ApplicationController < ActionController::API
         'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/apipie/'
       elsif gnumber == "7"
         'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/api/'
-      else        
+      else
         'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/'
       end
     end
