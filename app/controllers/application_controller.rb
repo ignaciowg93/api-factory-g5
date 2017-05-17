@@ -1,7 +1,9 @@
 require "http"
 require 'digest'
+
 @secret = "W1gCjv8gpoE4JnR" # desarrollo
 class ApplicationController < ActionController::API
+  include ActionView::Layouts
     rescue_from ActiveRecord::RecordNotFound, with: :record_not_found_exception
     rescue_from ActiveRecord::RecordNotUnique, with: :record_not_unique_exception
     rescue_from ActiveRecord::RecordInvalid,with: :record_invalid_exception
