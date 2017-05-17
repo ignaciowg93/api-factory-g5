@@ -2,6 +2,7 @@ require 'http'
 require 'digest'
 require 'purchase_orders_controller'
 base_route = "https://integracion-2017-dev.herokuapp.com/oc/"
+include ActionView::Layouts
 
 ActiveAdmin.register_page "Dashboard" do
 
