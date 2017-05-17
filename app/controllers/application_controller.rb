@@ -1,8 +1,7 @@
 require "http"
 require 'digest'
-
-#$@secret = "W1gCjv8gpoE4JnR" # desarrollo
-class ApplicationController < ActionController::Base
+@secret = "W1gCjv8gpoE4JnR" # desarrollo
+class ApplicationController < ActionController::API
     rescue_from ActiveRecord::RecordNotFound, with: :record_not_found_exception
     rescue_from ActiveRecord::RecordNotUnique, with: :record_not_unique_exception
     rescue_from ActiveRecord::RecordInvalid,with: :record_invalid_exception
@@ -355,14 +354,56 @@ class ApplicationController < ActionController::Base
       end
 
       #retorno fecha en que todo lo fabricado debería llegar
+      move_to_despacho(qty, sku)
       return longest_time
+    end
+
+    def move_to_despacho(qty, sku)
+      almacen_recepcion = "590baa76d6b4ec00049028b1"
+      almacen_pulmon = "590baa76d6b4ec00049029dc"
+      almacen_despacho = "590baa76d6b4ec00049028b2"
+      remaining = qty
+      search_pulmon = false
+      while remaining > 0 do
+        # Buscar en recepcion
+        if !search_pulmon
+          data = "GET" + almacen_recepcion + sku #GETalmacenIdsku
+          hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+          signature = Base64.encode64(hmac).chomp
+          auth_header = "INTEGRACION grupo5:" + signature
+          url = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + almacen_recepcion + "&sku=" + sku
+          products = HTTP.auth(auth_header).headers(:accept => "application/json").get(url)
+          search_pulmon = true if products.parse.empty?
+        else
+          # Buscar en pulmon
+          data = "GET" + almacen_pulmon + sku #GETalmacenIdsku
+          hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+          signature = Base64.encode64(hmac).chomp
+          auth_header = "INTEGRACION grupo5:" + signature
+          url = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + almacen_pulmon + "&sku=" + sku
+          products = HTTP.auth(auth_header).headers(:accept => "application/json").get(url)
+        end
+
+        products.parse.each do |product|
+          data = "POST" + product["_id"] + almacen_despacho #POSTproductoIdalmacenId
+          hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+          signature = Base64.encode64(hmac).chomp
+          auth_header = "INTEGRACION grupo5:" + signature
+          url = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
+          move = HTTP.auth(auth_header).headers(:accept => "application/json").post(url, json: { productoId: product["_id"], almacenId: almacen_despacho })
+          if move == 200
+            remaining -= 1
+          end
+        end
+      end
     end
 
     #Despacho de producto.
     def delivery(sku, quantity, almacen_recepcion, ordenId, precio)
       @secret = "W1gCjv8gpoE4JnR" # desarrollo
       bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega"
-      hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"))
+      data = "GET"
+      hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
       signature = Base64.encode64(hmac).chomp
       auth_header = "INTEGRACION grupo5:" + signature
       orden = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/obtener/#{ordenId}")
@@ -411,16 +452,17 @@ class ApplicationController < ActionController::Base
 
     def receive
         #The provider accepts a PO that we created.
-        if !(params.has_key?(:payment_method) || params.has_key?(:id_store_reception))
+        if !(params.has_key?(:payment_method) && params.has_key?(:id_store_reception))
             render json: {error: "Formato de Body incorrecto"}, status:400
             if !(params.has_key?(:payment_method))
                 render json: {error: "Falta método de pago"}, status:400
             elsif !(params.has_key?(:id_store_reception))
                 render json: {error: "Falta bodega de recepción"}, status:400
+            end
         else
-            if params[:payment_method] = "" || params[:payment_method].nil?
+            if params[:payment_method].empty? || params[:payment_method].nil?
                 render json: {error: "Falta método de pago"}, status:400
-            elsif params[:id_store_reception] = "" || params[:id_store_reception].nil?
+            elsif params[:id_store_reception].empty? || params[:id_store_reception].nil?
                 render json: {error: "Falta bodega de recepción"}, status:400
             else
                 poid = params["_id"]
@@ -490,9 +532,11 @@ class ApplicationController < ActionController::Base
                             #sleep((tiempo_espera-Time.now.to_f*1000)/1000)
                             sleep((Time.parse(tiempo_espera) - Time.now) + 1800) # 30 minutos de holgura
                             # mover lo que faltaba a despacho
+                            move_to_despacho(cantidad, sku)
                             delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario)
                         else
                             # mover cantidad a despacho
+                            move_to_despacho(cantidad, sku)
                             delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario)
                         end
 
@@ -522,7 +566,7 @@ class ApplicationController < ActionController::Base
         'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/apipie/'
       elsif gnumber == "7"
         'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/api/'
-      else        
+      else
         'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/'
       end
     end
