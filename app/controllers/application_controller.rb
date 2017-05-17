@@ -1,6 +1,5 @@
 require "http"
 require 'digest'
-
 @secret = "W1gCjv8gpoE4JnR" # desarrollo
 class ApplicationController < ActionController::API
     rescue_from ActiveRecord::RecordNotFound, with: :record_not_found_exception
@@ -626,4 +625,5 @@ class ApplicationController < ActionController::API
 
 
 
+end
 end

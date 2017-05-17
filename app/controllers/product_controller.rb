@@ -55,6 +55,10 @@ private
         return stock_productos
     end
 
+    def temp
+        "Hola"
+    end
+
 
 end
 
