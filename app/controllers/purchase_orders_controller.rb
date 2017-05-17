@@ -4,25 +4,24 @@ class PurchaseOrdersController < ApplicationController
     base_route = "https://integracion-2017-dev.herokuapp.com/oc/"
 
     def new
-        @purchase_order = PurchaseOrder.new 
+        @purchase_order = PurchaseOrder.new
     end
 
 
     def receive
         #The provider accepts a PO that we created.
-        if !(params.has_key?(:payment_method) || params.has_key?(:id_store_reception))
-            render json: {error: "Formato de Body incorrecto"}, status:400
+        if !(params.has_key?(:payment_method) && params.has_key?(:id_store_reception))
             if !(params.has_key?(:payment_method))
                 render json: {error: "Falta método de pago"}, status:400
             elsif !(params.has_key?(:id_store_reception))
                 render json: {error: "Falta bodega de recepción"}, status:400
         else
-            if params[:payment_method] = "" || params[:payment_method].nil?
+            if params[:payment_method].empty? || params[:payment_method].nil?
                 render json: {error: "Falta método de pago"}, status:400
-            elsif params[:id_store_reception] = "" || params[:id_store_reception].nil?
+            elsif params[:id_store_reception].empty? || params[:id_store_reception].nil?
                 render json: {error: "Falta bodega de recepción"}, status:400
             else
-                poid = params["_id"]        
+                poid = params["_id"]
                 orden = HTTP.get(base_route+"obtener/"+poid)
                 if orden.status.code != 200
                     render json: {error: "Orden de compra inexistente"}, status:404
@@ -52,20 +51,20 @@ class PurchaseOrdersController < ApplicationController
                         rechazo = "sku inválido"
                         PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
                                              date: DateTime.now ,sku: sku, amount: cantidad,
-                                             status: estado, delivery_date: fechaEntrega, 
+                                             status: estado, delivery_date: fechaEntrega,
                                              unit_price: precioUnitario, rejection: rechazo)
                         HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
                          json: {_id: poid, rechazo: rechazo})
                         HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/rejected',
                          json: {cause: rechazo})
 
-                        
+
                     elsif Time.now + product_time.hours >= fechaEntrega.to_date
                         estado = "rechazada"
                         rechazo = "No alcanza a estar la orden"
                         PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
                                              date: DateTime.now ,sku: sku, amount: cantidad,
-                                             status: estado, delivery_date: fechaEntrega, 
+                                             status: estado, delivery_date: fechaEntrega,
                                              unit_price: precioUnitario, rejection: rechazo)
                         HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
                          json: {_id: poid, rechazo: rechazo})
@@ -75,7 +74,7 @@ class PurchaseOrdersController < ApplicationController
                         estado = "aceptada"
                         PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
                                              date: DateTime.now ,sku: sku, amount: cantidad,
-                                             status: estado, delivery_date: fechaEntrega, 
+                                             status: estado, delivery_date: fechaEntrega,
                                              unit_price: precioUnitario, rejection: " ")
                         HTTP.header(accept: "application/json").put(base_route+"recepcionar/"+poid,
                          json: {_id: poid})
@@ -87,7 +86,7 @@ class PurchaseOrdersController < ApplicationController
                     end
                 end
             end
-        end        
+        end
     end
 
 
@@ -96,7 +95,7 @@ class PurchaseOrdersController < ApplicationController
     def accepted
 
         @purchase_order = PurchaseOrder.find_by(_id: params[:id])
-        if @purchase_order.status == "creada"            
+        if @purchase_order.status == "creada"
             oc = HTTP.headers(:accept => "application/json").get('https://integracion-2017-dev.herokuapp.com/oc/obtener/' + params[:id])
             if oc.code == 200
                 orden_compra = oc.parse
@@ -120,7 +119,7 @@ class PurchaseOrdersController < ApplicationController
     end
 
     def rejected
-        
+
         if (params.has_key?(:cause))
             @causa = params[:cause]
             if (@causa == "")
@@ -132,9 +131,9 @@ class PurchaseOrdersController < ApplicationController
             end
         else
             render json: {error: "Formato de body incorrecto"},status: 400
-        end    
+        end
         @purchase_order = PurchaseOrder.find_by(_id: params[:id])
-        if @purchase_order.status == "creada"            
+        if @purchase_order.status == "creada"
             oc = HTTP.headers(:accept => "application/json").get('https://integracion-2017-dev.herokuapp.com/oc/obtener/' + params[:id])
             if oc.code == 200
                 orden_compra = oc.parse
@@ -156,13 +155,13 @@ class PurchaseOrdersController < ApplicationController
         # The provider rejects a PO created by us. Check its existance.
         end
     end
-   
+
     def create(sku)
         ## Tenemos que generarla nosotros , por lo tanto los parametros entrar desde nuestra BDD
     end
-    
-    
-private 
+
+
+private
 
     def purchase_order_params
         params.permit( :purchase_order,:id ,:payment_method , :payment_option, :rejection, :poid)
@@ -185,7 +184,7 @@ private
     end
 
     def group_route(client)
-        
+
         'http://integra17-' + client + '.ing.puc.cl/purchase_orders/'
     end
 
@@ -228,9 +227,9 @@ private
 
 
     #TODOS2
-    #Crear orden de compra, basado en el Cliente recibido por ApplicationController.Máximo 5000 por orden de compra. 
+    #Crear orden de compra, basado en el Cliente recibido por ApplicationController.Máximo 5000 por orden de compra.
     #Decidir loop de ordenes de compra. Ver errores de rechazos con la ordenes de compra.
-    #Crear orden de compra ( Sistem Orden de compra). // Crear Orden De Compra 
+    #Crear orden de compra ( Sistem Orden de compra). // Crear Orden De Compra
     #Mandar orden de compra al cliente (B2B). //Enviar Orden De Compra
     #Recibir apruebo o rechazo de la orden  //
     # Frente a rechazo mapear los proveedores para budcar siguiente posible proveedor Y volver a tratar.
