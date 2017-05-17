@@ -453,7 +453,7 @@ class ApplicationController < ActionController::API
 
     def receive
         #The provider accepts a PO that we created.
-        if !(params.has_key?(:payment_method) || params.has_key?(:id_store_reception))
+        if !(params.has_key?(:payment_method) && params.has_key?(:id_store_reception))
             render json: {error: "Formato de Body incorrecto"}, status:400
             if !(params.has_key?(:payment_method))
                 render json: {error: "Falta método de pago"}, status:400
@@ -461,9 +461,9 @@ class ApplicationController < ActionController::API
                 render json: {error: "Falta bodega de recepción"}, status:400
             end
         else
-            if params[:payment_method] = "" || params[:payment_method].nil?
+            if params[:payment_method].empty? || params[:payment_method].nil?
                 render json: {error: "Falta método de pago"}, status:400
-            elsif params[:id_store_reception] = "" || params[:id_store_reception].nil?
+            elsif params[:id_store_reception].empty? || params[:id_store_reception].nil?
                 render json: {error: "Falta bodega de recepción"}, status:400
             else
                 poid = params["_id"]
