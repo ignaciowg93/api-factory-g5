@@ -1,8 +1,8 @@
 require "http"
 require 'digest'
 
-$@secret = "W1gCjv8gpoE4JnR" # desarrollo
-class ApplicationController < ActionController::API
+#$@secret = "W1gCjv8gpoE4JnR" # desarrollo
+class ApplicationController < ActionController::Base
     rescue_from ActiveRecord::RecordNotFound, with: :record_not_found_exception
     rescue_from ActiveRecord::RecordNotUnique, with: :record_not_unique_exception
     rescue_from ActiveRecord::RecordInvalid,with: :record_invalid_exception
@@ -581,4 +581,5 @@ class ApplicationController < ActionController::API
 
 
 
+end
 end

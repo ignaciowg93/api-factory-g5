@@ -162,7 +162,7 @@ class PurchaseOrdersController < ApplicationController
     end
     
     
-private 
+
 
     def purchase_order_params
         params.permit( :purchase_order,:id ,:payment_method , :payment_option, :rejection, :poid)
@@ -220,6 +220,10 @@ private
         return stock_final
     end
 
+
+    def temp
+        "Hola"
+    end
 
     #TODO
     #When a Oc is creaed we have to check its existance in the OC server. If not return a 404.
