@@ -1,7 +1,7 @@
 class PurchaseOrdersController < ApplicationController
     require 'http'
     require 'digest'
-    base_route = "https://integracion-2017-dev.herokuapp.com/oc/"
+    before_action :set_route
 
     def new
         @purchase_order = PurchaseOrder.new
@@ -13,37 +13,39 @@ class PurchaseOrdersController < ApplicationController
         if !(params.has_key?(:payment_method) && params.has_key?(:id_store_reception))
             if !(params.has_key?(:payment_method))
                 render json: {error: "Falta método de pago"}, status:400
+                puts "hola"
             elsif !(params.has_key?(:id_store_reception))
                 render json: {error: "Falta bodega de recepción"}, status:400
+            end
         else
             if params[:payment_method].empty? || params[:payment_method].nil?
                 render json: {error: "Falta método de pago"}, status:400
             elsif params[:id_store_reception].empty? || params[:id_store_reception].nil?
                 render json: {error: "Falta bodega de recepción"}, status:400
             else
-                poid = params["_id"]
-                orden = HTTP.get(base_route+"obtener/"+poid)
+                poid = params["id"]
+                orden = HTTP.get(@base_route+"obtener/"+poid)
                 if orden.status.code != 200
                     render json: {error: "Orden de compra inexistente"}, status:404
                 else
                     render json:{ok: "OC recibida exitosamente"} , status:201
 
-                    ordenParseada = JSON.parse orden.to_s
-                    id = ordenParseada[0]["_id"]
-                    cliente = ordenParseada[0]["cliente"]
-                    proveedor = ordenParseada[0]["proveedor"]
-                    sku = ordenParseada[0]["sku"]
-                    fechaEntrega = ordenParseada[0]["fechaEntrega"]
-                    cantidad = ordenParseada[0]["cantidad"]
-                    cantidadDespachada = ordenParseada[0]["cantidadDespachada"]
-                    precioUnitario = ordenParseada[0]["precioUnitario"]
-                    canal = ordenParseada[0]["canal"]
-                    estado = ordenParseada[0]["estado"]
-                    notas = ordenParseada[0]["notas"]
-                    rechazo = ordenParseada[0]["rechazo"]
-                    anulacion = ordenParseada[0]["anulacion"]
-                    created_at = ordenParseada[0]["created_at"]
-                    stock = Stock.find_by(sku: sku)
+                    #ordenParseada = JSON.parse orden.to_s
+                    id = orden["_id"]
+                    cliente = orden["cliente"]
+                    proveedor = orden["proveedor"]
+                    sku = orden["sku"]
+                    fechaEntrega = orden["fechaEntrega"]
+                    cantidad = orden["cantidad"]
+                    cantidadDespachada = orden["cantidadDespachada"]
+                    precioUnitario = orden["precioUnitario"]
+                    canal = orden["canal"]
+                    estado = orden["estado"]
+                    notas = orden["notas"]
+                    rechazo = orden["rechazo"]
+                    anulacion = orden["anulacion"]
+                    created_at = orden["created_at"]
+                    stock = Stock.find_by(sku: sku) # Stock = productos que vendemos? Poblar base de datos!!
                     prod = Product.find_by(sku: sku)
 
                     if stock == nil
@@ -52,14 +54,16 @@ class PurchaseOrdersController < ApplicationController
                         PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
                                              date: DateTime.now ,sku: sku, amount: cantidad,
                                              status: estado, delivery_date: fechaEntrega,
-                                             unit_price: precioUnitario, rejection: rechazo)
-                        HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
+                                             unit_price: precioUnitario, rejection: rechazo) # Por que creamos la orden?
+                        HTTP.headers(accept: "application/json").post(@base_route+"rechazar/"+poid,
                          json: {_id: poid, rechazo: rechazo})
-                        HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/rejected',
+                        HTTP.headers(accept: "application/json").patch(group_route(cliente) +poid + '/rejected',
                          json: {cause: rechazo})
 
 
-                    elsif Time.now + product_time.hours >= fechaEntrega.to_date
+                    #elsif Time.now + product_time.hours >= fechaEntrega.to_date
+                      ## Qué es product_time? de donde sale
+                    elsif Time.now + product_time(cantidad) >= fechaEntrega.to_date
                         estado = "rechazada"
                         rechazo = "No alcanza a estar la orden"
                         PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
@@ -81,13 +85,12 @@ class PurchaseOrdersController < ApplicationController
                         HTTP.header(accept: "application/json").patch(group_route(cliente) +poid + '/accepted')
                         if cantidad > get_stock_by_sku(sku)
                             # llamar a produce(sku)
-                            end
                         end
+                      end
                     end
-                end
-            end
-        end
-    end
+                 end
+               end
+             end
 
 
 ## BUYING
@@ -172,7 +175,7 @@ private
     end
 
     def product_time(prod)
-        time = prod.time
+        time = prod.time ##?
         max_t = 0
         prod.supplies.each do |supply|
             if supply.time > max_t
@@ -184,7 +187,6 @@ private
     end
 
     def group_route(client)
-
         'http://integra17-' + client + '.ing.puc.cl/purchase_orders/'
     end
 
@@ -220,10 +222,14 @@ private
     end
 
 
+
+
     #TODO
     #When a Oc is creaed we have to check its existance in the OC server. If not return a 404.
 
-
+    def set_route
+      @base_route = "https://integracion-2017-dev.herokuapp.com/oc/"
+    end
 
 
     #TODOS2

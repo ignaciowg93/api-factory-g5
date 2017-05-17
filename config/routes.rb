@@ -6,8 +6,8 @@ Rails.application.routes.draw do
 
 
 #Ordenes de Compra
-  #put 'purchase_orders/:id', to: 'purchase_orders#receive'
-  put 'purchase_orders/:id', to: 'application#receive'
+  put 'purchase_orders/:id', to: 'purchase_orders#receive'
+  #put 'purchase_orders/:id', to: 'application#receive'
 
   patch 'purchase_orders(/:id(/accepted))', to: 'purchase_orders#accepted'
 
