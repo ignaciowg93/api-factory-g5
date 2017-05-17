@@ -23,8 +23,8 @@ ActiveAdmin.register_page "Dashboard" do
       column do
         panel "Products" do
           ul do
-            Product.last(2).map do |p|
-              li get_stock_by_sku(p.sku)
+            Product.all.map do |p|
+              li p.Name + " : " + get_stock_by_sku(p.sku)
             end
           end
         end
