@@ -1,42 +1,31 @@
-# == Schema Information
-#
-# Table name: purchase_orders
-#
-#  id             :integer          not null, primary key
-#  payment_method :string
-#  payment_option :string
-#  date           :datetime
-#  sku            :string
-#  amount         :integer
-#  status         :boolean
-#  delivery_date  :datetime
-#  unit_price     :integer
-#  created_at     :datetime         not null
-#  updated_at     :datetime         not null
-#  poid           :string
-#  rejection      :string
-#
-
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  payment_method: 1
-  payment_option: 1
-  date: 2017-04-26 11:58:51
-  client: one
+  _id: MyString
+  client: MyString
+  supplier: MyString
   sku: MyString
-  amount: 1
-  status: false
-  delivery_date: 
-  unit_price: 1
+  delivery_date: 2017-05-15 16:34:23
+  amount: 
+  delivered_qt: 
+  unit_price: 
+  channel: MyString
+  status: MyString
+  notes: MyString
+  rejection: MyString
+  anullment: MyString
 
 two:
-  payment_method: 1
-  payment_option: 1
-  date: 2017-04-26 11:58:51
-  client: two
+  _id: MyString
+  client: MyString
+  supplier: MyString
   sku: MyString
-  amount: 1
-  status: false
-  delivery_date: 
-  unit_price: 1
+  delivery_date: 2017-05-15 16:34:23
+  amount: 
+  delivered_qt: 
+  unit_price: 
+  channel: MyString
+  status: MyString
+  notes: MyString
+  rejection: MyString
+  anullment: MyString
