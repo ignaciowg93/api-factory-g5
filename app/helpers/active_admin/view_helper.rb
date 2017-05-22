@@ -39,6 +39,9 @@ module ActiveAdmin::ViewHelper
         return stock_final
     end
 
+    def get_warehouse
+        
+
 
     def temp(hola)
         "hola"
