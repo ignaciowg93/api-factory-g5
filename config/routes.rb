@@ -26,5 +26,7 @@ Rails.application.routes.draw do
 
   patch 'invoices(/:id(/paid))' , to: 'invoice#paid'
 
+####Lista de Precios
 
+  get 'api/publico/precios', to: 'product#prices'
 end
