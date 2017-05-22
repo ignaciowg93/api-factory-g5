@@ -2,7 +2,7 @@ require 'http'
 require 'digest'
 require 'purchase_orders_controller'
 base_route = "https://integracion-2017-dev.herokuapp.com/oc/"
-
+include ActiveAdmin::ViewHelper
 ActiveAdmin.register_page "Dashboard" do
 
   menu priority: 1, label: proc{ I18n.t("active_admin.dashboard") }
@@ -30,6 +30,37 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
     end
+
+
+    columns do
+      column do
+        panel "Almacenes" do
+          almacenesHash = get_warehouse
+          table_for almacenesHash.each do 
+            column :_id do |almacen|
+              almacen["_id"]
+            end
+            column :usedSpace do |almacen|
+              almacen["usedSpace"]
+            end
+            column :type do |almacen|
+              if (almacen["pulmon"])
+                "Pulmón"
+              elsif (almacen["despacho"])
+                "Despacho"
+              elsif (almacen["recepcion"])
+                "Recepción"
+              else
+                "Intermedio"
+              end
+            end
+          end
+        end
+      end
+    end
+  
+    
+              
            
 
 

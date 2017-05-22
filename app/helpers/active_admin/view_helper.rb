@@ -40,7 +40,20 @@ module ActiveAdmin::ViewHelper
     end
 
     def get_warehouse
-        
+        stock_final = 0
+        secret = "W1gCjv8gpoE4JnR" # desarrollo
+        bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega/" # desarrollo
+        #Mandar a la bodega. Get sku de stock.
+        data = "GET"
+        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
+        signature = Base64.encode64(hmac).chomp
+        auth_header = "INTEGRACION grupo5:" + signature
+        # pedimos el arreglo de almacenes
+        almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get(bodega_sist + "almacenes")
+        almacenesP = JSON.parse almacenes.to_s
+        return almacenesP
+
+    end
 
 
     def temp(hola)
