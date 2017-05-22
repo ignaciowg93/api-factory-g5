@@ -494,7 +494,7 @@ class ApplicationController < ActionController::Base
                     if grupo == nil
                         estado = "rechazada"
                         rechazo = "cliente inválido"
-                        PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
+                        PurchaseOrder.create(_id: poid, payment_method: " ", payment_option: " ",
                                              date: DateTime.now ,sku: sku, amount: cantidad,
                                              status: estado, delivery_date: fechaEntrega,
                                              unit_price: precioUnitario, rejection: rechazo)
@@ -507,7 +507,7 @@ class ApplicationController < ActionController::Base
                     elsif (Time.now + product_time(prod)*3600) >= fechaEntrega
                         estado = "rechazada"
                         rechazo = "No alcanza a estar la orden"
-                        PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
+                        PurchaseOrder.create(_id: poid, payment_method: " ", payment_option: " ",
                                              date: DateTime.now ,sku: sku, amount: cantidad,
                                              status: estado, delivery_date: fechaEntrega,
                                              unit_price: precioUnitario, rejection: rechazo)
@@ -518,7 +518,7 @@ class ApplicationController < ActionController::Base
 
                     else
                         estado = "aceptada"
-                        PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
+                        PurchaseOrder.create(_id: poid, payment_method: " ", payment_option: " ",
                                              date: DateTime.now ,sku: sku, amount: cantidad,
                                              status: estado, delivery_date: fechaEntrega,
                                              unit_price: precioUnitario, rejection: " ")
