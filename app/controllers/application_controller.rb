@@ -286,24 +286,33 @@ class ApplicationController < ActionController::Base
                         auth_header = "INTEGRACION grupo5:" + signature
                         route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + s_almacen[0] + "&sku=" + supply[0] + "&limit=200"
                         #quedan = product["total"]
-                        quedan = supply[1]
-                        while quedan > 0
+                        # quedan = supply[1]
+                        while supply[1] > 0
                           puts("while quedan")
                           prod_ids = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
                           #mover a ID DESPACHO y restarle a quedan
-                          prod_ids.each do |prod|
-                            data = "POST" + prod["_id"] + sorted_almacenes.last[0]
-                            hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
-                            signature = Base64.encode64(hmac).chomp
-                            auth_header = "INTEGRACION grupo5:" + signature
-                            route_to_post = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
-                            move = HTTP.auth(auth_header).headers(:accept => "application/json").post(route_to_post, :json => { :productoId => prod["_id"], :almacenId => sorted_almacenes.last[0] })
-                            if move.code = 200
-                              quedan -= 1
+                          if prod_ids.code == 200
+                            prod_ids.each do |prod|
+                              data = "POST" + prod["_id"] + sorted_almacenes.last[0]
+                              hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
+                              signature = Base64.encode64(hmac).chomp
+                              auth_header = "INTEGRACION grupo5:" + signature
+                              route_to_post = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
+                              while romper2 > 0
+                                move = HTTP.auth(auth_header).headers(:accept => "application/json").post(route_to_post, :json => { :productoId => prod["_id"], :almacenId => sorted_almacenes.last[0] })
+                                if move.code = 200
+                                  supply[1] -= 1
+                                  romper = 0
+                                elsif move.code == 429
+                                  sleep(60)
+                                end
                             end
+                          elsif prod_ids.code == 400
+                            break
+                          elsif prod_ids.code == 429
+                            sleep(60)
                           end
                         end
-                        supply[1] -= product["total"] # dcto. de los restantes (me paso en la resta quizás)
                       end
                     end
                   end

@@ -13,8 +13,20 @@ class ProductController < ApplicationController
         end
 
         render :json => arreglo
+    end
 
-        
+    def prices
+        @products = Product.all
+        @stock = find_qt_by_sku
+        arreglo = Array.new
+        @products.each do |p|
+          temp = {:sku => p.sku , :price=> p.price , :stock=> @stock[p.sku] }
+          p(temp)
+          arreglo.push(temp)
+        end
+
+        render :json => arreglo
+
     end
 
 
@@ -59,19 +71,4 @@ private
         "Hola"
     end
 
-    def prices
-        @products = Product.all
-        @stock = find_qt_by_sku
-        arreglo = Array.new
-        @products.each do |p|
-            temp = {:sku => p.sku , :price=> p.price , :stock=> @stock[p.sku] }
-            p(temp)
-            arreglo.push(temp)
-        end
-
-        render :json => arreglo
-
-    end
 end
-
-
