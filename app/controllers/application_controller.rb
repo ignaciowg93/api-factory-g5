@@ -306,6 +306,7 @@ class ApplicationController < ActionController::Base
                                 elsif move.code == 429
                                   sleep(60)
                                 end
+                              end
                             end
                           elsif prod_ids.code == 400
                             break
