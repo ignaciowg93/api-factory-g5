@@ -480,6 +480,7 @@ class ApplicationController < ActionController::Base
       almacen_pulmon = "590baa76d6b4ec00049029dc"
       almacen_despacho = "590baa76d6b4ec00049028b2"
       remaining = qty
+      # Indica si es necesario o no llegar al pulmon a revisar
       search_pulmon = false
       while remaining > 0 do
         # Buscar en recepcion
@@ -568,88 +569,89 @@ class ApplicationController < ActionController::Base
     end
 
     def receive
-        #The provider accepts a PO that we created.
-        if !(params.has_key?(:payment_method) && params.has_key?(:id_store_reception))
-            render json: {error: "Formato de Body incorrecto"}, status:400
-            if !(params.has_key?(:payment_method))
-                render json: {error: "Falta método de pago"}, status:400
-            elsif !(params.has_key?(:id_store_reception))
-                render json: {error: "Falta bodega de recepción"}, status:400
-            end
-        else
-            if params[:payment_method].empty? || params[:payment_method].nil?
-                render json: {error: "Falta método de pago"}, status:400
-            elsif params[:id_store_reception].empty? || params[:id_store_reception].nil?
-                render json: {error: "Falta bodega de recepción"}, status:400
-            else
-                poid = params["_id"]
-                orden = HTTP.get(base_route+"obtener/"+poid)
-                if orden.status.code != 200
-                    render json: {error: "Orden de compra inexistente"}, status:404
-                else
+          # Receive purchase order
+          if !(params.has_key?(:payment_method) && params.has_key?(:id_store_reception))
+              if !(params.has_key?(:payment_method))
+                  render json: {error: "Falta método de pago"}, status:400
+              elsif !(params.has_key?(:id_store_reception))
+                  render json: {error: "Falta bodega de recepción"}, status:400
+              end
+          else
+              if params[:payment_method].empty? || params[:payment_method].nil?
+                  render json: {error: "Falta método de pago"}, status:400
+              elsif params[:id_store_reception].empty? || params[:id_store_reception].nil?
+                  render json: {error: "Falta bodega de recepción"}, status:400
+              else
+                  poid = params["id"]
+                  base_route = "https://integracion-2017-dev.herokuapp.com/oc/"
+                  response = HTTP.headers(accept: "application/json").get(base_route+"obtener/"+poid)
+                  orden = JSON.parse response.to_s
 
-                    ordenParseada = JSON.parse orden.to_s
-                    id = ordenParseada[0]["_id"]
-                    cliente = ordenParseada[0]["cliente"]
-                    proveedor = ordenParseada[0]["proveedor"]
-                    sku = ordenParseada[0]["sku"]
-                    fechaEntrega = ordenParseada[0]["fechaEntrega"]
-                    cantidad = ordenParseada[0]["cantidad"]
-                    cantidadDespachada = ordenParseada[0]["cantidadDespachada"]
-                    precioUnitario = ordenParseada[0]["precioUnitario"]
-                    canal = ordenParseada[0]["canal"]
-                    estado = ordenParseada[0]["estado"]
-                    notas = ordenParseada[0]["notas"]
-                    rechazo = ordenParseada[0]["rechazo"]
-                    anulacion = ordenParseada[0]["anulacion"]
-                    created_at = ordenParseada[0]["created_at"]
-                    stock = Stock.find_by(sku: sku)
-                    prod = Product.find_by(sku: sku)
-                    grupo = Cliente.find_by(name: cliente)
+                  if response.status.code != 200
+                      render json: {error: "Orden de compra inexistente"}, status:404
+                  else
+                      render json:{ok: "OC recibida exitosamente"} , status:201
+
+                      id = orden[0]["_id"]
+                      cliente = orden[0]["cliente"]
+                      proveedor = orden[0]["proveedor"]
+                      sku = orden[0]["sku"]
+                      fechaEntrega = orden[0]["fechaEntrega"]
+                      cantidad = orden[0]["cantidad"]
+                      cantidadDespachada = orden[0]["cantidadDespachada"]
+                      precioUnitario = orden[0]["precioUnitario"]
+                      canal = orden[0]["canal"]
+                      estado = orden[0]["estado"]
+                      notas = orden[0]["notas"]
+                      rechazo = orden[0]["rechazo"]
+                      anulacion = orden[0]["anulacion"]
+                      created_at = orden[0]["created_at"]
+                      stock = Stock.find_by(sku: sku) # Poblar base de datos
+                      prod = Product.find_by(sku: sku)
+                      grupo = Client.find_by(name: cliente)
 
                     if grupo == nil
                         estado = "rechazada"
                         rechazo = "cliente inválido"
-                        PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
-                                             date: DateTime.now ,sku: sku, amount: cantidad,
-                                             status: estado, delivery_date: fechaEntrega,
-                                             unit_price: precioUnitario, rejection: rechazo)
-                        HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
+                        # FIXME es necesario almacenar las ordenes de compra que nos llegan?
+                        # PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
+                        #                      date: DateTime.now ,sku: sku, amount: cantidad,
+                        #                      status: estado, delivery_date: fechaEntrega,
+                        #                      unit_price: precioUnitario, rejection: rechazo)
+                        HTTP.headers(accept: "application/json").put(base_route+"rechazar/"+poid,
                          json: {_id: poid, rechazo: rechazo})
-                        HTTP.header(accept: "application/json").patch(group_route(grupo) +poid + '/rejected',
-                         json: {cause: rechazo})
-
 
                     elsif (Time.now + product_time(prod)*3600) >= fechaEntrega
                         estado = "rechazada"
                         rechazo = "No alcanza a estar la orden"
-                        PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
-                                             date: DateTime.now ,sku: sku, amount: cantidad,
-                                             status: estado, delivery_date: fechaEntrega,
-                                             unit_price: precioUnitario, rejection: rechazo)
-                        HTTP.header(accept: "application/json").put(base_route+"rechazar/"+poid,
+                        # PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
+                        #                      date: DateTime.now ,sku: sku, amount: cantidad,
+                        #                      status: estado, delivery_date: fechaEntrega,
+                        #                      unit_price: precioUnitario, rejection: rechazo)
+                        HTTP.headers(accept: "application/json").put(base_route+"rechazar/"+poid,
                          json: {_id: poid, rechazo: rechazo})
-                        HTTP.header(accept: "application/json").patch(group_route(grupo) +poid + '/rejected',
+                        HTTP.headers(accept: "application/json").patch(group_route(grupo) +poid + '/rejected',
                          json: {cause: rechazo})
 
                     else
                         estado = "aceptada"
-                        PurchaseOrder.create(poid: poid, payment_method: " ", payment_option: " ",
-                                             date: DateTime.now ,sku: sku, amount: cantidad,
+                        PurchaseOrder.create(_id: poid, #payment_method: " ", payment_option: " ",
+                                             sku: sku, amount: cantidad,
                                              status: estado, delivery_date: fechaEntrega,
                                              unit_price: precioUnitario, rejection: " ")
-                        HTTP.header(accept: "application/json").put(base_route+"recepcionar/"+poid,
+                        response = HTTP.headers(accept: "application/json").post(base_route+"recepcionar/"+poid,
                          json: {_id: poid})
-                        HTTP.header(accept: "application/json").patch(group_route(grupo) +poid + '/accepted')
+                        HTTP.headers(accept: "application/json").patch(group_route(grupo) +poid + '/accepted')
                         en_stock = get_stock_by_sku(sku)
                         faltante = cantidad-en_stock
                         if faltante > 0
                             # mover stock a despacho para reservar
+                            move_to_despacho(en_stock, sku)
                             tiempo_espera = produce_and_supplying(sku, faltante, fechaEntrega)
                             #sleep((tiempo_espera-Time.now.to_f*1000)/1000)
                             sleep((Time.parse(tiempo_espera) - Time.now) + 1800) # 30 minutos de holgura
                             # mover lo que faltaba a despacho
-                            move_to_despacho(cantidad, sku)
+                            move_to_despacho(faltante, sku)
                             delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario)
                         else
                             # mover cantidad a despacho
@@ -680,9 +682,9 @@ class ApplicationController < ActionController::Base
     def group_route(client)
       gnumber = client.gnumber
       if gnumber == "2"
-        'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/apipie/'
+        'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/'
       elsif gnumber == "7"
-        'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/api/'
+        'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/'
       else
         'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/'
       end
@@ -703,7 +705,10 @@ class ApplicationController < ActionController::Base
             almacenesP = JSON.parse almacenes.to_s
             almacenesP.each do |almacen|
                 if !almacen["despacho"] && !almacen["pulmon"]
-                    data += almacen["_id"]
+                    data = "GET#{almacen["_id"]}"
+                    hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
+                    signature = Base64.encode64(hmac).chomp
+                    auth_header = "INTEGRACION grupo5:" + signature
                     products = HTTP.auth(auth_header).headers(:accept => "application/json").get(bodega_sist + "skusWithStock?almacenId=" + almacen["_id"])
                     if products.code == 200
                         productsP = JSON.parse products.to_s
