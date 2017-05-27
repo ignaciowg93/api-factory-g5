@@ -1,0 +1,10 @@
+<h1>Su compra fue realizada con éxito</h1>
+
+<h5> Id boleta: <%= @idBoleta %> </h5> 
+
+<h5> Monto bruto: <%= $montoBruto %> </h5> 
+
+<h5> IVA: <%= $iva %> </h5> 
+
+<h5> Total: <%= @total %></h5> 
+
