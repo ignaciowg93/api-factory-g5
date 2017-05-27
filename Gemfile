@@ -15,7 +15,11 @@ gem 'underscore-rails'
 gem 'listen', '~> 3.0.5'
 gem 'bootstrap-sass', '3.3.6'
 gem "http"  #https://github.com/httprb/http/tree/2-x-stable
-gem 'activeadmin' 
+gem 'activeadmin'
+
+gem 'spree', '~> 3.2.0'
+gem 'spree_auth_devise', '~> 3.2.0.beta'
+gem 'spree_gateway', '~> 3.2.0.beta'
 
 
 group :development, :test do
