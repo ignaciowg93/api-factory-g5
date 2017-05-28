@@ -29,4 +29,6 @@ Rails.application.routes.draw do
 ####Lista de Precios
 
   get 'api/publico/precios', to: 'product#prices'
+
+  get 'prueba', to: 'application#prueba'
 end

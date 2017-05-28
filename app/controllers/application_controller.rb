@@ -139,9 +139,16 @@ class ApplicationController < ActionController::Base
           notification = HTTP.headers(:accept => "application/json").put(seller_addr, :json => { :payment_method => "contra_factura", :id_store_reception  => alm_recep_id})
           PurchaseOrder.create(_id: oc.parse["_id"], client: oc.parse["cliente"], supplier: oc.parse["proveedor"], sku: oc.parse["sku"], delivery_date: oc.parse["fechaEntrega"], amount: oc.parse["cantidad"], delivered_qt: oc.parse["cantidadDespachada"], unit_price: oc.parse["precioUnitario"], channel: oc.parse["canal"], status: oc.parse["estado"])
           # esperar apruebo o rechazo
-          while (PurchaseOrder.find_by _id: oc.parse["_id"]).status == "creada"
-            puts("estoy aca")
+
+          oc = HTTP.headers(accept: "application/json").get("https://integracion-2017-dev.herokuapp.com/oc/obtener/#{oc.parse["_id"]}")
+
+          while oc.parse[0]["estado"] == "creada"
+            puts("estoy acaaaa")
             sleep(5)
+            while oc.code != 200
+              oc = HTTP.headers(accept: "application/json").get("https://integracion-2017-dev.herokuapp.com/oc/obtener/#{oc.parse["_id"]}")
+            end
+
             #esto es a la mala:
             # @purchase_order3 = (PurchaseOrder.find_by _id: oc.parse["_id"])
             # @purchase_order3.status = "aceptada"
@@ -149,7 +156,7 @@ class ApplicationController < ActionController::Base
             #     puts("corregido")
             # end
           end
-          if (PurchaseOrder.find_by _id: oc.parse["_id"]).status == "aceptada"
+          if oc.parse[0]["estado"] == "aceptada"
             # fue aceptada
             oc_this_time.push(oc.parse)
             cant_mp -= seller[3]
@@ -170,18 +177,17 @@ class ApplicationController < ActionController::Base
             notification = HTTP.headers(:accept => "application/json").put(seller_addr, :json => { :payment_method => "contra_factura", :id_store_reception  => alm_recep_id})
             PurchaseOrder.create(_id: oc.parse["_id"], client: oc.parse["cliente"], supplier: oc.parse["proveedor"], sku: oc.parse["sku"], delivery_date: oc.parse["fechaEntrega"], amount: oc.parse["cantidad"], delivered_qt: oc.parse["cantidadDespachada"], unit_price: oc.parse["precioUnitario"], channel: oc.parse["canal"], status: oc.parse["estado"])
             # esperar apruebo o rechazo
-            while (PurchaseOrder.find_by _id: oc.parse["_id"]).status == "creada"
-              puts("estoy aca")
-              sleep(5)
-              #esto es a la mala:
-              # @purchase_order3 = (PurchaseOrder.find_by _id: oc.parse["_id"])
-              # @purchase_order3.status = "aceptada"
-              # if @purchase_order3.save!
-              #     puts("corregido")
-              # end
+            oc = HTTP.headers(accept: "application/json").get("https://integracion-2017-dev.herokuapp.com/oc/obtener/#{oc.parse["_id"]}")
+            while oc.parse["estado"] == "creada"
+              puts oc
+              #puts("estoy aca, id: #{(PurchaseOrder.find_by _id: oc.parse["_id"]).status}")
+              sleep(15)
+              while oc.code != 200
+                oc = HTTP.headers(accept: "application/json").get("https://integracion-2017-dev.herokuapp.com/oc/obtener/#{oc.parse["_id"]}")
+              end
             end
             puts("salimos")
-            if (PurchaseOrder.find_by _id: oc.parse["_id"]).status == "aceptada"
+            if oc.parse[0]["estado"] == "aceptada"
               # fue aceptada
               puts("fue aceptada")
               oc_this_time.push(oc.parse)
@@ -330,86 +336,87 @@ class ApplicationController < ActionController::Base
         my_supplies.each do |supply|
           if supply[1] > 0 # no tengo todo
             #Llamar al abastecimiento de MP.(Block anterior)
-            puts("#{sku}, #{supply[0]}, #{supply[1]}, #{fecha_max}, #{@almacen_recep_id}")
+            #puts("#{sku}, #{supply[0]}, #{supply[1]}, #{fecha_max}, #{@almacen_recep_id}")
             oc_list = abastecimiento_mp(sku, supply[0], supply[1], fecha_max, @almacen_recep_id)
             puts("retorno: #{oc_list} fin")
-            oc_list.each do |oc|
-              # la idea es que me notifiquen que llegó, pero por ahora debiera ser un sleep del tiempo nomás
-              puts("ahora sleep")
-              sleep((Time.parse(oc["fechaEntrega"]) - Time.now) + 1800)
-              puts("ya fue el sleep")
-              #while (Invoice_reg.find_by oc_id: oc).delivered == 0
-              #end
-              #mover a despacho(buscar en recepcion o pulmón)
-              sorted_almacenes.each do |s_almacen|
-                #busco en cada almacen
-                if s_almacen[1] == 2 || s_almacen[1] == 3 #solo en recepción y pulmón
-                  data = "GET" + s_almacen[0]
-                  hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
-                  signature = Base64.encode64(hmac).chomp
-                  auth_header = "INTEGRACION grupo5:" + signature
-                  route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/skusWithStock?almacenId=" + s_almacen[0]
-                  worked_st2 = 0
-                  while worked_st2 == 0
-                    puts("while worked_st2")
-                    sleep(2)
-                    products_array = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
-                    if products_array.code == 200
-                      worked_st2 = 1
-                      # comparo con lo que necesito
-                      products_array.each do |product| # le sacamos un parse que tenia
-                        my_supplies.each do |supply|
-                          if supply[1] > 0 # si todavía no he alcanzado el total necesario
-                            if supply[0] == product["_id"]
-                              #mover a despacho (muevo directo)
-                              data = "GET" + s_almacen[0] + supply[0]
-                              hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
-                              signature = Base64.encode64(hmac).chomp
-                              auth_header = "INTEGRACION grupo5:" + signature
-                              route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + s_almacen[0] + "&sku=" + supply[0] + "&limit=200"
-                              # quedan = product["total"]
-                              while supply[1] > 0
-                                puts("while quedan 2")
-                                sleep(2)
-                                prod_ids = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
-                                #mover a ID DESPACHO y restarle a quedan
-                                if prod_ids.code == 200
-                                  prod_ids.each do |prod|
-                                    data = "POST" + prod["_id"] + sorted_almacenes.last[0]
-                                    hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
-                                    signature = Base64.encode64(hmac).chomp
-                                    auth_header = "INTEGRACION grupo5:" + signature
-                                    route_to_post = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
-                                    romper = 1
-                                    while romper > 0
-                                      move = HTTP.auth(auth_header).headers(:accept => "application/json").post(route_to_post, :json => { :productoId => prod["_id"], :almacenId => sorted_almacenes.last[0] })
-                                      if move.code = 200
-                                        supply[1] -= 1
-                                        romper = 0
-                                      elsif move.code == 429
-                                        sleep(60)
-                                      end
+            # la idea es que me notifiquen que llegó, pero por ahora debiera ser un sleep del tiempo nomás
+            puts("ahora sleep")
+            #FIXME
+            sleep((Time.parse(oc_listm[0]["fechaEntrega"]) - Time.now) + 1800)
+            #sleep(5)
+            puts("ya fue el sleep")
+            #while (Invoice_reg.find_by oc_id: oc).delivered == 0
+            #end
+            #mover a despacho(buscar en recepcion o pulmón)
+            sorted_almacenes.each do |s_almacen|
+              #busco en cada almacen
+              if s_almacen[1] == 2 || s_almacen[1] == 3 #solo en recepción y pulmón
+
+                data = "GET" + s_almacen[0]
+                hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
+                signature = Base64.encode64(hmac).chomp
+                auth_header = "INTEGRACION grupo5:" + signature
+                route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/skusWithStock?almacenId=" + s_almacen[0]
+                worked_st2 = 0
+                while worked_st2 == 0
+                  puts("while worked_st2")
+                  sleep(2)
+                  products_array = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
+                  if products_array.code == 200
+                    worked_st2 = 1
+                    # comparo con lo que necesito
+                    puts products_array
+                    products_array.parse.each do |product| # le sacamos un parse que tenia
+                      my_supplies.each do |supply|
+                        if supply[1] > 0 # si todavía no he alcanzado el total necesario
+                          if supply[0] == product["_id"]
+                            #mover a despacho (muevo directo)
+                            data = "GET" + s_almacen[0] + supply[0]
+                            hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
+                            signature = Base64.encode64(hmac).chomp
+                            auth_header = "INTEGRACION grupo5:" + signature
+                            limit = (supply[1] if supply[1] < 200) || 200
+                            route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + s_almacen[0] + "&sku=" + supply[0] + "&limit=#{limit}"
+                            # quedan = product["total"]
+                            while supply[1] > 0
+                              puts("while quedan 2")
+                              sleep(2)
+                              prod_ids = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
+                              #mover a ID DESPACHO y restarle a quedan
+                              if prod_ids.code == 200
+                                prod_ids.parse.each do |prod|
+                                  data = "POST" + prod["_id"] + sorted_almacenes.last[0]
+                                  hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), @secret.encode("ASCII"), data.encode("ASCII"))
+                                  signature = Base64.encode64(hmac).chomp
+                                  auth_header = "INTEGRACION grupo5:" + signature
+                                  route_to_post = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
+                                  romper = 1
+                                  while romper > 0 && supply[1]>0
+                                    move = HTTP.auth(auth_header).headers(:accept => "application/json").post(route_to_post, :json => { :productoId => prod["_id"], :almacenId => sorted_almacenes.last[0] })
+                                    if move.code == 200
+                                      supply[1] -= 1
+                                      romper = 0
+                                    elsif move.code == 429
+                                      sleep(60)
                                     end
                                   end
-                                elsif prod_ids.code == 400
-                                  break
-                                elsif prod_ids.code == 429
-                                  sleep(60)
                                 end
+                              elsif prod_ids.code == 400
+                                break
+                              elsif prod_ids.code == 429
+                                sleep(60)
                               end
-                              #supply[1] -= product["total"] # dcto. de los restantes (me paso en la resta quizás)
                             end
                           end
                         end
                       end
-                    elsif products_array.code == 429
-                      #esperar 1 minuto
-                      sleep(60)
                     end
+                  elsif products_array.code == 429
+                    #esperar 1 minuto
+                    sleep(60)
                   end
                 end
               end
-              ##hasta aquí pegué
             end
           end
         end
@@ -596,11 +603,14 @@ class ApplicationController < ActionController::Base
                   base_route = "https://integracion-2017-dev.herokuapp.com/oc/"
                   response = HTTP.headers(accept: "application/json").get(base_route+"obtener/"+poid)
                   orden = JSON.parse response.to_s
+                  puts
 
                   if response.status.code != 200
                       render json: {error: "Orden de compra inexistente"}, status:404
                   else
                       render json:{ok: "OC recibida exitosamente"} , status:201
+                      puts "orden recibida"
+
 
                       id = orden[0]["_id"]
                       cliente = orden[0]["cliente"]
@@ -619,6 +629,10 @@ class ApplicationController < ActionController::Base
                       stock = Stock.find_by(sku: sku) # Poblar base de datos
                       prod = Product.find_by(sku: sku)
                       grupo = Client.find_by(name: cliente)
+
+                      puts prod
+                      puts id
+                      puts grupo
 
                     if grupo == nil
                         estado = "rechazada"
@@ -654,10 +668,13 @@ class ApplicationController < ActionController::Base
                         HTTP.headers(accept: "application/json").patch(group_route(grupo) +poid + '/accepted')
                         en_stock = get_stock_by_sku(sku)
                         faltante = cantidad-en_stock
+                        puts "aceptada"
+                        puts "falta #{faltante}"
                         if faltante > 0
                             # mover stock a despacho para reservar
                             move_to_despacho(en_stock, sku)
-                            tiempo_espera = produce_and_supplying(sku, faltante, fechaEntrega)
+                            tiempo_espera = produce_and_supplying(sku, faltante, Time.parse(fechaEntrega).to_f*1000)
+                            puts tiempo_espera
                             #sleep((tiempo_espera-Time.now.to_f*1000)/1000)
                             sleep((Time.parse(tiempo_espera) - Time.now) + 1800) # 30 minutos de holgura
                             # mover lo que faltaba a despacho
