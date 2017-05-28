@@ -158,7 +158,7 @@ class ApplicationController < ActionController::Base
           end
           if oc.parse[0]["estado"] == "aceptada"
             # fue aceptada
-            oc_this_time.push(oc.parse)
+            oc_this_time.push(oc.parse[0])
             cant_mp -= seller[3]
           end
         end
@@ -190,7 +190,7 @@ class ApplicationController < ActionController::Base
             if oc.parse[0]["estado"] == "aceptada"
               # fue aceptada
               puts("fue aceptada")
-              oc_this_time.push(oc.parse)
+              oc_this_time.push(oc.parse[0])
               cant_mp -= cant_mp
             end
           end
@@ -199,6 +199,7 @@ class ApplicationController < ActionController::Base
           end
         end
       end
+      oc_this_time.sort!{|a,b| b["fechaEntrega"] <=> a["fechaEntrega"]}
       # retornar la lista de OCs para después verificar los despachos
       return oc_this_time
     end
