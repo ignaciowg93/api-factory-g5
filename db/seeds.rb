@@ -120,5 +120,5 @@ Client.create(name: "", url: "http://integra17-3.ing.puc.cl/", token: "", gnumbe
 Client.create(name: "", url: "http://integra17-4.ing.puc.cl/", token: "", gnumber: "4")
 Client.create(name: "590baa00d6b4ec0004902466", url: "http://integra17-5.ing.puc.cl/", token: "", gnumber: "5")
 Client.create(name: "", url: "http://integra17-6.ing.puc.cl/", token: "", gnumber: "6")
-Client.create(name: "590baa00d6b4ec0004902468", url: "http://dev.integra17-7.ing.puc.cl/", token: "", gnumber: "7")
+Client.create(name: "590baa00d6b4ec0004902468", url: "http://integra17-7.ing.puc.cl/", token: "", gnumber: "7")
 Client.create(name: "", url: "http://integra17-8.ing.puc.cl/", token: "", gnumber: "8")

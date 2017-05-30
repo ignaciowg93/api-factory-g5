@@ -109,7 +109,7 @@ class ApplicationController < ActionController::Base
         end
       end
       sorted_suppliers.sort!{|a,b| a[2] <=> b[2]}
-      return sorted_suppliers # ojo que podría retornar un arreglo vacío
+      sorted_suppliers
     end
       #Después de aceptada la OC,
 
@@ -130,13 +130,14 @@ class ApplicationController < ActionController::Base
       #oc_this_time = Array.new
       # Cotizar
       sellers = quote_a_price(sku_prod, sku_insumo, cant_mp)
+
       # mandar OC hasta cubrir cant_mp confirmada
       sellers.each do |seller|
         oc = ""
         # Se envia orden de compra por el stock disponible completo del proveedor
         loop do
           sleep(15)
-          oc = HTTP.headers(:accept => "application/json").put('https://integracion-2017-dev.herokuapp.com/oc/crear', :json => { :cliente => "5910c0910e42840004f6e684", :proveedor => seller[0], :sku => sku_insumo, :fechaEntrega => fecha_max, :cantidad => seller[3], :precioUnitario => seller[1], :canal => "b2b" })
+          oc = HTTP.headers(:accept => "application/json").put(Rails.configuration.base_route_oc +'crear', :json => { :cliente => "5910c0910e42840004f6e684", :proveedor => seller[0], :sku => sku_insumo, :fechaEntrega => fecha_max, :cantidad => seller[3], :precioUnitario => seller[1], :canal => "b2b" })
           break if oc.code == 200
         end
         # agrego entrada (nueva OC) en la tabla y notifico
@@ -146,7 +147,7 @@ class ApplicationController < ActionController::Base
         # esperar apruebo o rechazo
 
         loop do
-          oc = HTTP.headers(accept: "application/json").get("https://integracion-2017-dev.herokuapp.com/oc/obtener/#{oc.parse["_id"]}")
+          oc = HTTP.headers(accept: "application/json").get(Rails.configuration.base_route_oc + "obtener/#{oc.parse["_id"]}")
           sleep(15)
           break if oc.parse[0]["estado"] == "aceptada"
           sleep(60) if oc.code == 429
@@ -160,7 +161,7 @@ class ApplicationController < ActionController::Base
         sellers.each do |seller|
           oc = ""
           loop do
-            oc = HTTP.headers(:accept => "application/json").put('https://integracion-2017-dev.herokuapp.com/oc/crear', :json => { :cliente => "5910c0910e42840004f6e684", :proveedor => seller[0], :sku => sku_insumo, :fechaEntrega => fecha_max, :cantidad => cant_mp, :precioUnitario => seller[1], :canal => "b2b" })
+            oc = HTTP.headers(:accept => "application/json").put(Rails.configuration.base_route_oc + 'crear', :json => { :cliente => "5910c0910e42840004f6e684", :proveedor => seller[0], :sku => sku_insumo, :fechaEntrega => fecha_max, :cantidad => cant_mp, :precioUnitario => seller[1], :canal => "b2b" })
             break if oc.code == 200
           end
           # agrgo entrada en la tabla (inicializada en id ) y notifico
@@ -169,7 +170,7 @@ class ApplicationController < ActionController::Base
           PurchaseOrder.create(_id: oc.parse["_id"], client: oc.parse["cliente"], supplier: oc.parse["proveedor"], sku: oc.parse["sku"], delivery_date: oc.parse["fechaEntrega"], amount: oc.parse["cantidad"], delivered_qt: oc.parse["cantidadDespachada"], unit_price: oc.parse["precioUnitario"], channel: oc.parse["canal"], status: oc.parse["estado"])
           # esperar apruebo o rechazo
           loop do
-            oc = HTTP.headers(accept: "application/json").get("https://integracion-2017-dev.herokuapp.com/oc/obtener/#{oc.parse["_id"]}")
+            oc = HTTP.headers(accept: "application/json").get(Rails.configuration.base_route_oc + "obtener/#{oc.parse["_id"]}")
             sleep(15)
             break if oc.parse[0]["estado"] == "aceptada"
             sleep(60) if oc.code == 429
@@ -252,6 +253,8 @@ class ApplicationController < ActionController::Base
         # Se espera por las ordenes de compra, segun la fecha
         # FIXME: ir accediendo al estado de las ordenes, porque pueden estar despachadas mucho antes.
         sleep((Time.parse(fecha) - Time.now) + 1800)
+        # Verificar que ha llegado todo.
+        # Get sku
 
         # Mover unidades a almacen de despacho
         # Cuando se mueven, ya no estan reservadas, porque no se busca en despacho
@@ -444,7 +447,7 @@ class ApplicationController < ActionController::Base
         #puts("factory to_s: #{factory_account2.to_s}")
         factory_account = factory_account2.parse["cuentaId"]
         #puts("factory_account: #{factory_account}")
-        trx1 = HTTP.headers(:accept => "application/json").put("https://integracion-2017-dev.herokuapp.com/banco/trx", :json => { :monto => monto, :origen => "590baa00d6b4ec0004902471", :destino => factory_account })
+        trx1 = HTTP.headers(:accept => "application/json").put(Rails.configuration.base_route_banco + "trx", :json => { :monto => monto, :origen => "590baa00d6b4ec0004902471", :destino => factory_account })
         aviso = trx1.to_s
         #puts("trx1: #{aviso}")
         #Producir
@@ -489,7 +492,7 @@ class ApplicationController < ActionController::Base
         # Buscar en recepcion
         if !search_pulmon
           data = "GET" + Rails.configuration.recepcion_id + sku #GETalmacenIdsku
-          url = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + Rails.configuration.recepcion_id + "&sku=" + sku
+          url = Rails.configuration.base_route_bodega +"stock?almacenId=" + Rails.configuration.recepcion_id + "&sku=" + sku
           loop do
             products = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get(url)
             break if products.code == 200
@@ -499,7 +502,7 @@ class ApplicationController < ActionController::Base
         else
           # Buscar en pulmon
           data = "GET" + Rails.configuration.pulmon_id + sku #GETalmacenIdsku
-          url = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=" + Rails.configuration.pulmon_id + "&sku=" + sku
+          url = Rails.configuration.base_route_bodega +"stock?almacenId=" + Rails.configuration.pulmon_id + "&sku=" + sku
           loop do
             products = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get(url)
             break if products.code == 200
@@ -509,7 +512,7 @@ class ApplicationController < ActionController::Base
 
         products.parse.each do |product|
           data = "POST" + product["_id"] + Rails.configuration.despacho_id #POSTproductoIdalmacenId
-          url = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
+          url = Rails.configuration.base_route_bodega + "moveStock"
           move = ""
           loop do
             move = HTTP.auth(generate_header(data)).headers(:accept => "application/json").post(url, json: { productoId: product["_id"], almacenId: Rails.configuration.despacho_id })
@@ -524,7 +527,7 @@ class ApplicationController < ActionController::Base
     #Despacho de producto.
     def delivery(sku, quantity, almacen_recepcion, ordenId, precio)
       data = "GET"
-      orden = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/obtener/#{ordenId}")
+      orden = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get( Rails.configuration.base_route_bodega + "obtener/#{ordenId}")
       # buscar precio correspondiente a la orden de compra
       precio = orden["precioUnitario"]
 
@@ -534,7 +537,7 @@ class ApplicationController < ActionController::Base
       #Hacer la request la cantidad de veces necesaria
       while quantity > 0 do
         limit = (quantity if quantity < 200) || 200
-        url = "https://integracion-2017-dev.herokuapp.com/bodega/stock?almacenId=#{almacenId}&sku=#{sku}&limit=#{limit}"
+        url = Rails.configuration.base_route_bodega + "stock?almacenId=#{almacenId}&sku=#{sku}&limit=#{limit}"
         data = "GET#{almacenId}#{sku}"
 
         # Obtener productos
@@ -550,7 +553,7 @@ class ApplicationController < ActionController::Base
           products.parse.each do |product|
             productoId = product["_id"]
             data = "POST#{productoId}#{almacen_recepcion}" # Almacen de recepcion comprador?
-            url = "https://integracion-2017-dev.herokuapp.com/bodega/moveStockBodega"
+            url = Rails.configuration.base_route_bodega + "moveStockBodega"
             deliver = HTTP.auth(generate_header(data)).headers(:accept => "application/json").post(url, json: { productoId: productoId, almacenId: almacen_recepcion, oc: ordenId, precio: precio})
             # if deliver.code != 200
             #   render ({json: "No se pudo procesar despacho", status: 422})
