@@ -7,7 +7,7 @@ class ProductController < ApplicationController
         @stock = find_qt_by_sku
         arreglo = Array.new
         @products.each do |p|
-            temp = {:sku => p.sku , :name => p.name , :price=> p.price , :stock=> @stock[p.sku] }
+            temp = {:sku => p.sku , :name => p.name , :price=> p.price , :stock=> @stock[p.sku] - p.stock_reservado}
             p(temp)
             arreglo.push(temp)
         end
@@ -20,7 +20,7 @@ class ProductController < ApplicationController
         @stock = find_qt_by_sku
         arreglo = Array.new
         @products.each do |p|
-          temp = {:sku => p.sku , :price=> p.sell_price , :stock=> @stock[p.sku] }
+          temp = {:sku => p.sku , :price=> p.sell_price , :stock=> @stock[p.sku] - p.stock_reservado}
           p(temp)
           arreglo.push(temp)
         end
@@ -48,7 +48,7 @@ private
       almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/almacenes")
       if almacenes.code == 200
           almacenes.parse.each do |almacen|
-              if(!almacen["despacho"] && !almacen["pulmon"])
+              if(!almacen["despacho"])
                     data = "GET" + almacen["_id"]
                     hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
                     signature = Base64.encode64(hmac).chomp

@@ -30,5 +30,7 @@ Rails.application.routes.draw do
 
   get 'api/publico/precios', to: 'product#prices'
 
+  get 'products', to: 'product#index'
+
   #get 'prueba', to: 'application#quote_a_price'
 end
