@@ -235,18 +235,12 @@ class ApplicationController < ActionController::Base
       end
       n_lotes = @remaining/lot
 
-      # El sobrante pasa a STOCK DISPONIBLE
-      # FIXME: actualizar base de datos
-
       puts ("Producir: #{n_lotes} lote(s) ")
 
       # Buscar materias primas si producto es procesado
       if prdt.processed == 1
         # Preparación para producir
-
-        # Excluir de prdt.supplies los sku repetidos
         my_supplies = prdt.supplies
-        puts my_supplies
         # my_supplies_r = prdt.supplies
         # current_supply_sku = ""
         # my_supplies = Array.new
@@ -261,9 +255,8 @@ class ApplicationController < ActionController::Base
         # Reservar
         # Mover a despacho cuando se tengan todas las unidades
         my_supplies.each do |supply|
-          # En stock esta solo stock disponible
-          # El stock puede ser negativo porque se puede reservar antes de que llgado
-          stock = get_stock_by_sku(supply) - supply.stock_reservado
+          # En stock esta solo stock disponible (stock reservado esta restado)
+          stock = get_stock_by_sku(supply)
           puts "Stock: #{stock}"
           if supply.requierment * n_lotes >= stock
             remain = supply.requierment * n_lotes - stock
