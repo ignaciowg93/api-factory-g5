@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170516230539) do
+ActiveRecord::Schema.define(version: 20170530090733) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -83,9 +83,9 @@ ActiveRecord::Schema.define(version: 20170516230539) do
   create_table "products", force: :cascade do |t|
     t.string   "sku"
     t.string   "name"
-    t.decimal  "price",        precision: 64, scale: 12
-    t.datetime "created_at",                             null: false
-    t.datetime "updated_at",                             null: false
+    t.decimal  "price",           precision: 64, scale: 12
+    t.datetime "created_at",                                null: false
+    t.datetime "updated_at",                                null: false
     t.integer  "warehouse_id"
     t.integer  "processed"
     t.integer  "lot"
@@ -93,6 +93,7 @@ ActiveRecord::Schema.define(version: 20170516230539) do
     t.integer  "dependent"
     t.decimal  "time"
     t.integer  "stock_reservado"
+    t.integer  "sell_price"
     t.index ["warehouse_id"], name: "index_products_on_warehouse_id", using: :btree
   end
 
@@ -114,6 +115,14 @@ ActiveRecord::Schema.define(version: 20170516230539) do
     t.datetime "updated_at",    null: false
   end
 
+  create_table "sellers", force: :cascade do |t|
+    t.integer  "supply_id"
+    t.string   "seller"
+    t.decimal  "time"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "stocks", force: :cascade do |t|
     t.string   "sku"
     t.integer  "totalAmount"
@@ -128,17 +137,9 @@ ActiveRecord::Schema.define(version: 20170516230539) do
     t.integer  "stock_reservado"
     t.decimal  "time"
     t.integer  "product_id"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
     t.index ["product_id"], name: "index_supplies_on_product_id", using: :btree
-  end
-
-  create_table "sellers", force: :cascade do |t|
-    t.integer   "supply_id"
-    t.string   "seller"
-    t.decimal  "time"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
   end
 
   create_table "warehouses", force: :cascade do |t|
