@@ -63,7 +63,8 @@ class ApplicationController < ActionController::Base
 
     # Cotizar productos. en este sprint es solo ver el stock.
 
-    #retornar una lista con id_seller, precio unitarios, tiempo, y stock
+    #retornar una lista ordenada en base a precio con id_seller, precio unitarios, tiempo, y stock
+    # FUNCIONANDO
     def quote_a_price(sku_prod, sku_insumo, cant) #sku_insumo
       # Hacer un for de búsqueda, por lo productos.
       # ---
@@ -132,12 +133,14 @@ class ApplicationController < ActionController::Base
       # mandar OC hasta cubrir cant_mp confirmada
       sellers.each do |seller|
         oc = ""
+        # Se envia orden de compra por el stock disponible completo del proveedor
         loop do
+          sleep(15)
           oc = HTTP.headers(:accept => "application/json").put('https://integracion-2017-dev.herokuapp.com/oc/crear', :json => { :cliente => "5910c0910e42840004f6e684", :proveedor => seller[0], :sku => sku_insumo, :fechaEntrega => fecha_max, :cantidad => seller[3], :precioUnitario => seller[1], :canal => "b2b" })
           break if oc.code == 200
         end
         # agrego entrada (nueva OC) en la tabla y notifico
-        seller_addr =  (Client.find_by name: seller[0]).url + "purchase_orders/" + oc.parse["_id"] # ruta debiera sacarse de una base de datos
+        seller_addr =  (Client.find_by name: seller[0]).url + "purchase_orders/" + oc.parse["_id"]
         notification = HTTP.headers(:accept => "application/json").put(seller_addr, :json => { :payment_method => "contra_factura", :id_store_reception  => alm_recep_id})
         PurchaseOrder.create(_id: oc.parse["_id"], client: oc.parse["cliente"], supplier: oc.parse["proveedor"], sku: oc.parse["sku"], delivery_date: oc.parse["fechaEntrega"], amount: oc.parse["cantidad"], delivered_qt: oc.parse["cantidadDespachada"], unit_price: oc.parse["precioUnitario"], channel: oc.parse["canal"], status: oc.parse["estado"])
         # esperar apruebo o rechazo
@@ -153,6 +156,7 @@ class ApplicationController < ActionController::Base
         break if cant_mp <= 0
       end
       while cant_mp > 0
+        # Si despues de pedir todo el stock disponible de los grupos, todavia faltan unidades, mandar a producir.
         sellers.each do |seller|
           oc = ""
           loop do
@@ -171,18 +175,10 @@ class ApplicationController < ActionController::Base
             sleep(60) if oc.code == 429
           end
           cant_mp = 0
-          # if oc.parse[0]["estado"] == "aceptada"
-          #   # fue aceptada
-          #   puts("fue aceptada")
-          #   #oc_this_time.push(oc.parse[0])
-          #   cant_mp -= cant_mp
-          # end
-          # if cant_mp <= 0
-          #   break
-          # end
         end
       end
       #oc_this_time.sort!{|a,b| b["fechaEntrega"] <=> a["fechaEntrega"]}
+      # FIXME: para sprint 4, cuando se notifique despacho
       # retornar la lista de OCs para después verificar los despachos
       #return oc_this_time
     end
