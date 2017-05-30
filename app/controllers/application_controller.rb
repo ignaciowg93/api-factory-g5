@@ -67,39 +67,37 @@ class ApplicationController < ActionController::Base
     def quote_a_price(sku_prod, sku_insumo, cant) #sku_insumo
       # Hacer un for de búsqueda, por lo productos.
       # ---
-      #sku_prod = '11'
-      #sku_insumo = '4'
-      #cant = 10
+      # sku_prod = '11'
+      # sku_insumo = '4'
+      # cant = 10
       # ---
       supplier_list = (Product.find_by sku: sku_prod).supplies.where(:sku => sku_insumo)
+
       #current_min_price = "0" # nosotros tenemos en string, pero debiera ser INT
       sorted_suppliers = Array.new
       #iterar sobre los distintos vendedores
       supplier_list.each do |supplier|
         supplier.sellers.each do |supplier_seller|
-          #seller = supplier.seller
           seller = (Client.find_by gnumber: supplier_seller.seller)
-          #route = 'http://integra17-' + seller + '.ing.puc.cl/products'
           route = seller.url + "products"
-          # route = "http://integra17-2.ing.puc.cl/products"
           @response = HTTP.get(route)
-          # puts @response
+          # Probar con la otra posible ruta
+          route = seller.url + 'api/publico/precios'
+          @response = HTTP.get(route) if @response.code !=200 || (response["Content-Type"] != "application/json; charset=utf-8")
           if @response.code == 200
-            #puts @response["Content-Type"]
             if @response["Content-Type"] == "application/json; charset=utf-8"
-              #VER POR CADA GRUPO
-              #puts "hola"
               begin
                 products_list = @response.parse
                 # obtengo la lista de productos del seller y cotizo
                 products_list.each do |prod|
-                  if prod["sku"] == sku_insumo
+                  if prod["sku"] == sku_insumo.to_i || prod["sku"] == sku_insumo
                     if prod["stock"] != nil
                       prod2 = prod["stock"]
                     else
                       prod2 = 0
                     end
-                    sorted_suppliers.push([seller.name, prod["price"], supplier.time, prod2])
+                    sorted_suppliers << [seller.name, prod["price"], supplier_seller.time, prod2]
+                    #puts sorted_suppliers
                   end
                 end
               rescue JSON::ParserError => e
@@ -110,7 +108,6 @@ class ApplicationController < ActionController::Base
         end
       end
       sorted_suppliers.sort!{|a,b| a[2] <=> b[2]}
-      #puts sorted_suppliers
       return sorted_suppliers # ojo que podría retornar un arreglo vacío
     end
       #Después de aceptada la OC,
@@ -257,6 +254,7 @@ class ApplicationController < ActionController::Base
         end
 
         # Se espera por las ordenes de compra, segun la fecha
+        # FIXME: ir accediendo al estado de las ordenes, porque pueden estar despachadas mucho antes.
         sleep((Time.parse(fecha) - Time.now) + 1800)
 
         # Mover unidades a almacen de despacho
