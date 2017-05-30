@@ -36,7 +36,7 @@ module ApiFactoryG5
     config.recepcion_id = "590baa76d6b4ec00049028b1"
     config.despacho_id = "590baa76d6b4ec00049028b2"
     config.pulmon_id = "590baa76d6b4ec00049029dc"
-    #config.intermedio_id_1 =
-    #config.intermedio_id_2 =
+    config.intermedio_id_1 = "5910c0b90e42840004f6e9ee" #prod
+    config.intermedio_id_2 = "5910c0ba0e42840004f6ea7b" #prod
   end
 end

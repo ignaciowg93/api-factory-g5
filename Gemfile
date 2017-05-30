@@ -15,8 +15,8 @@ gem 'underscore-rails'
 gem 'listen', '~> 3.0.5'
 gem 'bootstrap-sass', '3.3.6'
 gem "http"  #https://github.com/httprb/http/tree/2-x-stable
-gem 'activeadmin' 
-
+gem 'activeadmin'
+gem 'rufus-scheduler', '~> 3.2', '>= 3.2.2'
 
 group :development, :test do
   gem 'byebug', platform: :mri
