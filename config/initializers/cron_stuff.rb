@@ -1,8 +1,6 @@
 require 'rufus/scheduler'
 require "http"
 
-before_action :get_almacenes
-
 def get_stock_by_sku(producto)
     sku = producto.sku
     stock_final = 0
@@ -33,17 +31,6 @@ def generate_header(data)
   signature = Base64.encode64(hmac).chomp
   auth_header = "INTEGRACION grupo5:" + signature
   auth_header
-end
-
-def get_almacenes
-  data = "GET"
-  response = ""
-  loop do
-    response = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get(Rails.configuration.base_route_bodega + "almacenes")
-    break if response.code == 200
-    sleep(60) if response.code == 429
-  end
-  @almacenes = JSON.parse response.to_s
 end
 
 def quote_a_price(sku_prod, sku_insumo, cant) #sku_insumo
@@ -517,6 +504,17 @@ def move_to_intermedio(qty, sku)
     end
   end
 end
+
+
+
+data = "GET"
+response = ""
+loop do
+  response = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get(Rails.configuration.base_route_bodega + "almacenes")
+  break if response.code == 200
+  sleep(60) if response.code == 429
+end
+@almacenes = JSON.parse response.to_s
 
 scheduler = Rufus::Scheduler.new
 por_producir = Array.new
