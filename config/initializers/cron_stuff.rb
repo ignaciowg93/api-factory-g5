@@ -1,6 +1,8 @@
 require 'rufus/scheduler'
 require "http"
 
+before_action :get_almacenes
+
 def get_stock_by_sku(producto)
     sku = producto.sku
     stock_final = 0
@@ -33,6 +35,17 @@ def generate_header(data)
   auth_header
 end
 
+def get_almacenes
+  data = "GET"
+  response = ""
+  loop do
+    response = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get(Rails.configuration.base_route_bodega + "almacenes")
+    break if response.code == 200
+    sleep(60) if response.code == 429
+  end
+  @almacenes = JSON.parse response.to_s
+end
+
 def quote_a_price(sku_prod, sku_insumo, cant) #sku_insumo
   # Hacer un for de búsqueda, por lo productos.
   # ---
@@ -49,7 +62,7 @@ def quote_a_price(sku_prod, sku_insumo, cant) #sku_insumo
       #seller = supplier.seller
       seller = (Client.find_by gnumber: supplier_seller.seller)
       #route = 'http://integra17-' + seller + '.ing.puc.cl/products'
-      route = seller.url + "products"
+      route = seller.url + "publico/productos"
       # route = "http://integra17-2.ing.puc.cl/products"
       @response = HTTP.get(route)
       # puts @response
@@ -498,7 +511,7 @@ def move_to_intermedio(qty, sku)
       data = "POST" + product["_id"] + Rails.configuration.intermedio_id_1 #POSTproductoIdalmacenId
       url = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
       move = HTTP.auth(generate_header(data)).headers(:accept => "application/json").post(url, json: { productoId: product["_id"], almacenId: Rails.configuration.intermedio_id_1 })
-      if move == 200
+      if move.code == 200
         remaining -= 1
       end
     end

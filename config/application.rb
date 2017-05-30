@@ -30,12 +30,12 @@ module ApiFactoryG5
     config.middleware.use Rack::MethodOverride
     config.middleware.use ActionDispatch::Cookies
 
-    config.secret = 'W1gCjv8gpoE4JnR'
-    config.base_route_oc = "https://integracion-2017-dev.herokuapp.com/oc/"
-    config.base_route_bodega = "https://integracion-2017-dev.herokuapp.com/bodega/" # desarrollo
-    config.recepcion_id = "590baa76d6b4ec00049028b1"
+    config.secret = "%hG4INNjIAYx9&0"#'W1gCjv8gpoE4JnR'
+    config.base_route_oc = "https://integracion-2017-prod.herokuapp.com/oc/"
+    config.base_route_bodega = "https://integracion-2017-prod.herokuapp.com/bodega/" # desarrollo
+    config.recepcion_id = "5910c0b90e42840004f6e9ec" #"590baa76d6b4ec00049028b1"
     config.despacho_id = "590baa76d6b4ec00049028b2"
-    config.pulmon_id = "590baa76d6b4ec00049029dc"
+    config.pulmon_id = "5910c0ba0e42840004f6ea7c" #"590baa76d6b4ec00049029dc"
     config.intermedio_id_1 = "5910c0b90e42840004f6e9ee" #prod
     config.intermedio_id_2 = "5910c0ba0e42840004f6ea7b" #prod
   end
