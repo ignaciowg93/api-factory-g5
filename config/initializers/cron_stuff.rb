@@ -51,7 +51,7 @@ def quote_a_price(sku_prod, sku_insumo, cant) #sku_insumo
       #route = 'http://integra17-' + seller + '.ing.puc.cl/products'
       route = seller.url + 'api/publico/precios'
       # route = "http://integra17-2.ing.puc.cl/products"
-      @response = HTTP.auth("X-ACCESS-TOKEN: #{Rails.configuration.my_id}").get(route)
+      @response = HTTP.headers("X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").get(route)
       # puts @response
       if @response.code == 200
         #puts @response["Content-Type"]
@@ -106,7 +106,7 @@ def abastecimiento_mp(sku_prod, sku_insumo, cant_mp, fecha_max, alm_recep_id)
     end
     # agrego entrada (nueva OC) en la tabla y notifico
     seller_addr =  (Client.find_by name: seller[0]).url + "purchase_orders/" + oc.parse["_id"]
-    notification = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN: #{Rails.configuration.my_id}").put(seller_addr, :json => { :payment_method => "contra_factura", :id_store_reception  => alm_recep_id})
+    notification = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").put(seller_addr, :json => { :payment_method => "contra_factura", :id_store_reception  => alm_recep_id})
     PurchaseOrder.create(_id: oc.parse["_id"], client: oc.parse["cliente"], supplier: oc.parse["proveedor"], sku: oc.parse["sku"], delivery_date: oc.parse["fechaEntrega"], amount: oc.parse["cantidad"], delivered_qt: oc.parse["cantidadDespachada"], unit_price: oc.parse["precioUnitario"], channel: oc.parse["canal"], status: oc.parse["estado"])
     # esperar apruebo o rechazo
 
@@ -130,7 +130,7 @@ def abastecimiento_mp(sku_prod, sku_insumo, cant_mp, fecha_max, alm_recep_id)
       end
       # agrgo entrada en la tabla (inicializada en id ) y notifico
       seller_addr = (Client.find_by name: seller[0]).url + "purchase_orders/" + oc.parse["_id"] # ruta debiera sacarse de una base de datos
-      notification = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN: #{Rails.configuration.my_id}").put(seller_addr, :json => { :payment_method => "contra_factura", :id_store_reception  => alm_recep_id})
+      notification = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").put(seller_addr, :json => { :payment_method => "contra_factura", :id_store_reception  => alm_recep_id})
       PurchaseOrder.create(_id: oc.parse["_id"], client: oc.parse["cliente"], supplier: oc.parse["proveedor"], sku: oc.parse["sku"], delivery_date: oc.parse["fechaEntrega"], amount: oc.parse["cantidad"], delivered_qt: oc.parse["cantidadDespachada"], unit_price: oc.parse["precioUnitario"], channel: oc.parse["canal"], status: oc.parse["estado"])
       # esperar apruebo o rechazo
       loop do
