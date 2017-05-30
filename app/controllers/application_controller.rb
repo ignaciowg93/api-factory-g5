@@ -129,81 +129,65 @@ class ApplicationController < ActionController::Base
       #fecha_max = 1793214596281
       #alm_recep_id = "590baa76d6b4ec00049028b1"
       #---
-      oc_this_time = Array.new
+      #oc_this_time = Array.new
       # Cotizar
       sellers = quote_a_price(sku_prod, sku_insumo, cant_mp)
       # mandar OC hasta cubrir cant_mp confirmada
       sellers.each do |seller|
-        oc = HTTP.headers(:accept => "application/json").put('https://integracion-2017-dev.herokuapp.com/oc/crear', :json => { :cliente => "5910c0910e42840004f6e684", :proveedor => seller[0], :sku => sku_insumo, :fechaEntrega => fecha_max, :cantidad => seller[3], :precioUnitario => seller[1], :canal => "b2b" })
-        if oc.code == 200
-          # agrego entrada (nueva OC) en la tabla y notifico
-          seller_addr =  (Client.find_by name: seller[0]).url + "purchase_orders/" + oc.parse["_id"] # ruta debiera sacarse de una base de datos
+        oc = ""
+        loop do
+          oc = HTTP.headers(:accept => "application/json").put('https://integracion-2017-dev.herokuapp.com/oc/crear', :json => { :cliente => "5910c0910e42840004f6e684", :proveedor => seller[0], :sku => sku_insumo, :fechaEntrega => fecha_max, :cantidad => seller[3], :precioUnitario => seller[1], :canal => "b2b" })
+          break if oc.code == 200
+        end
+        # agrego entrada (nueva OC) en la tabla y notifico
+        seller_addr =  (Client.find_by name: seller[0]).url + "purchase_orders/" + oc.parse["_id"] # ruta debiera sacarse de una base de datos
+        notification = HTTP.headers(:accept => "application/json").put(seller_addr, :json => { :payment_method => "contra_factura", :id_store_reception  => alm_recep_id})
+        PurchaseOrder.create(_id: oc.parse["_id"], client: oc.parse["cliente"], supplier: oc.parse["proveedor"], sku: oc.parse["sku"], delivery_date: oc.parse["fechaEntrega"], amount: oc.parse["cantidad"], delivered_qt: oc.parse["cantidadDespachada"], unit_price: oc.parse["precioUnitario"], channel: oc.parse["canal"], status: oc.parse["estado"])
+        # esperar apruebo o rechazo
+
+        loop do
+          oc = HTTP.headers(accept: "application/json").get("https://integracion-2017-dev.herokuapp.com/oc/obtener/#{oc.parse["_id"]}")
+          sleep(15)
+          break if oc.parse[0]["estado"] == "aceptada"
+          sleep(60) if oc.code == 429
+        end
+        # Orden aceptada
+        cant_mp -= seller[3]
+        break if cant_mp <= 0
+      end
+      while cant_mp > 0
+        sellers.each do |seller|
+          oc = ""
+          loop do
+            oc = HTTP.headers(:accept => "application/json").put('https://integracion-2017-dev.herokuapp.com/oc/crear', :json => { :cliente => "5910c0910e42840004f6e684", :proveedor => seller[0], :sku => sku_insumo, :fechaEntrega => fecha_max, :cantidad => cant_mp, :precioUnitario => seller[1], :canal => "b2b" })
+            break if oc.code == 200
+          end
+          # agrgo entrada en la tabla (inicializada en id ) y notifico
+          seller_addr = (Client.find_by name: seller[0]).url + "purchase_orders/" + oc.parse["_id"] # ruta debiera sacarse de una base de datos
           notification = HTTP.headers(:accept => "application/json").put(seller_addr, :json => { :payment_method => "contra_factura", :id_store_reception  => alm_recep_id})
           PurchaseOrder.create(_id: oc.parse["_id"], client: oc.parse["cliente"], supplier: oc.parse["proveedor"], sku: oc.parse["sku"], delivery_date: oc.parse["fechaEntrega"], amount: oc.parse["cantidad"], delivered_qt: oc.parse["cantidadDespachada"], unit_price: oc.parse["precioUnitario"], channel: oc.parse["canal"], status: oc.parse["estado"])
           # esperar apruebo o rechazo
-
-          oc = HTTP.headers(accept: "application/json").get("https://integracion-2017-dev.herokuapp.com/oc/obtener/#{oc.parse["_id"]}")
-
-          while oc.parse[0]["estado"] == "creada"
-            puts("estoy acaaaa")
-            sleep(5)
-            while oc.code != 200
-              oc = HTTP.headers(accept: "application/json").get("https://integracion-2017-dev.herokuapp.com/oc/obtener/#{oc.parse["_id"]}")
-            end
-
-            #esto es a la mala:
-            # @purchase_order3 = (PurchaseOrder.find_by _id: oc.parse["_id"])
-            # @purchase_order3.status = "aceptada"
-            # if @purchase_order3.save!
-            #     puts("corregido")
-            # end
-          end
-          if oc.parse[0]["estado"] == "aceptada"
-            # fue aceptada
-            oc_this_time.push(oc.parse[0])
-            cant_mp -= seller[3]
-          end
-        end
-        if cant_mp <= 0
-          break
-        end
-      end
-      while cant_mp > 0
-        puts("Dentro del while")
-        sleep(1)
-        sellers.each do |seller|
-          oc = HTTP.headers(:accept => "application/json").put('https://integracion-2017-dev.herokuapp.com/oc/crear', :json => { :cliente => "5910c0910e42840004f6e684", :proveedor => seller[0], :sku => sku_insumo, :fechaEntrega => fecha_max, :cantidad => cant_mp, :precioUnitario => seller[1], :canal => "b2b" })
-          if oc.code == 200
-            # agrgo entrada en la tabla (inicializada en id ) y notifico
-            seller_addr = (Client.find_by name: seller[0]).url + "purchase_orders/" + oc.parse["_id"] # ruta debiera sacarse de una base de datos
-            notification = HTTP.headers(:accept => "application/json").put(seller_addr, :json => { :payment_method => "contra_factura", :id_store_reception  => alm_recep_id})
-            PurchaseOrder.create(_id: oc.parse["_id"], client: oc.parse["cliente"], supplier: oc.parse["proveedor"], sku: oc.parse["sku"], delivery_date: oc.parse["fechaEntrega"], amount: oc.parse["cantidad"], delivered_qt: oc.parse["cantidadDespachada"], unit_price: oc.parse["precioUnitario"], channel: oc.parse["canal"], status: oc.parse["estado"])
-            # esperar apruebo o rechazo
+          loop do
             oc = HTTP.headers(accept: "application/json").get("https://integracion-2017-dev.herokuapp.com/oc/obtener/#{oc.parse["_id"]}")
-            while oc.parse[0]["estado"] == "creada"
-              puts oc
-              #puts("estoy aca, id: #{(PurchaseOrder.find_by _id: oc.parse["_id"]).status}")
-              sleep(15)
-              while oc.code != 200
-                oc = HTTP.headers(accept: "application/json").get("https://integracion-2017-dev.herokuapp.com/oc/obtener/#{oc.parse["_id"]}")
-              end
-            end
-            puts("salimos")
-            if oc.parse[0]["estado"] == "aceptada"
-              # fue aceptada
-              puts("fue aceptada")
-              oc_this_time.push(oc.parse[0])
-              cant_mp -= cant_mp
-            end
+            sleep(15)
+            break if oc.parse[0]["estado"] == "aceptada"
+            sleep(60) if oc.code == 429
           end
-          if cant_mp <= 0
-            break
-          end
+          cant_mp = 0
+          # if oc.parse[0]["estado"] == "aceptada"
+          #   # fue aceptada
+          #   puts("fue aceptada")
+          #   #oc_this_time.push(oc.parse[0])
+          #   cant_mp -= cant_mp
+          # end
+          # if cant_mp <= 0
+          #   break
+          # end
         end
       end
-      oc_this_time.sort!{|a,b| b["fechaEntrega"] <=> a["fechaEntrega"]}
+      #oc_this_time.sort!{|a,b| b["fechaEntrega"] <=> a["fechaEntrega"]}
       # retornar la lista de OCs para después verificar los despachos
-      return oc_this_time
+      #return oc_this_time
     end
 
     # Producción y abastecimiento
@@ -254,6 +238,8 @@ class ApplicationController < ActionController::Base
         # Revisar stock para cada materia prima
         # Reservar
         # Mover a despacho cuando se tengan todas las unidades
+        # Fecha entrega de las materias primas
+        fecha = fecha_max - prdt.time*3600 - 3600
         my_supplies.each do |supply|
           # En stock esta solo stock disponible (stock reservado esta restado)
           stock = get_stock_by_sku(supply)
@@ -261,24 +247,17 @@ class ApplicationController < ActionController::Base
           if supply.requierment * n_lotes >= stock
             remain = supply.requierment * n_lotes - stock
             # Abastecerse del resto
-            # FIXME: cambiar la fecha de entrega. No puede ser fecha_max
-            fecha = fecha_max
-            oc_list = abastecimiento_mp(sku, supply.sku, remain, fecha, Rails.configuration.recepcion_id)
-            puts("Orden de compra materia prima #{oc_list.parse}")
+            #oc_list = abastecimiento_mp(sku, supply.sku, remain, fecha, Rails.configuration.recepcion_id)
+            abastecimiento_mp(sku, supply.sku, remain, fecha, Rails.configuration.recepcion_id)
             # La idea es que me notifiquen que llegó, pero por ahora debiera ser un sleep del tiempo nomás
           end
           # Se reserva todo, aunque no haya llegado
           supply.stock_reservado += supply.requierment * n_lotes
           supply.save
-          puts supply.requierment
-          puts "hola"
-          puts prdt.supplies
         end
 
         # Se espera por las ordenes de compra, segun la fecha
-        # FIXME: sleep
-        #sleep((Time.parse(fecha) - Time.now) + 1800)
-        sleep(5)
+        sleep((Time.parse(fecha) - Time.now) + 1800)
 
         # Mover unidades a almacen de despacho
         # Cuando se mueven, ya no estan reservadas, porque no se busca en despacho
@@ -508,6 +487,7 @@ class ApplicationController < ActionController::Base
     end
 
     def move_to_despacho(qty, sku)
+      products = ""
       remaining = qty
       # Indica si es necesario o no llegar al pulmon a revisar
       search_pulmon = false
@@ -536,10 +516,13 @@ class ApplicationController < ActionController::Base
         products.parse.each do |product|
           data = "POST" + product["_id"] + Rails.configuration.despacho_id #POSTproductoIdalmacenId
           url = "https://integracion-2017-dev.herokuapp.com/bodega/moveStock"
-          move = HTTP.auth(generate_header(data)).headers(:accept => "application/json").post(url, json: { productoId: product["_id"], almacenId: Rails.configuration.despacho_id })
-          if move == 200
-            remaining -= 1
+          move = ""
+          loop do
+            move = HTTP.auth(generate_header(data)).headers(:accept => "application/json").post(url, json: { productoId: product["_id"], almacenId: Rails.configuration.despacho_id })
+            break if move.code == 200
+            sleep(60) if move.code == 429
           end
+          remaining -= 1
         end
       end
     end
@@ -693,7 +676,6 @@ class ApplicationController < ActionController::Base
         max_t = 0
         prod.supplies.each do |supply|
           supply.sellers.each do |seller|
-            puts seller.time
             if seller.time > max_t
                 max_t = seller.time
             end
