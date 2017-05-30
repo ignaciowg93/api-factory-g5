@@ -222,7 +222,7 @@ class PurchaseOrdersController < ApplicationController
         return stock_final
     end
 
-    
+
     #TODO
     #When a Oc is creaed we have to check its existance in the OC server. If not return a 404.
 

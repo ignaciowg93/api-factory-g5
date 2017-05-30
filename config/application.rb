@@ -29,5 +29,14 @@ module ApiFactoryG5
     config.middleware.use ActionDispatch::Flash
     config.middleware.use Rack::MethodOverride
     config.middleware.use ActionDispatch::Cookies
+
+    config.secret = 'W1gCjv8gpoE4JnR'
+    config.base_route_oc = "https://integracion-2017-dev.herokuapp.com/oc/"
+    config.base_route_bodega = "https://integracion-2017-dev.herokuapp.com/bodega/" # desarrollo
+    config.recepcion_id = "590baa76d6b4ec00049028b1"
+    config.despacho_id = "590baa76d6b4ec00049028b2"
+    config.pulmon_id = "590baa76d6b4ec00049029dc"
+    #config.intermedio_id_1 =
+    #config.intermedio_id_2 =
   end
 end

@@ -5,62 +5,114 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+require "http"
+require 'digest'
 
-p3 = Product.create(sku: '3', name: 'Maíz', processed: 0, price: 117, lot: 30, ingredients: 0, dependent: 1, time: 1.726)
-p5 = Product.create(sku: '5', name: 'Yogur', processed: 1, price: 428, lot: 600, ingredients: 3, dependent: 0, time: 3.191)
-p7 = Product.create(sku: '7', name: 'Leche', processed: 0, price: 290, lot: 1000, ingredients: 0, dependent: 8, time: 1.441)
-p9 = Product.create(sku: '9', name: 'Carne', processed: 0, price: 350, lot: 620, ingredients: 0, dependent: 1, time: 2.846)
-p11 = Product.create(sku: '11', name: 'Margarina', processed: 1, price: 247, lot: 900, ingredients: 1, dependent: 0, time: 3.074)
-p15 = Product.create(sku: '15', name: 'Avena', processed: 0, price: 276, lot: 480, ingredients: 0, dependent: 1, time: 1.430)
-p17 = Product.create(sku: '17', name: 'Cereal Arroz', processed: 1, price: 821, lot: 1000, ingredients: 3, dependent: 0, time: 1.158)
-p22 = Product.create(sku: '22', name: 'Mantequilla', processed: 1, price: 336, lot: 400, ingredients: 1, dependent: 1, time: 1.832)
-p25 = Product.create(sku: '25', name: 'Azúcar', processed: 0, price: 93, lot: 560, ingredients: 0, dependent: 6, time: 2.785)
-p52 = Product.create(sku: '52', name: 'Harina Integral', processed: 1, price: 410, lot: 890, ingredients: 2, dependent: 2, time: 1.506)
-p56 = Product.create(sku: '56', name: 'Hamburguesas de Pollo', processed: 1, price: 479, lot: 620, ingredients: 2, dependent: 0, time: 1.533)
+# def generate_header(data)
+#   hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Rails.configuration.secret.encode("ASCII"), data.encode("ASCII"))
+#   signature = Base64.encode64(hmac).chomp
+#   auth_header = "INTEGRACION grupo5:" + signature
+#   auth_header
+# end
+#
+# def get_almacenes
+#   data = "GET"
+#   response = ""
+#   loop do
+#     response = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get(Rails.configuration.base_route_bodega + "almacenes")
+#     break if response.code == 200
+#   end
+#   @almacenes = JSON.parse response.to_s
+# end
 
+# Revisa en todos los almacenes
+# def get_stock(sku)
+#     stock_final = 0
+#     response = ""
+#     @almacenes.each do |almacen|
+#       data = "GET#{almacen["_id"]}"
+#       loop do
+#         response = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get(Rails.configuration.base_route_bodega + "skusWithStock?almacenId=" + almacen["_id"])
+#         break if response.code == 200
+#       end
+#       products = JSON.parse response.to_s
+#       products.each do |product|
+#         # Sku viene en id de producto
+#           if product["_id"] == sku
+#               stock_final += product["total"]
+#           end
+#       end
+#
+#     end
+#     stock_final
+# end
 
-p5.supplies.create(sku: '49', requierment: 228, seller: '3', time: 1.846)
-p5.supplies.create(sku: '49', requierment: 228, seller: '2', time: 2.368)
-p5.supplies.create(sku: '49', requierment: 228, seller: '1', time: 2.046)
-p5.supplies.create(sku: '6', requierment: 228, seller: '8', time: 2.481)
-p5.supplies.create(sku: '6', requierment: 228, seller: '6', time: 2.916)
-p5.supplies.create(sku: '6', requierment: 228, seller: '2', time: 2.123)
-p5.supplies.create(sku: '41', requierment: 194, seller: '7', time: 2.091)
-p5.supplies.create(sku: '41', requierment: 194, seller: '3', time: 1.460)
-p5.supplies.create(sku: '41', requierment: 194, seller: '2', time: 1.687)
+p3 = Product.create(sku: '3', name: 'Maíz', processed: 0, price: 117, lot: 30, ingredients: 0, dependent: 1, time: 1.726, stock_reservado: 0)
+p5 = Product.create(sku: '5', name: 'Yogur', processed: 1, price: 428, lot: 600, ingredients: 3, dependent: 0, time: 3.191, stock_reservado: 0)
+p7 = Product.create(sku: '7', name: 'Leche', processed: 0, price: 290, lot: 1000, ingredients: 0, dependent: 8, time: 1.441, stock_reservado: 0)
+p9 = Product.create(sku: '9', name: 'Carne', processed: 0, price: 350, lot: 620, ingredients: 0, dependent: 1, time: 2.846, stock_reservado: 0)
+p11 = Product.create(sku: '11', name: 'Margarina', processed: 1, price: 247, lot: 900, ingredients: 1, dependent: 0, time: 3.074, stock_reservado: 0)
+p15 = Product.create(sku: '15', name: 'Avena', processed: 0, price: 276, lot: 480, ingredients: 0, dependent: 1, time: 1.430, stock_reservado: 0)
+p17 = Product.create(sku: '17', name: 'Cereal Arroz', processed: 1, price: 821, lot: 1000, ingredients: 3, dependent: 0, time: 1.158, stock_reservado: 0)
+p22 = Product.create(sku: '22', name: 'Mantequilla', processed: 1, price: 336, lot: 400, ingredients: 1, dependent: 1, time: 1.832, stock_reservado: 0)
+p25 = Product.create(sku: '25', name: 'Azúcar', processed: 0, price: 93, lot: 560, ingredients: 0, dependent: 6, time: 2.785, stock_reservado: 0)
+p52 = Product.create(sku: '52', name: 'Harina Integral', processed: 1, price: 410, lot: 890, ingredients: 2, dependent: 2, time: 1.506, stock_reservado: 0)
+p56 = Product.create(sku: '56', name: 'Hamburguesas de Pollo', processed: 1, price: 479, lot: 620, ingredients: 2, dependent: 0, time: 1.533, stock_reservado: 0)
 
-p11.supplies.create(sku: '4', requierment: 828, seller: '8', time: 1.205)
-p11.supplies.create(sku: '4', requierment: 828, seller: '6', time: 2.615)
-p11.supplies.create(sku: '4', requierment: 828, seller: '4', time: 2.713)
+s51 = p5.supplies.create(sku: '49', requierment: 228, stock_reservado: 0)
+s51.sellers.create(seller: '3', time: 1.846)
+s51.sellers.create(seller: '2', time: 2.368)
+s51.sellers.create(seller: '1', time: 2.046)
+s52 = p5.supplies.create(sku: '6', requierment: 228, stock_reservado: 0)
+s52.sellers.create(seller: '8', time: 2.481)
+s52.sellers.create(seller: '6', time: 2.916)
+s52.sellers.create(seller: '2', time: 2.123)
+s53 = p5.supplies.create(sku: '41', requierment: 194, stock_reservado: 0)
+s53.sellers.create(seller: '7', time: 2.091)
+s53.sellers.create(seller: '3', time: 1.460)
+s53.sellers.create(seller: '2', time: 1.687)
 
-p17.supplies.create(sku: '25', requierment: 360, seller: '7', time: 0.945)
-p17.supplies.create(sku: '25', requierment: 360, seller: '5', time: 2.785)
-p17.supplies.create(sku: '25', requierment: 360, seller: '3', time: 3.254)
-p17.supplies.create(sku: '25', requierment: 360, seller: '1', time: 0.821)
-p17.supplies.create(sku: '20', requierment: 350, seller: '8', time: 2.258)
-p17.supplies.create(sku: '20', requierment: 350, seller: '6', time: 3.356)
-p17.supplies.create(sku: '20', requierment: 350, seller: '4', time: 1.955)
-p17.supplies.create(sku: '20', requierment: 350, seller: '2', time: 3.475)
-p17.supplies.create(sku: '13', requierment: 290, seller: '7', time: 1.304)
-p17.supplies.create(sku: '13', requierment: 290, seller: '3', time: 3.164)
-p17.supplies.create(sku: '13', requierment: 290, seller: '1', time: 3.256)
+s11 = p11.supplies.create(sku: '4', requierment: 828, stock_reservado: 0)
+s11.sellers.create(seller: '8', time: 1.205)
+s11.sellers.create(seller: '6', time: 2.615)
+s11.sellers.create(seller: '4', time: 2.713)
 
-p22.supplies.create(sku: '6', requierment: 380, seller: '8', time: 2.481)
-p22.supplies.create(sku: '6', requierment: 380, seller: '6', time: 2.916)
-p22.supplies.create(sku: '6', requierment: 380, seller: '2', time: 2.123)
+s171 = p17.supplies.create(sku: '25', requierment: 360, stock_reservado: 0)
+s171.sellers.create(seller: '7', time: 0.945)
+s171.sellers.create(seller: '5', time: 2.785)
+s171.sellers.create(seller: '3', time: 3.254)
+s171.sellers.create(seller: '1', time: 0.821)
+s172 = p17.supplies.create(sku: '20', requierment: 350, stock_reservado: 0)
+s172.sellers.create(seller: '8', time: 2.258)
+s172.sellers.create(seller: '6', time: 3.356)
+s172.sellers.create(seller: '4', time: 1.955)
+s172.sellers.create(seller: '2', time: 3.475)
+s173 = p17.supplies.create(sku: '13', requierment: 290, stock_reservado: 0)
+s173.sellers.create(seller: '7', time: 1.304)
+s173.sellers.create(seller: '3', time: 3.164)
+s173.sellers.create(seller: '1', time: 3.256)
 
-p52.supplies.create(sku: '8', requierment: 1000, seller: '6', time: 3.773)
-p52.supplies.create(sku: '8', requierment: 1000, seller: '4', time: 2.531)
-p52.supplies.create(sku: '8', requierment: 1000, seller: '2', time: 1.516)
-p52.supplies.create(sku: '38', requierment: 20, seller: '8', time: 3.462)
-p52.supplies.create(sku: '38', requierment: 20, seller: '7', time: 3.128)
+s22 = p22.supplies.create(sku: '6', requierment: 380, stock_reservado: 0)
+s22.sellers.create(seller: '8', time: 2.481)
+s22.sellers.create(seller: '6', time: 2.916)
+s22.sellers.create(seller: '2', time: 2.123)
 
-p56.supplies.create(sku: '1', requierment: 935, seller: '3', time: 3.605)
-p56.supplies.create(sku: '1', requierment: 935, seller: '1', time: 2.176)
-p56.supplies.create(sku: '26', requierment: 65, seller: '8', time: 3.059)
-p56.supplies.create(sku: '26', requierment: 65, seller: '6', time: 1.092)
-p56.supplies.create(sku: '26', requierment: 65, seller: '4', time: 1.242)
-p56.supplies.create(sku: '26', requierment: 65, seller: '2', time: 2.609)
+s521 = p52.supplies.create(sku: '8', requierment: 1000, stock_reservado: 0)
+s521.sellers.create(seller: '6', time: 3.773)
+s521.sellers.create(seller: '4', time: 2.531)
+s521.sellers.create(seller: '2', time: 1.516)
+s522 = p52.supplies.create(sku: '38', requierment: 20, stock_reservado: 0)
+s521.sellers.create(seller: '8', time: 3.462)
+s521.sellers.create(seller: '7', time: 3.128)
+
+s561 = p56.supplies.create(sku: '1', requierment: 935, stock_reservado: 0)
+s561.sellers.create(seller: '3', time: 3.605)
+s561.sellers.create(seller: '1', time: 2.176)
+s562 = p56.supplies.create(sku: '26', requierment: 65, stock_reservado: 0)
+s562.sellers.create(seller: '8', time: 3.059)
+s562.sellers.create(seller: '6', time: 1.092)
+s562.sellers.create(seller: '4', time: 1.242)
+s562.sellers.create(seller: '2', time: 2.609)
 
 Client.create(name: "5910c0910e42840004f6e680", url: "http://integra17-1.ing.puc.cl/", token: "", gnumber: "1") #prod
 Client.create(name: "590baa00d6b4ec0004902463", url: "http://integra17-2.ing.puc.cl/", token: "", gnumber: "2")

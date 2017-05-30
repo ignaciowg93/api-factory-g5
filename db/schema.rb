@@ -92,6 +92,7 @@ ActiveRecord::Schema.define(version: 20170516230539) do
     t.integer  "ingredients"
     t.integer  "dependent"
     t.decimal  "time"
+    t.integer  "stock_reservado"
     t.index ["warehouse_id"], name: "index_products_on_warehouse_id", using: :btree
   end
 
@@ -124,12 +125,20 @@ ActiveRecord::Schema.define(version: 20170516230539) do
   create_table "supplies", force: :cascade do |t|
     t.string   "sku"
     t.integer  "requierment"
-    t.string   "seller"
+    t.integer  "stock_reservado"
     t.decimal  "time"
     t.integer  "product_id"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
     t.index ["product_id"], name: "index_supplies_on_product_id", using: :btree
+  end
+
+  create_table "sellers", force: :cascade do |t|
+    t.integer   "supply_id"
+    t.string   "seller"
+    t.decimal  "time"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
   end
 
   create_table "warehouses", force: :cascade do |t|
