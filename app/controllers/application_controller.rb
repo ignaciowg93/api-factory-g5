@@ -114,7 +114,7 @@ class ApplicationController < ActionController::Base
       #Después de aceptada la OC,
 
 
-      #Mandar al proveedor el Id del alamcen a recepcionar los productos de la OC asociada.
+      #Mandar al proveedor el Id del almacen a recepcionar los productos de la OC asociada.
       # -> ALGUNOS LO MANDAN EN EL MENSAJE DE OC EMITIDA
 
       #Esperar notificación de despacho desde proveedor.
@@ -264,7 +264,7 @@ class ApplicationController < ActionController::Base
           supply.save
         end
 
-
+=begin
         # data = "GET"
         # worked_st = 0
         # # pedimos el arreglo de almacenes
@@ -336,8 +336,10 @@ class ApplicationController < ActionController::Base
         #     sleep(60)
         #   end
         # end
+=end
 
-        #Verificar stock mínimo de producción.
+=begin
+      #Verificar stock mínimo de producción.
       #   my_supplies.each do |supply|
       #     if supply[1] > 0 # no tengo todo
       #       #Llamar al abastecimiento de MP.(Block anterior)
@@ -419,9 +421,12 @@ class ApplicationController < ActionController::Base
       #   # fin preparación para producir
 
       # end
+
+=end
       end
 
       #Ir y producir stock, máximo 5000 por ciclo. **Llega a Recepción y si está lleno , llega a pulmón.
+      ### Creo que no está haciendo 5000 por ciclo. Está haciendo menos.
       puts("ahora a fabricar")
       sleep(4)
       #transferir $$ a fábrica
@@ -457,21 +462,26 @@ class ApplicationController < ActionController::Base
           puts("p_order antes")
           production_order = HTTP.auth(generate_header(data)).headers(:accept => "application/json").put(Rails.configuration.base_route_bodega + "/fabrica/fabricar", :json => { :sku => sku, :cantidad => to_produce, :trxId =>  trx1.parse["_id"]})
           puts("p_order dsps")
-          if production_order.code == 200
-            puts("en el if: #{production_order.parse}")
-            # podría quizás guardar la fecha esperada de entrega, estado despachado, etc.
-            # guradar orden de produccion
-            if longest_time < production_order.parse["disponible"]
-              longest_time = production_order.parse["disponible"]
+          @production_order = ProductionOrder.new
+          @production_order.sku = sku
+          @production_order.amount =  to_produce
+          if @production_order.save!
+            if production_order.code == 200
+              puts("en el if: #{production_order.parse}")
+              # podría quizás guardar la fecha esperada de entrega, estado despachado, etc.
+              # guradar orden de produccion
+              if longest_time < production_order.parse["disponible"]
+                longest_time = production_order.parse["disponible"]
+              end
+              @remaining -= 5000
+            elsif production_order.code == 429
+              puts("en el else if")
+              #esperar 1 minuto
+              sleep(60)
+            else
+              a = production_order.to_s
+              puts("error en p_order: #{a}")
             end
-            @remaining -= 5000
-          elsif production_order.code == 429
-            puts("en el else if")
-            #esperar 1 minuto
-            sleep(60)
-          else
-            a = production_order.to_s
-            puts("error en p_order: #{a}")
           end
         end
       end
