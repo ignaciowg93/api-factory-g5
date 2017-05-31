@@ -7,14 +7,14 @@ set :rbenv_path, '/home/deploy/.rbenv'
 set :deploy_to, '/home/deploy/deployapp'
 set :branch, ENV['BRANCH'] if ENV['BRANCH']
 # Add this in config/deploy.rb
-# and run 'cap production deploy:seed' to seed your database
+# and run 'cap production deploy seed' to seed your database
 desc 'Runs rake db:seed'
 task :seed do
   on primary fetch(:migration_role) do
     within release_path do
       with rails_env: fetch(:rails_env) do
-        execute :rake, "db:reset"
-        execute :rake, "db:seed"
+        execute :rake, 'db:schema:load'
+        execute :rake, 'db:seed'
       end
     end
   end
