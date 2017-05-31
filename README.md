@@ -1,24 +1,7 @@
-# README
+## Pasos por si falla la base de datos
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
-
-Things you may want to cover:
-
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+* rake db:reset DISABLE_DATABASE_ENVIRONMENT_CHECK=1
+* rake db:environment:set RAILS_ENV=production
+* rake db:schema:load RAILS_ENV=production DISABLE_DATABASE_ENVIRONMENT_CHECK=1
+* rake db:migrate
+* rake db:seed

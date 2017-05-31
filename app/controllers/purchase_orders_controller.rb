@@ -11,6 +11,7 @@ class PurchaseOrdersController < ApplicationController
     def receive
         #The provider accepts a PO that we created.
         if !(params.has_key?(:payment_method) && params.has_key?(:id_store_reception))
+            render json: {error: "Formato de Body incorrecto"}, status:400
             if !(params.has_key?(:payment_method))
                 render json: {error: "Falta método de pago"}, status:400
             elsif !(params.has_key?(:id_store_reception))
@@ -93,21 +94,23 @@ class PurchaseOrdersController < ApplicationController
 ## BUYING
 
     def accepted
-
         @purchase_order = PurchaseOrder.find_by(_id: params[:id])
         if @purchase_order.status == "creada"
             oc = HTTP.headers(:accept => "application/json").get('https://integracion-2017-dev.herokuapp.com/oc/obtener/' + params[:id])
             if oc.code == 200
-                orden_compra = oc.parse
-                if orden_compra["estado"]== "aceptada"
+                orden_compra = oc.parse[0]
+                if orden_compra["estado"] == "aceptada"
+                  puts("bbb")
                     if @purchase_order
+                      puts("ccc")
                         @purchase_order.status = "aceptada"
                         if @purchase_order.save!
                             render json: {ok: "Resolución recibida exitosamente" }, status:200
                         end
                     end
                 else
-                    render json: {error: "ORden de compra No se encuentra aceptada en el sistema"}, status: 400
+                  puts("a versh")
+                    render json: {error: "Orden de compra No se encuentra aceptada en el sistema"}, status: 400
                 end
             else
                 render json: {error: "Orden de compra no encontrada"}, status:404
@@ -219,10 +222,6 @@ class PurchaseOrdersController < ApplicationController
         return stock_final
     end
 
-
-    def temp
-        "Hola"
-    end
 
     #TODO
     #When a Oc is creaed we have to check its existance in the OC server. If not return a 404.
