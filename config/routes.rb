@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   scope 'api' do
     ActiveAdmin.routes(self)
-    get '/', to: 'admin/dashboard#index'  
+    get '/', to: 'admin/dashboard#index'
   end
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
@@ -35,5 +35,5 @@ Rails.application.routes.draw do
 
   get 'products', to: 'product#index'
 
-  #get 'prueba', to: 'application#quote_a_price'
+  #get 'prueba', to: 'application#prueba'
 end
