@@ -27,19 +27,19 @@ task :initdb do
     end
   end
 end
-# desc 'Runs rake db:seed'
-# task :seed do
-#   on primary fetch(:migration_role) do
-#     within release_path do
-#       with rails_env: fetch(:rails_env) do
-#         #execute :rake, "db:reset DISABLE_DATABASE_ENVIRONMENT_CHECK=1"
-#         #execute :rake, "db:schema:load"
-#         #execute :rake, "db:seed DISABLE_DATABASE_ENVIRONMENT_CHECK=1"
-#         execute :rake, "db:setup"
-#       end
-#     end
-#   end
-# end
+desc 'Runs rake db:seed'
+task :seed do
+  on primary fetch(:migration_role) do
+    within release_path do
+      with rails_env: fetch(:rails_env) do
+        #execute :rake, "db:reset DISABLE_DATABASE_ENVIRONMENT_CHECK=1"
+        #execute :rake, "db:schema:load"
+        execute :rake, 'db:seed'
+        #execute :rake, "db:setup"
+      end
+    end
+  end
+end
 
 append :linked_files, "config/database.yml", "config/secrets.yml"
 append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "vendor/bundle", "public/system", "public/uploads"
