@@ -13,7 +13,7 @@ task :seed do
   on primary fetch(:migration_role) do
     within release_path do
       with rails_env: fetch(:rails_env) do
-        execute :rake, "db:reset DISABLE_DATABASE_ENVIRONMENT_CHECK=1"
+        #execute :rake, "db:reset DISABLE_DATABASE_ENVIRONMENT_CHECK=1"
         execute :rake, "db:seed DISABLE_DATABASE_ENVIRONMENT_CHECK=1"
       end
     end
