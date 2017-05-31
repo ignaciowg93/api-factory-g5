@@ -14,8 +14,9 @@ task :seed do
     within release_path do
       with rails_env: fetch(:rails_env) do
         #execute :rake, "db:reset DISABLE_DATABASE_ENVIRONMENT_CHECK=1"
-        execute :rake, "db:schema:load"
-        execute :rake, "db:seed DISABLE_DATABASE_ENVIRONMENT_CHECK=1"
+        #execute :rake, "db:schema:load"
+        #execute :rake, "db:seed DISABLE_DATABASE_ENVIRONMENT_CHECK=1"
+        execute :rake, "db:setup"
       end
     end
   end
