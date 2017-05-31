@@ -1,7 +1,7 @@
 require 'http'
 require 'digest'
 require 'purchase_orders_controller'
-base_route = "https://integracion-2017-dev.herokuapp.com/oc/"
+base_route = "https://integracion-2017-prod.herokuapp.com/oc/"
 #include ActiveAdmin::ViewHelper
 ActiveAdmin.register_page "Dashboard" do
 
@@ -15,7 +15,33 @@ ActiveAdmin.register_page "Dashboard" do
       end
     end
 
- 
+
+
+    ## ORDENES DE COMPRA MANDADAS
+    columns do
+      column do
+        panel "Órdenes de compra recibidas" do
+          table_for PurchaseOrder.all.order('created_at desc') do
+            column("ID") {|prod| prod.id }
+            column("SKU") {|prod| prod.sku}
+            column("AMOUNT") {|prod| prod.amount}
+            column("STATUS") {|prod| prod.status}
+          end
+        end
+      end
+    end
+
+    panel "Top stuff --all name-removed for brevity--" do
+        # line_chart   Content.pluck("download").uniq.map { |c| { title: c, data: Content.where(download: c).group_by_day(:updated_at, format: "%B %d, %Y").count }  }, discrete: true
+        # column_chart Content.group_by_hour_of_day(:updated_at, format: "%l %P").order(:download).count, {library: {title:'Downloads for all providers'}}
+        # column_chart Content.group(:title).order('download DESC').limit(5).sum(:download)
+        pie_chart PurchaseOrder.group(:status).count ,{library: {title:'Top 5 Downloads'}}
+        #<%= pie_chart Yogurt.group(:flavor).count %>
+        ##
+        # line_chart result.each(:as => :hash) { |item|
+        #   {name: item.title, data: item.sum_download.count}
+        # }
+    end
 
     ## STOCK POR PRODUCTO
 
@@ -30,6 +56,10 @@ ActiveAdmin.register_page "Dashboard" do
     #     end
     #   end
     # end
+
+    incompletas = PurchaseOrder.where(status: 'no_completada').count
+    completas = PurchaseOrder.where(status: 'finalizada').count
+    puts "cuenta: #{incompletas}/#{completas}"
 
 
 ## ORDENES DE COMPRA MANDADAS
@@ -51,7 +81,7 @@ ActiveAdmin.register_page "Dashboard" do
     #   column do
     #     panel "Almacenes" do
     #       almacenesHash = get_warehouse
-    #       table_for almacenesHash.each do 
+    #       table_for almacenesHash.each do
     #         column :_id do |almacen|
     #           almacen["_id"]
     #         end
@@ -73,9 +103,9 @@ ActiveAdmin.register_page "Dashboard" do
     #     end
     #   end
     # end
-  
-    
-    ##BOLETAS GENERADAS ## Esto deberían ser invoices. No Purchase Order. Cambiar junto con los métodos de creación de boletas. 
+
+
+    ##BOLETAS GENERADAS ## Esto deberían ser invoices. No Purchase Order. Cambiar junto con los métodos de creación de boletas.
      columns do
       column do
         panel "Boletas generadas" do
@@ -96,7 +126,7 @@ ActiveAdmin.register_page "Dashboard" do
     columns do
       column do
         panel "Ordenes de Compra Aprobadas" do
-          table_for PurchaseOrder.where(:status =='accepted').order('created_at desc') do
+          table_for PurchaseOrder.where(status: 'aceptada').order('created_at desc') do
             column("ID") {|prod| prod.id }
             column("CLIENT") {|prod| prod.client}
             column("SKU") {|prod| prod.sku}
@@ -112,7 +142,7 @@ ActiveAdmin.register_page "Dashboard" do
     columns do
       column do
         panel "Ordenes de Compra Rechazadas" do
-          table_for PurchaseOrder.where(:status =='rejected').order('created_at desc') do
+          table_for PurchaseOrder.where(status: 'rechazada').order('created_at desc') do
             column("ID") {|prod| prod.id }
             column("CLIENT") {|prod| prod.client}
             column("SKU") {|prod| prod.sku}
@@ -123,7 +153,7 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
     end
-           
+
 
 
     # Here is an example of a simple dashboard with columns and panels.

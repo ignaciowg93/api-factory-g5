@@ -95,7 +95,7 @@ class ApplicationController < ActionController::Base
                     else
                       prod2 = 0
                     end
-                    sorted_suppliers << [seller.name, prod["price"], supplier_seller.time, prod2]
+                    sorted_suppliers << [seller.name, prod["price"].to_s, supplier_seller.time, prod2]
                     #puts sorted_suppliers
                   end
                 end

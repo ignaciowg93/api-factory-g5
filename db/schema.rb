@@ -97,6 +97,7 @@ ActiveRecord::Schema.define(version: 20170531161920) do
   create_table "production_orders", force: :cascade do |t|
     t.string   "sku"
     t.integer  "amount"
+    #id_oc #con migración
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
