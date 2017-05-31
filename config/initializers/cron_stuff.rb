@@ -497,7 +497,7 @@ end
 scheduler = Rufus::Scheduler.new
 por_producir = Array.new
 
-scheduler.every '5h', :first_at => Time.now + 3600 do
+scheduler.every '5h', :first_at => Time.now + 18000 do
   # rake "mails:monthly_report_mail"
   Product.all.each do |prod|
     stock = get_stock_by_sku(prod)
