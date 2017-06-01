@@ -104,34 +104,49 @@ class InteractionController < ApplicationController
 
     # Definir lote de produccion
     lot = product.lot
-    remaining = lot
-    while remaining / quantity < 1 do
-      remaining += lot
+    to_produce = lot
+    while to_produce / quantity < 1 do
+      to_produce += lot
     end
-    n_lotes = remaining/lot
+    n_lotes = to_produce/lot
 
-    # Si producto procesado, verificar stock de materias primas, y mandar a despacho
+
+
     if product.processed == 1
-      my_supplies = product.supplies
-      # Pedir sku de todos los supplies
-      my_supplies.each do |supply|
-        # Verificar que haya stock
-        stocks = get_stocks
-        if supply.requierment * n_lotes >= stocks[supply.sku]
-          remain = supply.requierment * n_lotes - stocks[supply.sku]
-          # FIXME: Solo se produce si hay stock
-          # # Abastecerse del resto
-          # abastecimiento_mp(sku, supply.sku, remain, fecha, Rails.configuration.recepcion_id)
-          render json: {error: "Faltan #{remain} unidades de sku #{supply.sku}"}, status: 400
-          return
-        end
-      end
-      # Mover unidades a almacen de despacho
-      my_supplies.each do |supply|
-        move_to_despacho(supply.requierment * n_lotes, supply.sku)
-      end
-    end
 
+      n_lotes.times each do
+        # Si producto procesado, verificar stock de materias primas, y mandar a despacho
+        my_supplies = product.supplies
+        # Pedir sku de todos los supplies
+        my_supplies.each do |supply|
+          # Verificar que haya stock
+          stocks = get_stocks
+          if supply.requierment >= stocks[supply.sku]
+            remain = supply.requierment - stocks[supply.sku]
+            # FIXME: Solo se produce si hay stock
+            # # Abastecerse del resto
+            # abastecimiento_mp(sku, supply.sku, remain, fecha, Rails.configuration.recepcion_id)
+            render json: {error: "Faltan #{remain} unidades de sku #{supply.sku}"}, status: 400
+            return
+          end
+        end
+        # Mover unidades a almacen de despacho
+        my_supplies.each do |supply|
+          move_to_despacho(supply.requierment, supply.sku)
+        end
+        # Producir un solo lote
+        mandar_a_producir(lot,product)
+      end
+    else
+      # Producir todo
+      mandar_a_producir(to_produce, product)
+    end
+  end
+
+
+
+  def mandar_a_producir(quantity, product)
+    remaining = quantity
     # Producir
     # FIXME: refactoring
     # FIXME: Error
@@ -260,7 +275,6 @@ class InteractionController < ApplicationController
           prod.save
           orden.delivered_qt += 1
           orden.save
-          puts "stock reservado #{prod.stock_reservado}"
         end
       end
     end
@@ -269,8 +283,37 @@ class InteractionController < ApplicationController
     orden.save
   end
 
+  def move_to_despacho(qty, sku)
+    products = ""
+    remaining = qty
+    while remaining > 0 do
+      @almacenes.each do |almacen|
+        next if almacen["despacho"]
+        limit = (remaining if remaining < 200) || 200
+        data = "GET#{almacen["_id"]}#{sku}" #GETalmacenIdsku
+        route = "#{Rails.configuration.base_route_bodega}stock?almacenId=#{almacen["_id"]}&sku=#{sku}&limit=#{limit}"
+        loop do
+          products = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get(route)
+          break if products.code == 200
+          sleep(60) if products.code == 429
+          sleep(15)
+        end
+        products.parse.each do |product|
+          data = "POST#{product["_id"]}#{Rails.configuration.despacho_id}" #POSTproductoIdalmacenId
+          route = "#{Rails.configuration.base_route_bodega}moveStock"
+          move = ""
+          loop do
+            move = HTTP.auth(generate_header(data)).headers(:accept => "application/json").post(route, json: { productoId: product["_id"], almacenId: Rails.configuration.despacho_id })
+            break if move.code == 200
+            sleep(60) if move.code == 429
+            sleep(15)
+          end
+        end
+      end
+    end
+  end
+
   # Stock de todos los sku. Se aprovecha la consulta
-  # FIXME: restar reservado
   def get_stocks
     stocks = Hash.new(0)
     response = ""
