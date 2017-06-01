@@ -82,7 +82,7 @@ class ApplicationController < ActionController::Base
           @response = HTTP.headers("X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").get(route)
           # Probar con la otra posible ruta
           route = seller.url + 'api/publico/precios'
-          @response = HTTP.headers("X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").get(route) if @response.code !=200 || (response["Content-Type"] != "application/json; charset=utf-8")
+          @response = HTTP.headers("X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").get(route) if @response.code !=200 || (@response["Content-Type"] != "application/json; charset=utf-8")
           if @response.code == 200
             if @response["Content-Type"] == "application/json; charset=utf-8"
               begin
@@ -95,7 +95,8 @@ class ApplicationController < ActionController::Base
                     else
                       prod2 = 0
                     end
-                    sorted_suppliers << [seller.name, prod["price"].to_s, supplier_seller.time, prod2]
+                    precio = prod["price"] || prod["precio"]
+                    sorted_suppliers << [seller.name, precio, supplier_seller.time, prod2]
                     #puts sorted_suppliers
                   end
                 end

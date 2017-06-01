@@ -34,11 +34,23 @@ module ApiFactoryG5
     config.base_route_oc = "https://integracion-2017-prod.herokuapp.com/oc/"
     config.base_route_bodega = "https://integracion-2017-prod.herokuapp.com/bodega/"
     config.base_route_banco = "https://integracion-2017-prod.herokuapp.com/banco/"
+    config.banco_id = "5910c0910e42840004f6e68a"
     config.recepcion_id = "5910c0b90e42840004f6e9ec" #"590baa76d6b4ec00049028b1"
-    config.despacho_id = "590baa76d6b4ec00049028b2"
+    config.despacho_id = "5910c0b90e42840004f6e9ed" #"590baa76d6b4ec00049028b2"
     config.pulmon_id = "5910c0ba0e42840004f6ea7c" #"590baa76d6b4ec00049029dc"
-    config.intermedio_id_1 = "5910c0b90e42840004f6e9ee" #prod
-    config.intermedio_id_2 = "5910c0ba0e42840004f6ea7b" #prod
+    config.intermedio_id_1 = "5910c0b90e42840004f6e9ee" #590baa76d6b4ec00049028b3
+    config.intermedio_id_2 = "5910c0ba0e42840004f6ea7b" #590baa76d6b4ec00049029db
     config.my_id = "5910c0910e42840004f6e684" #prod
+
+    # config.secret = 'W1gCjv8gpoE4JnR'
+    # config.base_route_oc = "https://integracion-2017-dev.herokuapp.com/oc/"
+    # config.base_route_bodega = "https://integracion-2017-dev.herokuapp.com/bodega/" # desarrollo
+    # config.base_route_banco = "https://integracion-2017-prod.herokuapp.com/banco/"
+    # config.recepcion_id = "590baa76d6b4ec00049028b1"
+    # config.despacho_id = "590baa76d6b4ec00049028b2"
+    # config.pulmon_id = "590baa76d6b4ec00049029dc"
+    # config.intermedio_id_1 = "590baa76d6b4ec00049028b3" #prod
+    # config.intermedio_id_2 = "590baa76d6b4ec00049029db" #prod
+    # config.my_id = "5910c0910e42840004f6e684" #prod
   end
 end

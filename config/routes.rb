@@ -11,7 +11,7 @@ Rails.application.routes.draw do
 
 #Ordenes de Compra
   #put 'purchase_orders/:id', to: 'purchase_orders#receive'
-  put 'purchase_orders/:id', to: 'application#receive'
+  #put 'purchase_orders/:id', to: 'application#receive'
 
   patch 'purchase_orders(/:id(/accepted))', to: 'purchase_orders#accepted'
 
@@ -35,5 +35,11 @@ Rails.application.routes.draw do
 
   get 'products', to: 'product#index'
 
-  get 'prueba', to: 'product#index_total'
+## Metodos manuales para dashboard
+  post 'produce', to: 'interaction#produce'
+  put 'purchase_orders/:id', to: 'interaction#receive'
+  put 'despachar/:id', to: 'interaction#despachar'
+
+  # temporary
+  get 'stock', to: 'interaction#get_stocks'
 end
