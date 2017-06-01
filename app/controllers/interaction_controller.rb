@@ -103,7 +103,6 @@ class InteractionController < ApplicationController
       remaining += lot
     end
     n_lotes = remaining/lot
-    puts "numero de lots a producir #{n_lotes}"
 
     # Si producto procesado, verificar stock de materias primas, y mandar a despacho
     if product.processed == 1
@@ -111,12 +110,7 @@ class InteractionController < ApplicationController
       # Pedir sku de todos los supplies
       my_supplies.each do |supply|
         # Verificar que haya stock
-        puts "sku #{supply.sku}"
         stocks = get_stocks
-        puts "Stock: #{stocks}"
-        puts "hola"
-        puts supply.sku
-        puts stocks[supply.sku]
         if supply.requierment * n_lotes >= stocks[supply.sku]
           remain = supply.requierment * n_lotes - stocks[supply.sku]
           # FIXME: Solo se produce si hay stock
@@ -140,7 +134,6 @@ class InteractionController < ApplicationController
     ### Creo que no está haciendo 5000 por ciclo. Está haciendo menos.
 
     #transferir $$ a fábrica
-    puts(remaining)
     longest_time = Time.now
     while remaining >= 0
       # request de producción
@@ -152,17 +145,16 @@ class InteractionController < ApplicationController
       else
         to_produce = remaining
       end
-      puts("ahora to_produce= #{to_produce}")
       #pagar producción
       data = "GET"
       #puts("antes")
       monto = to_produce * product.price.to_i
       #puts("monto= #{monto}")
-      factory_account2 = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get(Rails.configuration.base_route_bodega + "/fabrica/getCuenta")
+      factory_account2 = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get(Rails.configuration.base_route_bodega + "fabrica/getCuenta")
       #puts("factory to_s: #{factory_account2.to_s}")
       factory_account = factory_account2.parse["cuentaId"]
       #puts("factory_account: #{factory_account}")
-      trx1 = HTTP.headers(:accept => "application/json").put(Rails.configuration.base_route_banco + "trx", :json => { :monto => monto, :origen => "590baa00d6b4ec0004902471", :destino => factory_account })
+      trx1 = HTTP.headers(:accept => "application/json").put(Rails.configuration.base_route_banco + "trx", :json => { :monto => monto, :origen => Rails.configuration.banco_id, :destino => factory_account })
       aviso = trx1.to_s
       #puts("trx1: #{aviso}")
       #Producir
@@ -195,6 +187,21 @@ class InteractionController < ApplicationController
         end
       end
     end
+  end
+
+  # Para despachar directamente
+  def despachar
+    orden_id = params[:id]
+    almacen_recepcion = params[:id_store_reception]
+    order = ""
+    loop do
+      order = HTTP.headers(accept: "application/json").get("#{Rails.configuration.base_route_oc}obtener/#{orden_id}")
+      break if order.code == 200
+      sleep(60) if order.code == 429
+      sleep(15)
+    end
+    order = order.parse
+    to_despacho_and_delivery(order[0]["sku"], order[0]["cantidad"].to_i, almacen_recepcion, orden_id, order[0]["precioUnitario"])
   end
 
   def to_despacho_and_delivery(sku, qty, almacen_recepcion, ordenId, precio)
@@ -235,7 +242,6 @@ class InteractionController < ApplicationController
             sleep(15)
           end
           remaining -= 1
-          puts remaining
         end
       end
     end
@@ -257,7 +263,6 @@ class InteractionController < ApplicationController
         sleep(15)
       end
       products = JSON.parse response.to_s
-      puts "productos #{products}"
       if !products.empty?
         products.each do |product|
           # product["_id"] es el sku del producto
@@ -282,7 +287,6 @@ class InteractionController < ApplicationController
         sleep(15)
       end
       products = JSON.parse response.to_s
-      puts "productos #{products}"
       if !products.empty?
         products.each do |product|
           # Sku viene en id de producto
@@ -299,6 +303,7 @@ class InteractionController < ApplicationController
 
   def get_almacenes
     # Ordenar intermedio, recepcion, pulmon (?)
+    # FIXME: guardar los id directamente
     data = "GET"
     response = ""
     loop do
