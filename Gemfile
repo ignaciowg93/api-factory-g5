@@ -1,5 +1,17 @@
 source 'https://rubygems.org'
 
+gem 'digest'
+gem 'sdoc', '~> 0.4.0', group: :doc
+gem 'ruby-hmac'
+gem 'rest-client'
+gem 'rf-rest-open-uri'
+gem 'sinatra'
+gem 'net-ssh'
+gem 'net-sftp'
+gem 'typhoeus'
+gem 'groupdate'
+gem "chartkick"
+gem "twitter"
 
 gem 'rails', '~> 5.0.0', '>= 5.0.0.1'
 gem 'puma', '~> 3.0'
@@ -16,7 +28,6 @@ gem 'listen', '~> 3.0.5'
 gem 'bootstrap-sass', '3.3.6'
 gem "http"  #https://github.com/httprb/http/tree/2-x-stable
 gem 'activeadmin'
-gem "chartkick"
 gem 'rufus-scheduler', '~> 3.2', '>= 3.2.2'
 
 group :development, :test do

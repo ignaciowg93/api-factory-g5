@@ -1,3 +1,17 @@
+require "http"
+require 'digest'
+require 'rubygems'
+# require 'base64'
+# require 'cgi'
+require 'hmac-sha1'
+require 'openssl'
+require 'base64'
+require 'open-uri'
+require 'rest-client'
+# require 'net/http'
+# require 'uri'
+# require 'typhoeus'
+
 class ProductController < ApplicationController
     almacen_base_url = "https://integracion-2017-prod.herokuapp.com/bodega/almacenes"
     stock_productos = Hash.new(0)
@@ -43,7 +57,12 @@ class ProductController < ApplicationController
             end
         end
     end
-
+    def find
+        response = Product.consultar(params[:sku])
+        render :json => response
+        puts 'esta es la response:'
+        puts response
+    end
 
 private
     def find_qt_by_sku
@@ -86,4 +105,22 @@ private
         "Hola"
     end
 
+<<<<<<< Updated upstream
+=======
+    
+
+    def prices
+        @products = Product.all
+        @stock = find_qt_by_sku
+        arreglo = Array.new
+        @products.each do |p|
+            temp = {:sku => p.sku , :price=> p.price , :stock=> @stock[p.sku] }
+            p(temp)
+            arreglo.push(temp)
+        end
+
+        render :json => arreglo
+
+    end
+>>>>>>> Stashed changes
 end
