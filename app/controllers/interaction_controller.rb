@@ -98,6 +98,7 @@ class InteractionController < ApplicationController
   def produce
 
     sku = params[:sku]
+    puts "sku= #{sku}"
     quantity = params[:quantity]
     product = (Product.find_by sku: sku)
 
@@ -160,14 +161,14 @@ class InteractionController < ApplicationController
       factory_account = factory_account2.parse["cuentaId"]
       #puts("factory_account: #{factory_account}")
       trx1 = HTTP.headers(:accept => "application/json").put(Rails.configuration.base_route_banco + "trx", :json => { :monto => monto, :origen => Rails.configuration.banco_id, :destino => factory_account })
-      aviso = trx1.to_s
+      puts trx1.to_s
       #puts("trx1: #{aviso}")
       #Producir
       if trx1.code == 200
         data = "PUT" + sku + to_produce.to_s + trx1.parse["_id"]
         puts("ahora remaining: #{remaining}")
         puts("p_order antes")
-        production_order = HTTP.auth(generate_header(data)).headers(:accept => "application/json").put(Rails.configuration.base_route_bodega + "/fabrica/fabricar", :json => { :sku => sku, :cantidad => to_produce, :trxId =>  trx1.parse["_id"]})
+        production_order = HTTP.auth(generate_header(data)).headers(:accept => "application/json").put(Rails.configuration.base_route_bodega + "fabrica/fabricar", :json => { :sku => sku, :cantidad => to_produce, :trxId =>  trx1.parse["_id"]})
         puts("p_order dsps")
         @production_order = ProductionOrder.new
         @production_order.sku = sku
@@ -216,7 +217,7 @@ class InteractionController < ApplicationController
     # FIXME: la cantidad despachada no se actualiza siempre en el sistema!!
     #remaining = qty - cantidad_despachada
     orden = PurchaseOrder.find_by(_id: ordenId)
-    remaining = qty - orden.delivered_qt
+    remaining = 499#qty - orden.delivered_qt
     # Obtener producto con sku
     prod = Product.find_by(sku: sku)
 
