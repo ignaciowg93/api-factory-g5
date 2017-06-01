@@ -5,6 +5,22 @@ class InvoicesController < ApplicationController
     def new
         @invoice = Invoice.new
     end
+
+    def new(oc)
+      @invoice = Invoice.new
+
+      #Ahora debo buscar los datos del invoice en PO y cargar los datos en la entidad.
+      if PurchaseOrder.where(poid: oc).exists?
+        @invoice.po_idtemp = oc
+        @invoice.save!
+
+      else
+        puts("Error en INVOICE.NEW(OC) , no existe la Po en la BDD")
+      end
+
+      @invoice
+
+    end
 ###BUYING
 
     def receive
@@ -14,11 +30,11 @@ class InvoicesController < ApplicationController
             @invoice.invoiceid = params[:id]
             if @invoice.save
                 @invoice.save!
-                render json: {ok: "notificación recibida exitosamente"} , status: 201    
+                render json: {ok: "notificación recibida exitosamente"} , status: 201
             else
-                render json: {error: "No se pudo enviar resolución"}, status: 500    
+                render json: {error: "No se pudo enviar resolución"}, status: 500
             end
-         rescue ActiveRecord::RecordNotFound 
+         rescue ActiveRecord::RecordNotFound
             render json:{error: "Id no asociado a OC por resolver"}, status: 404
          #rescue ActionController::ParameterMissing
           #   render json:{error:"Falta algún parámetro"}, status: 422
@@ -27,16 +43,41 @@ class InvoicesController < ApplicationController
 
 
 ###SELLING
+
+#Method to generate the invoice given certain parameters.
+#Returns True if code 200 is received.
+#Returns false if another code is received, or fails to save in DB
+
+    def generate_boleta(prov,client,precio_final)
+      temp_invoice = HTTP.headers(:accept => "application/json").put("https://integracion-2017-dev.herokuapp.com/sii", :json => { :proveedor =>prov , :cliente => client , :total => precio_final })
+      temp_result = temp_invoice.to_s
+      if temp_invoice.code == 200
+        @invoice = Invoice.new
+        @invoice.proveedor = prov
+        @invoice.cliente = client
+        @invoice.price = precio_final
+        @invoice.tax = precio_final*0.19
+        @invoice.total_price = @invoice.price + @invoice.tax
+        @invoice.boleta = true
+        @invoice.invoiceid = params["id"]
+        if @invoice.save!
+            @invoice
+        else
+          puts("Problemas al crear el invoice de un boleta")
+        end
+
+    end
+
     def create
     end
-    
+
 
     def accepted
         begin
             @invoice = set_invoice
             @invoice.accepted = true
             render json: {ok: "Factura resuelta recibida exitosamente " }, status: 201
-        rescue ActiveRecord::RecordInvalid 
+        rescue ActiveRecord::RecordInvalid
             render json:{error: "No se pudo enviar factura resuelta"}, status: 500
         end
 
@@ -49,7 +90,7 @@ class InvoicesController < ApplicationController
             @invoice = set_invoice
             @pinvoice.rejected = true
             render json: {ok: "Factura resuelta recivida exitosamente" }, status: 201
-        rescue ActiveRecord::RecordInvalid 
+        rescue ActiveRecord::RecordInvalid
             render json:{error: "No se pudo enviar factura resuelta"}, status: 500
         end
         #Change the status of an Invoice in the system.
@@ -60,7 +101,7 @@ class InvoicesController < ApplicationController
             @invoice = set_invoice
             @invoice.paid = true
             render json: {ok: "Factura resuelta recibida exitosamente " }, status: 201
-        rescue ActiveRecord::RecordNotFound 
+        rescue ActiveRecord::RecordNotFound
             render json:{error: "Id no asociado a OC por pagar"}, status: 404
         end
         #change the status of an Invoice inthe system. Check for the transaction.

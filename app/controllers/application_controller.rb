@@ -454,6 +454,8 @@ class ApplicationController < ActionController::Base
         #puts("factory_account: #{factory_account}")
         trx1 = HTTP.headers(:accept => "application/json").put(Rails.configuration.base_route_banco + "trx", :json => { :monto => monto, :origen => "590baa00d6b4ec0004902471", :destino => factory_account })
         aviso = trx1.to_s
+
+        ### Estas transacciones tiene que quedar guardadas en la BDD para poder mostrarlas en el administrador.
         #puts("trx1: #{aviso}")
         #Producir
         if trx1.code == 200
