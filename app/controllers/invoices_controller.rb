@@ -48,7 +48,11 @@ class InvoicesController < ApplicationController
 #Returns True if code 200 is received.
 #Returns false if another code is received, or fails to save in DB
 
-    def generate_boleta(prov,client,precio_final)
+    def generate_boleta
+      proveedor = params["id"]
+      cliente = params["cliente"]
+      precio_final = params["precio"]
+      cantidad = params["cantidad"]
       temp_invoice = HTTP.headers(:accept => "application/json").put("https://integracion-2017-dev.herokuapp.com/sii", :json => { :proveedor =>prov , :cliente => client , :total => precio_final })
       temp_result = temp_invoice.to_s
       if temp_invoice.code == 200
@@ -61,7 +65,9 @@ class InvoicesController < ApplicationController
         @invoice.boleta = true
         @invoice.invoiceid = params["id"]
         if @invoice.save!
-            @invoice
+          boleta = temp_invoice.parse
+
+          render json: {_id: boleta["_id"]}
         else
           puts("Problemas al crear el invoice de un boleta")
         end
@@ -121,7 +127,7 @@ class InvoicesController < ApplicationController
 private
 
     def invoice_params
-        params.require(:invoice).permit(:id,:rejected,:accepted, :paid,:delivered, :account,:date,:proveedor,:cliente,:price, :tax, :total_price ,:po_idtemp,:invoiceid )
+        params.require(:invoice).permit(:id,:rejected,:accepted, :paid,:delivered, :account,:date,:proveedor,:cliente,:price, :tax, :total_price ,:po_idtemp,:invoiceid ,:proveedor, :precio, :cantidad)
     end
 
     def set_invoice
