@@ -53,7 +53,7 @@ class InvoicesController < ApplicationController
       cliente = params["cliente"]
       precio_final = params["precio"]
       cantidad = params["cantidad"]
-      temp_invoice = HTTP.headers(:accept => "application/json").put("https://integracion-2017-dev.herokuapp.com/sii", :json => { :proveedor =>prov , :cliente => client , :total => precio_final })
+      temp_invoice = HTTP.headers(:accept => "application/json").put("https://integracion-2017-dev.herokuapp.com/sii", :json => { :proveedor =>proveedor , :cliente => cliente , :total => precio_final })
       temp_result = temp_invoice.to_s
       if temp_invoice.code == 200
         @invoice = Invoice.new
@@ -71,7 +71,9 @@ class InvoicesController < ApplicationController
         else
           puts("Problemas al crear el invoice de un boleta")
         end
-
+      else
+        render json: {error: "Problemas con el request."}
+      end
     end
 
     def create

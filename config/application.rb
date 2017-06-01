@@ -40,5 +40,6 @@ module ApiFactoryG5
     config.intermedio_id_1 = "5910c0b90e42840004f6e9ee" #prod
     config.intermedio_id_2 = "5910c0ba0e42840004f6ea7b" #prod
     config.my_id = "5910c0910e42840004f6e684" #prod
+    config.time_zone = 'Santiago'
   end
 end

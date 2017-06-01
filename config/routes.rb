@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   # Agregar el Metodo find para buscar un producto con el id como parametro
   # get 'products/:sku', to: 'product#find'
   get 'products/:sku' => 'product#find'
-  
+
   get 'tienda/ok/:_id' => 'boletas#ok'
 
   get 'tienda/fail' => 'boletas#fail'
@@ -30,15 +30,15 @@ Rails.application.routes.draw do
 
   put 'invoices/:id' , to: 'invoices#receive'
 
-  patch 'invoices(/:id(/accepted))' , to: 'invoice#accepted'
+  patch 'invoices(/:id(/accepted))' , to: 'invoices#accepted'
 
-  patch 'invoices(/:id(/rejected))' , to: 'invoice#rejected'
+  patch 'invoices(/:id(/rejected))' , to: 'invoices#rejected'
 
-  patch 'invoices(/:id(/delivered))' , to: 'invoice#delivered'
+  patch 'invoices(/:id(/delivered))' , to: 'invoices#delivered'
 
-  patch 'invoices(/:id(/paid))' , to: 'invoice#paid'
+  patch 'invoices(/:id(/paid))' , to: 'invoices#paid'
 
-  put 'api/boleta' , to: 'invoice#generate_boleta'
+  put 'api/boleta' , to: 'invoices#generate_boleta'
 
 ####Lista de Precios
 
