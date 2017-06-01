@@ -1,5 +1,17 @@
 source 'https://rubygems.org'
 
+gem 'digest'
+gem 'sdoc', '~> 0.4.0', group: :doc
+gem 'ruby-hmac'
+gem 'rest-client'
+gem 'rf-rest-open-uri'
+gem 'sinatra'
+gem 'net-ssh'
+gem 'net-sftp'
+gem 'typhoeus'
+gem 'groupdate'
+gem "chartkick"
+gem "twitter"
 
 gem 'rails', '~> 5.0.0', '>= 5.0.0.1'
 gem 'puma', '~> 3.0'

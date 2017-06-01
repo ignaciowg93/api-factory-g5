@@ -8,6 +8,15 @@ Rails.application.routes.draw do
 #Productos
   get 'products/', to: 'product#index'
 
+#
+  # Agregar el Metodo find para buscar un producto con el id como parametro
+  # get 'products/:sku', to: 'product#find'
+  get 'products/:sku' => 'product#find'
+  
+  get 'tienda/ok/:_id' => 'boletas#ok'
+
+  get 'tienda/fail' => 'boletas#fail'
+#
 
 #Ordenes de Compra
   #put 'purchase_orders/:id', to: 'purchase_orders#receive'
