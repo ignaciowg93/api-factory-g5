@@ -2,7 +2,7 @@ require 'rufus/scheduler'
 require "http"
 
 def get_stock_by_sku(producto)
-    sku = producto.sku
+    @sku = producto.sku
     stock_final = 0
     response = ""
     @almacenes.each do |almacen|
@@ -16,7 +16,7 @@ def get_stock_by_sku(producto)
       products = JSON.parse response.to_s
       products.each do |product|
         # Sku viene en id de producto
-          if product["_id"] == sku
+          if product["_id"] == @sku
               stock_final += product["total"]
           end
       end

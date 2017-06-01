@@ -10,7 +10,7 @@ module ActiveAdmin::ViewHelper
 
 #TODO poco eficiente. arreglar chucheta. Se llama una vez no más.
 
-    def get_stock_by_sku(sku)
+    def get_stock_helper(sku)
         stock_final = 0
           # desarrollo
 

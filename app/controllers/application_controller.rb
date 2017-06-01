@@ -452,11 +452,22 @@ class ApplicationController < ActionController::Base
         #puts("factory_account: #{factory_account}")
         trx1 = HTTP.headers(:accept => "application/json").put(Rails.configuration.base_route_banco + "trx", :json => { :monto => monto, :origen => "590baa00d6b4ec0004902471", :destino => factory_account })
         aviso = trx1.to_s
-
         ### Estas transacciones tiene que quedar guardadas en la BDD para poder mostrarlas en el administrador.
         #puts("trx1: #{aviso}")
         #Producir
         if trx1.code == 200
+          @transaction = Transaction.new
+          @transaction._id = trx1.parse["_id"]
+          @transaction.amount = monto
+          @transaction.origen = "590baa00d6b4ec0004902471"
+          @transaction.destiny = factory_account
+          @transaction.state = true
+          if @transaction.save!
+            puts("Transaction creada exitosamente.")
+          else
+            puts("PRoblemas al crear la transaction en BDD. Linea 469 APP")
+            break
+          end
           data = "PUT" + sku + to_produce.to_s + trx1.parse["_id"]
           puts("ahora remaining: #{@remaining}")
           puts("p_order antes")
@@ -482,6 +493,19 @@ class ApplicationController < ActionController::Base
               a = production_order.to_s
               puts("error en p_order: #{a}")
             end
+          end
+        else
+          @transaction = Transaction.new
+          @transaction._id = trx1.parse["_id"]
+          @transaction.amount = monto
+          @transaction.origen = "590baa00d6b4ec0004902471"
+          @transaction.destiny = factory_account
+          @transaction.state = false
+          if @transaction.save!
+            puts("Transaction creada exitosamente.")
+          else
+            puts("PRoblemas al crear la transaction en BDD. Linea 469 APP")
+            break
           end
         end
       end

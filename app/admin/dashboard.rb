@@ -21,7 +21,7 @@ ActiveAdmin.register_page "Dashboard" do
         panel "Products" do
           ul do
             Product.all.map do |p|
-              li p.name + " : " + get_stock_by_sku(p.sku).to_s
+              li p.name + " : " + get_stock_helper(p.sku).to_s
             end
           end
         end
@@ -84,20 +84,34 @@ ActiveAdmin.register_page "Dashboard" do
     end
 
     ##TRANSACCIONES EXITOSAS
-    # columns do
-    #   column do
-    #     panel "Ordenes de Compra Aprobadas" do
-    #       table_for PurchaseOrder.where(:status =='accepted').order('created_at desc') do
-    #         column("ID") {|prod| prod.id }
-    #         column("CLIENT") {|prod| prod.client}
-    #         column("SKU") {|prod| prod.sku}
-    #         column("AMOUNT") {|prod| prod.amount}
-    #         column("UNIT PRICE") {|prod| prod.unit_price}
-    #         column("DELIVERY DATE"){|prod| prod.delivery_date}
-    #       end
-    #     end
-    #   end
-    # end
+    columns do
+      column do
+        panel "Transacciones Aprobadas" do
+          table_for Transaction.where(:state ==true).order('created_at desc') do
+            column("ID") {|tran| tran._id }
+            column("ORIGEN") {|tran| tran.origin }
+            column("DESTINO") {|tran| tran.destiny }
+            column("MONTO") {|tran| tran.amount }
+
+          end
+        end
+      end
+    end
+
+
+    columns do
+      column do
+        panel "Transacciones Rechazadas" do
+          table_for Transaction.where(:state ==false).order('created_at desc') do
+            column("ID") {|tran| tran._id }
+            column("ORIGEN") {|tran| tran.origin }
+            column("DESTINO") {|tran| tran.destiny }
+            column("MONTO") {|tran| tran.amount }
+
+          end
+        end
+      end
+    end
     #
     # ##TRANSACCIONES RECHAZADAS
     # columns do
