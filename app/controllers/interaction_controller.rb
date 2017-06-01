@@ -220,10 +220,11 @@ class InteractionController < ApplicationController
     # Obtener producto con sku
     prod = Product.find_by(sku: sku)
 
+
     while remaining > 0 do
       @almacenes.each do |almacen|
         next if almacen["despacho"]
-        limit = (qty if qty < 200) || 200
+        limit = (remaining if remaining < 200) || 200
         data = "GET#{almacen["_id"]}#{sku}" #GETalmacenIdsku
         route = "#{Rails.configuration.base_route_bodega}stock?almacenId=#{almacen["_id"]}&sku=#{sku}&limit=#{limit}"
         loop do
