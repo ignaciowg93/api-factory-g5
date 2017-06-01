@@ -217,7 +217,7 @@ class InteractionController < ApplicationController
     # FIXME: la cantidad despachada no se actualiza siempre en el sistema!!
     #remaining = qty - cantidad_despachada
     orden = PurchaseOrder.find_by(_id: ordenId)
-    remaining = 499#qty - orden.delivered_qt
+    remaining = qty - orden.delivered_qt
     # Obtener producto con sku
     prod = Product.find_by(sku: sku)
 
