@@ -53,18 +53,20 @@ class InvoicesController < ApplicationController
       cliente = params["cliente"]
       precio_final = params["precio"]
       cantidad = params["cantidad"]
-      temp_invoice = HTTP.headers(:accept => "application/json").put("https://integracion-2017-dev.herokuapp.com/sii", :json => { :proveedor =>proveedor , :cliente => cliente , :total => precio_final })
+      temp_invoice = HTTP.headers(:accept => "application/json").put("https://integracion-2017-dev.herokuapp.com/sii/boleta", :json => { :proveedor =>proveedor , :cliente => cliente , :total => precio_final })
       puts(temp_invoice)
       temp_result = temp_invoice.to_s
       if temp_invoice.code == 200
+        temp_boleta = temp_invoice.parse
         @invoice = Invoice.new
-        @invoice.proveedor = prov
-        @invoice.cliente = client
-        @invoice.price = precio_final
-        @invoice.tax = precio_final*0.19
-        @invoice.total_price = @invoice.price + @invoice.tax
+        @invoice.proveedor = temp_boleta["proveedor"]
+        @invoice.cliente = temp_boleta["cliente"]
+        @invoice.price = temp_boleta["bruto"]
+        @invoice.tax = temp_boleta["iva"]
+        @invoice.total_price = temp_boleta["total"]
         @invoice.boleta = true
-        @invoice.invoiceid = params["id"]
+        @invoice.invoiceid = temp_boleta["_id"]
+        @invoice.status = temp_boleta["estado"]
         if @invoice.save!
           boleta = temp_invoice.parse
 

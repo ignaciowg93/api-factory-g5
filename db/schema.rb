@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170601053303) do
+ActiveRecord::Schema.define(version: 20170601185250) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -84,6 +84,7 @@ ActiveRecord::Schema.define(version: 20170601053303) do
     t.datetime "date"
     t.string   "po_idtemp"
     t.boolean  "boleta"
+    t.string   "status"
   end
 
   create_table "messages", force: :cascade do |t|
