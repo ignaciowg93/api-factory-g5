@@ -81,7 +81,7 @@ class InteractionController < ApplicationController
                         HTTP.headers(accept: "application/json").post(Rails.configuration.base_route_oc+"recepcionar/"+poid,
                          json: {_id: poid})
                         HTTP.headers(accept: "application/json").patch(group_route(grupo) +poid + '/accepted')
-                        to_despacho_and_delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario)
+                        to_despacho_and_delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario, 0)
                     end
                   end
               end
@@ -201,14 +201,14 @@ class InteractionController < ApplicationController
       sleep(15)
     end
     order = order.parse
-    to_despacho_and_delivery(order[0]["sku"], order[0]["cantidad"].to_i, almacen_recepcion, orden_id, order[0]["precioUnitario"])
+    to_despacho_and_delivery(order[0]["sku"], order[0]["cantidad"].to_i, almacen_recepcion, orden_id, order[0]["precioUnitario"], order[0]["cantidadDespachada"].to_i)
   end
 
-  def to_despacho_and_delivery(sku, qty, almacen_recepcion, ordenId, precio)
+  def to_despacho_and_delivery(sku, qty, almacen_recepcion, ordenId, precio, cantidad_despachada)
     # Mover unidad a despacho, hacer delivery
     # Mantener stock reservado para que no se vayan las unidades
     products = ""
-    remaining = qty
+    remaining = qty - cantidad_despachada
 
     while remaining > 0 do
       @almacenes.each do |almacen|
@@ -245,6 +245,7 @@ class InteractionController < ApplicationController
         end
       end
     end
+    # Orden de compra se cambia a finalizada en la base local
   end
 
   # Stock de todos los sku. Se aprovecha la consulta
