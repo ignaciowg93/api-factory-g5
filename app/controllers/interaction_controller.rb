@@ -49,7 +49,7 @@ class InteractionController < ApplicationController
                     stock = Stock.find_by(sku: sku) # Poblar base de datos
                     prod = Product.find_by(sku: sku)
                     grupo = Client.find_by(name: cliente)
-                    en_stock = get_stock_by_sku(sku)
+                    en_stock = get_stock_by_sku(prod)
 
                     if grupo == nil
                         estado = "rechazada"
@@ -82,6 +82,9 @@ class InteractionController < ApplicationController
                          json: {_id: poid})
                         HTTP.headers(accept: "application/json").patch(group_route(grupo) +poid + '/accepted')
                         to_despacho_and_delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario, 0)
+                        # Reservar unidades
+                        prod.stock_reservado += cantidad
+                        prod.save
                     end
                   end
               end
@@ -208,7 +211,10 @@ class InteractionController < ApplicationController
     # Mover unidad a despacho, hacer delivery
     # Mantener stock reservado para que no se vayan las unidades
     products = ""
+    # FIXME: la cantidad despachada no se actualiza siempre en el sistema!!
     remaining = qty - cantidad_despachada
+    # Obtener producto con sku
+    prod = Product.find_by(sku: sku)
 
     while remaining > 0 do
       @almacenes.each do |almacen|
@@ -242,10 +248,16 @@ class InteractionController < ApplicationController
             sleep(15)
           end
           remaining -= 1
+          # Liberar unidades reservadas
+          prod.stock_reservado -= 1
+          prod.save
         end
       end
     end
     # Orden de compra se cambia a finalizada en la base local
+    orden = PurchaseOrder.find(ordenId)
+    orden.status = 'finalizada'
+    orden.save
   end
 
   # Stock de todos los sku. Se aprovecha la consulta
@@ -264,17 +276,27 @@ class InteractionController < ApplicationController
         sleep(15)
       end
       products = JSON.parse response.to_s
-      if !products.empty?
-        products.each do |product|
-          # product["_id"] es el sku del producto
-          stocks[product["_id"]] += product["total"]
-        end
+      products.each do |product|
+        # product["_id"] es el sku del producto
+        # FIXME: restar unidades reservadas
+        stocks[product["_id"]] += product["total"]
       end
-     end
+    end
+     # Descontar stock reservado, de todos los sku (productos y supplies)
+    productos_db = Product.all
+    supplies_db = Supply.all
+
+    productos_db.each do |producto|
+      stocks[producto.sku] -= producto.stock_reservado
+    end
+    supplies_db.each do |supply|
+      stocks[supply.sku] -= supply.stock_reservado
+    end
     stocks
   end
 
-  def get_stock_by_sku(sku)
+  def get_stock_by_sku(prod) # FIXME: producto en vez de sku
+    sku = prod.sku
     stock = 0
     response = ""
     @almacenes.each do |almacen|
@@ -297,7 +319,7 @@ class InteractionController < ApplicationController
         end
       end
      end
-    stock
+    stock - prod.stock_reservado > 0 ? (stock - prod.stock_reservado) : 0
   end
 
   private
