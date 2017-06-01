@@ -84,6 +84,7 @@ class InteractionController < ApplicationController
                         to_despacho_and_delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario, 0)
                         # Reservar unidades
                         prod.stock_reservado += cantidad
+                        puts "cantidad reservada #{stock_reservado}"
                         prod.save
                     end
                   end
@@ -212,7 +213,9 @@ class InteractionController < ApplicationController
     # Mantener stock reservado para que no se vayan las unidades
     products = ""
     # FIXME: la cantidad despachada no se actualiza siempre en el sistema!!
-    remaining = qty - cantidad_despachada
+    #remaining = qty - cantidad_despachada
+    orden = PurchaseOrder.find(ordenId)
+    remaining = qty - orden.delivered_qt
     # Obtener producto con sku
     prod = Product.find_by(sku: sku)
 
@@ -249,13 +252,16 @@ class InteractionController < ApplicationController
           end
           remaining -= 1
           # Liberar unidades reservadas
+          # Aumentar en unidades despachadas
           prod.stock_reservado -= 1
           prod.save
+          orden.delivered_qt += 1
+          orden.save
+          puts "stock reservado #{prod.stock_reservado}"
         end
       end
     end
     # Orden de compra se cambia a finalizada en la base local
-    orden = PurchaseOrder.find(ordenId)
     orden.status = 'finalizada'
     orden.save
   end
