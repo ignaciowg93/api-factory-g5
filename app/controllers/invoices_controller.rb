@@ -72,7 +72,7 @@ class InvoicesController < ApplicationController
           puts("Problemas al crear el invoice de un boleta")
         end
       else
-        render json: {error: "Problemas con el request."}
+        render json: {error: "Problemas con el request."}, status: 400
       end
     end
 
