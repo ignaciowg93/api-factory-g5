@@ -35,5 +35,5 @@ Rails.application.routes.draw do
 
   get 'products', to: 'product#index'
 
-  #get 'prueba', to: 'application#prueba'
+  get 'prueba', to: 'product#index_total'
 end

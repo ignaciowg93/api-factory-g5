@@ -1,6 +1,7 @@
 require 'http'
 require 'digest'
 require 'purchase_orders_controller'
+require 'product_controller'
 base_route = "https://integracion-2017-prod.herokuapp.com/oc/"
 #include ActiveAdmin::ViewHelper
 ActiveAdmin.register_page "Dashboard" do
@@ -147,6 +148,34 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
     end
+
+
+
+    @stock = find_qt_by_sku
+    columns do
+      column do
+        panel "Stock" do
+          table_for Product.all do
+            column("SKU") {|prod| prod.sku}
+            column("NAME") {|prod| prod.name}
+            column("STOCK") {|prod| @stock[prod.sku]}
+          end
+        end
+      end
+    end
+
+    columns do
+      column do
+        panel "Stock insumos" do
+          table_for [[1, 935], [4, 828], [6,228],[8, 1000], [13, 290], [20, 350], [25, 360], [26, 65], [38,20], [41,194], [49,228]]  do
+            column("SKU") {|insumo| insumo[0]}
+            column("STOCK") {|insumo| @stock[insumo[0].to_s]}
+            column("REQUIERED") {|insumo| insumo[1]}
+          end
+        end
+      end
+    end
+
 
 ## STOCK POR ALMACEN
 

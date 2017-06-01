@@ -622,8 +622,7 @@ class ApplicationController < ActionController::Base
                       if grupo == nil
                           estado = "rechazada"
                           rechazo = "cliente inválido"
-                          PurchaseOrder.create(_id: poid, #payment_method: " ", payment_option: " ",
-                                               delivery_date: DateTime.now ,sku: sku, amount: cantidad,
+                          PurchaseOrder.create(_id: poid, #payment_method: " ", payment_option: " ", ,sku: sku, amount: cantidad,
                                                status: estado, delivery_date: fechaEntrega,
                                                unit_price: precioUnitario, rejection: rechazo)
                           HTTP.headers(accept: "application/json").put(Rails.configuration.base_route_oc+"rechazar/"+poid,
@@ -633,8 +632,7 @@ class ApplicationController < ActionController::Base
                       elsif en_stock < cantidad.to_i && (Time.now + product_time(prod)*3600) >= fechaEntrega
                           estado = "rechazada"
                           rechazo = "No alcanza a estar la orden"
-                          PurchaseOrder.create(_id: poid, #payment_method: " ", payment_option: " ",
-                                               delivery_date: DateTime.now ,sku: sku, amount: cantidad,
+                          PurchaseOrder.create(_id: poid, sku: sku, amount: cantidad,
                                                status: estado, delivery_date: fechaEntrega,
                                                unit_price: precioUnitario, rejection: rechazo)
                           HTTP.headers(accept: "application/json").put(Rails.configuration.base_route_oc+"rechazar/"+poid,

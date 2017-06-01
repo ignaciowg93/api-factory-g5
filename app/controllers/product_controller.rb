@@ -29,6 +29,21 @@ class ProductController < ApplicationController
 
     end
 
+    def index_total
+        @products = Product.all
+        @stock = find_qt_by_sku
+        arreglo = Array.new
+        @products.each do |p|
+            temp = {:sku => p.sku , :name => p.name , :price=> p.price , :stock=> @stock[p.sku] - p.stock_reservado}
+            stock_display = @stock[p.sku] #- p.stock_reservado
+            puts("Producto: #{p.name}, stock: #{stock_display}")
+            p.supplies.each do |insumo|
+              stock_display = @stock[insumo.sku]
+              puts("\tInsumo: #{insumo.sku}, stock: #{stock_display}")
+            end
+        end
+    end
+
 
 private
     def find_qt_by_sku
