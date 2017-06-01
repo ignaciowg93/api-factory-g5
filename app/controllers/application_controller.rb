@@ -59,8 +59,6 @@ class ApplicationController < ActionController::Base
     end
 
     #### Métodos
-
-
     # Cotizar productos. en este sprint es solo ver el stock.
 
     #retornar una lista ordenada en base a precio con id_seller, precio unitarios, tiempo, y stock
@@ -97,7 +95,7 @@ class ApplicationController < ActionController::Base
                     else
                       prod2 = 0
                     end
-                    sorted_suppliers << [seller.name, prod["price"], supplier_seller.time, prod2]
+                    sorted_suppliers << [seller.name, prod["price"].to_s, supplier_seller.time, prod2]
                     #puts sorted_suppliers
                   end
                 end
@@ -603,75 +601,75 @@ class ApplicationController < ActionController::Base
                       render json:{ok: "OC recibida exitosamente"} , status:201
                       puts "orden recibida"
 
-                      id = orden[0]["_id"]
-                      cliente = orden[0]["cliente"]
-                      proveedor = orden[0]["proveedor"]
-                      sku = orden[0]["sku"]
-                      fechaEntrega = orden[0]["fechaEntrega"]
-                      cantidad = orden[0]["cantidad"]
-                      cantidadDespachada = orden[0]["cantidadDespachada"]
-                      precioUnitario = orden[0]["precioUnitario"]
-                      canal = orden[0]["canal"]
-                      estado = orden[0]["estado"]
-                      notas = orden[0]["notas"]
-                      rechazo = orden[0]["rechazo"]
-                      anulacion = orden[0]["anulacion"]
-                      created_at = orden[0]["created_at"]
-                      stock = Stock.find_by(sku: sku) # Poblar base de datos
-                      prod = Product.find_by(sku: sku)
-                      grupo = Client.find_by(name: cliente)
-                      en_stock = get_stock_by_sku(prod)
+                      Thread.new do
+                        id = orden[0]["_id"]
+                        cliente = orden[0]["cliente"]
+                        proveedor = orden[0]["proveedor"]
+                        sku = orden[0]["sku"]
+                        fechaEntrega = orden[0]["fechaEntrega"]
+                        cantidad = orden[0]["cantidad"]
+                        cantidadDespachada = orden[0]["cantidadDespachada"]
+                        precioUnitario = orden[0]["precioUnitario"]
+                        canal = orden[0]["canal"]
+                        estado = orden[0]["estado"]
+                        notas = orden[0]["notas"]
+                        rechazo = orden[0]["rechazo"]
+                        anulacion = orden[0]["anulacion"]
+                        created_at = orden[0]["created_at"]
+                        stock = Stock.find_by(sku: sku) # Poblar base de datos
+                        prod = Product.find_by(sku: sku)
+                        grupo = Client.find_by(name: cliente)
+                        en_stock = get_stock_by_sku(prod)
 
-                    if grupo == nil
-                        estado = "rechazada"
-                        rechazo = "cliente inválido"
-                        PurchaseOrder.create(poid: poid, #payment_method: " ", payment_option: " ",
-                                             date: DateTime.now ,sku: sku, amount: cantidad,
-                                             status: estado, delivery_date: fechaEntrega,
-                                             unit_price: precioUnitario, rejection: rechazo)
-                        HTTP.headers(accept: "application/json").put(Rails.configuration.base_route_oc+"rechazar/"+poid,
-                         json: {_id: poid, rechazo: rechazo})
+                      if grupo == nil
+                          estado = "rechazada"
+                          rechazo = "cliente inválido"
+                          PurchaseOrder.create(_id: poid, #payment_method: " ", payment_option: " ", ,sku: sku, amount: cantidad,
+                                               status: estado, delivery_date: fechaEntrega,
+                                               unit_price: precioUnitario, rejection: rechazo)
+                          HTTP.headers(accept: "application/json").put(Rails.configuration.base_route_oc+"rechazar/"+poid,
+                           json: {_id: poid, rechazo: rechazo})
 
-                    # No hay stock y el tiempo de produccion excede la fecha de entrega
-                    elsif en_stock < cantidad.to_i && (Time.now + product_time(prod)*3600) >= fechaEntrega
-                        estado = "rechazada"
-                        rechazo = "No alcanza a estar la orden"
-                        PurchaseOrder.create(poid: poid, #payment_method: " ", payment_option: " ",
-                                             date: DateTime.now ,sku: sku, amount: cantidad,
-                                             status: estado, delivery_date: fechaEntrega,
-                                             unit_price: precioUnitario, rejection: rechazo)
-                        HTTP.headers(accept: "application/json").put(Rails.configuration.base_route_oc+"rechazar/"+poid,
-                         json: {_id: poid, rechazo: rechazo})
-                        HTTP.headers(accept: "application/json").patch(group_route(grupo) +poid + '/rejected',
-                         json: {cause: rechazo})
+                      # No hay stock y el tiempo de produccion excede la fecha de entrega
+                      elsif en_stock < cantidad.to_i && (Time.now + product_time(prod)*3600) >= fechaEntrega
+                          estado = "rechazada"
+                          rechazo = "No alcanza a estar la orden"
+                          PurchaseOrder.create(_id: poid, sku: sku, amount: cantidad,
+                                               status: estado, delivery_date: fechaEntrega,
+                                               unit_price: precioUnitario, rejection: rechazo)
+                          HTTP.headers(accept: "application/json").put(Rails.configuration.base_route_oc+"rechazar/"+poid,
+                           json: {_id: poid, rechazo: rechazo})
+                          HTTP.headers(accept: "application/json").patch(group_route(grupo) +poid + '/rejected',
+                           json: {cause: rechazo})
 
-                    else
-                        estado = "aceptada"
-                        PurchaseOrder.create(_id: poid, #payment_method: " ", payment_option: " ",
-                                             sku: sku, amount: cantidad,
-                                             status: estado, delivery_date: fechaEntrega,
-                                             unit_price: precioUnitario, rejection: " ")
-                        response = HTTP.headers(accept: "application/json").post(Rails.configuration.base_route_oc+"recepcionar/"+poid,
-                         json: {_id: poid})
-                        HTTP.headers(accept: "application/json").patch(group_route(grupo) +poid + '/accepted')
-                        faltante = cantidad - en_stock
-                        # Reservar cantidad
-                        prod.stock_reservado += cantidad
-                        prod.save
-                        puts "Orden aceptada"
-                        puts "En stock: #{en_stock}"
-                        puts "Producir: #{faltante}"
-                        puts "Reservado: #{prod.stock_reservado}"
-                        if faltante > 0
-                            tiempo_espera = produce_and_supplying(sku, faltante, Time.parse(fechaEntrega).to_f*1000)
-                            puts "Tiempo de espera produccion: #{tiempo_espera}"
-                            sleep((Time.parse(tiempo_espera) - Time.now) + 1800) # 30 minutos de holgura
-                        end
-                        move_to_despacho(cantidad, sku)
-                        delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario)
-                        # Reestablecer disponibilidad
-                        prod.stock_reservado -= cantidad
-                        prod.save
+                      else
+                          estado = "aceptada"
+                          PurchaseOrder.create(_id: poid, #payment_method: " ", payment_option: " ",
+                                               sku: sku, amount: cantidad,
+                                               status: estado, delivery_date: fechaEntrega,
+                                               unit_price: precioUnitario, rejection: " ")
+                          response = HTTP.headers(accept: "application/json").post(Rails.configuration.base_route_oc+"recepcionar/"+poid,
+                           json: {_id: poid})
+                          HTTP.headers(accept: "application/json").patch(group_route(grupo) +poid + '/accepted')
+                          faltante = cantidad - en_stock
+                          # Reservar cantidad
+                          prod.stock_reservado += cantidad
+                          prod.save
+                          puts "Orden aceptada"
+                          puts "En stock: #{en_stock}"
+                          puts "Producir: #{faltante}"
+                          puts "Reservado: #{prod.stock_reservado}"
+                          if faltante > 0
+                              tiempo_espera = produce_and_supplying(sku, faltante, Time.parse(fechaEntrega).to_f*1000)
+                              puts "Tiempo de espera produccion: #{tiempo_espera}"
+                              sleep((Time.parse(tiempo_espera) - Time.now) + 1800) # 30 minutos de holgura
+                          end
+                          move_to_despacho(cantidad, sku)
+                          delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario)
+                          # Reestablecer disponibilidad
+                          prod.stock_reservado -= cantidad
+                          prod.save
+                      end
                     end
                   end
               end

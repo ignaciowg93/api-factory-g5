@@ -3,6 +3,11 @@ class PurchaseOrdersController < ApplicationController
     require 'digest'
     base_route = "https://integracion-2017-dev.herokuapp.com/oc/"
 
+
+    def aversh
+      puts("\nWAAAAA\n")
+    end
+
     def new
         @purchase_order = PurchaseOrder.new
     end
