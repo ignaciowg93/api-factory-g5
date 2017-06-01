@@ -73,19 +73,20 @@ class InteractionController < ApplicationController
                         return
 
                     else
+                        # Reservar unidades
+                        prod.stock_reservado += cantidad
+                        prod.save
                         estado = "aceptada"
-                        PurchaseOrder.create(_id: poid, #payment_method: " ", payment_option: " ",
+                        orden = PurchaseOrder.create(_id: poid, #payment_method: " ", payment_option: " ",
                                              sku: sku, amount: cantidad,
                                              status: estado, delivery_date: fechaEntrega,
-                                             unit_price: precioUnitario, rejection: " ")
+                                             unit_price: precioUnitario, rejection: " ", delivered_qt: 0)
                         HTTP.headers(accept: "application/json").post(Rails.configuration.base_route_oc+"recepcionar/"+poid,
                          json: {_id: poid})
                         HTTP.headers(accept: "application/json").patch(group_route(grupo) +poid + '/accepted')
+
+                        # Despachar
                         to_despacho_and_delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario, 0)
-                        # Reservar unidades
-                        prod.stock_reservado += cantidad
-                        puts "cantidad reservada #{stock_reservado}"
-                        prod.save
                     end
                   end
               end
@@ -214,7 +215,7 @@ class InteractionController < ApplicationController
     products = ""
     # FIXME: la cantidad despachada no se actualiza siempre en el sistema!!
     #remaining = qty - cantidad_despachada
-    orden = PurchaseOrder.find(ordenId)
+    orden = PurchaseOrder.find_by(_id: ordenId)
     remaining = qty - orden.delivered_qt
     # Obtener producto con sku
     prod = Product.find_by(sku: sku)
