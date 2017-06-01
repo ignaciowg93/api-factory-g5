@@ -600,7 +600,6 @@ class ApplicationController < ActionController::Base
     end
 
     def receive
-<<<<<<< HEAD
           # Receive purchase order
           # Verified body request
           if !(params.has_key?(:payment_method) && params.has_key?(:id_store_reception))
