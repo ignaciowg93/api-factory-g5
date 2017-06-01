@@ -54,6 +54,7 @@ class InvoicesController < ApplicationController
       precio_final = params["precio"]
       cantidad = params["cantidad"]
       temp_invoice = HTTP.headers(:accept => "application/json").put("https://integracion-2017-dev.herokuapp.com/sii", :json => { :proveedor =>proveedor , :cliente => cliente , :total => precio_final })
+      puts(temp_invoice)
       temp_result = temp_invoice.to_s
       if temp_invoice.code == 200
         @invoice = Invoice.new
