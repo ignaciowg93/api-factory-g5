@@ -34,7 +34,7 @@ class ProductController < ApplicationController
         @stock = find_qt_by_sku
         arreglo = Array.new
         @products.each do |p|
-          temp = {:sku => p.sku.to_i , :precio=> p.sell_price , :stock=> @stock[p.sku]}
+          temp = {:sku => p.sku , :precio=> p.sell_price , :stock=> @stock[p.sku]}
           p(temp)
           arreglo.push(temp)
         end
