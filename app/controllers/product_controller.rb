@@ -101,13 +101,7 @@ private
         return stock_productos
     end
 
-    def temp
-        "Hola"
-    end
 
-<<<<<<< Updated upstream
-=======
-    
 
     def prices
         @products = Product.all
@@ -122,5 +116,4 @@ private
         render :json => arreglo
 
     end
->>>>>>> Stashed changes
 end
