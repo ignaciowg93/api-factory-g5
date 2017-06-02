@@ -113,8 +113,8 @@ class InteractionController < ApplicationController
 
 
     if product.processed == 1
-
-      n_lotes.times each do
+      puts "procesado"
+      n_lotes.times do
         # Si producto procesado, verificar stock de materias primas, y mandar a despacho
         my_supplies = product.supplies
         # Pedir sku de todos los supplies
@@ -132,20 +132,23 @@ class InteractionController < ApplicationController
         end
         # Mover unidades a almacen de despacho
         my_supplies.each do |supply|
+          puts "1- muevo a despacho"
           move_to_despacho(supply.requierment, supply.sku)
         end
         # Producir un solo lote
-        mandar_a_producir(lot,product)
+        mandar_a_producir(lot,product, sku)
       end
     else
+      puts "no procesado"
       # Producir todo
-      mandar_a_producir(to_produce, product)
+      mandar_a_producir(to_produce, product, sku)
     end
   end
 
 
 
-  def mandar_a_producir(quantity, product)
+  def mandar_a_producir(quantity, product, sku)
+    puts "en mandar a producir"
     remaining = quantity
     # Producir
     # FIXME: refactoring
@@ -166,6 +169,7 @@ class InteractionController < ApplicationController
       else
         to_produce = remaining
       end
+      puts "to_produce = #{to_produce}"
       #pagar producción
       data = "GET"
       #puts("antes")
@@ -308,6 +312,7 @@ class InteractionController < ApplicationController
             sleep(60) if move.code == 429
             sleep(15)
           end
+          remaining -= 1
         end
       end
     end
