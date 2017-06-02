@@ -103,7 +103,7 @@ private
 
 
 
-    def prices
+    /def prices
         @products = Product.all
         @stock = find_qt_by_sku
         arreglo = Array.new
@@ -115,5 +115,5 @@ private
 
         render :json => arreglo
 
-    end
+    end/
 end
