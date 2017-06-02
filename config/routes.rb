@@ -13,7 +13,7 @@ Rails.application.routes.draw do
   # get 'products/:sku', to: 'product#find'
   get 'products/:sku' => 'product#find'
 
-  get 'tienda/ok/:_id' => 'boletas#ok'
+  get 'tienda/ok/:_id' => 'invoices#confirm_boleta'
 
   get 'tienda/fail' => 'boletas#fail'
 #

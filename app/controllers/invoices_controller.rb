@@ -53,6 +53,7 @@ class InvoicesController < ApplicationController
       cliente = params["cliente"]
       precio_final = params["precio"]
       cantidad = params["cantidad"]
+      sku = params["sku"]
       temp_invoice = HTTP.headers(:accept => "application/json").put("https://integracion-2017-dev.herokuapp.com/sii/boleta", :json => { :proveedor =>proveedor , :cliente => cliente , :total => precio_final })
       puts(temp_invoice)
       temp_result = temp_invoice.to_s
@@ -68,6 +69,7 @@ class InvoicesController < ApplicationController
         @invoice.invoiceid = temp_boleta["_id"]
         @invoice.status = temp_boleta["estado"]
         @invoice.amount = cantidad
+        @invoice.sku = sku
         if @invoice.save!
           boleta = temp_invoice.parse
 
@@ -78,6 +80,18 @@ class InvoicesController < ApplicationController
       else
         render json: {error: "Problemas con el request."}, status: 400
       end
+    end
+
+    def confirm_boleta
+      id = params["_id"]
+      if Invoice.where(invoiceid: id ).exists?
+        boleta = Invoice.where(invoiceid: id ).first
+        boleta.status = "pagada"
+        #moverInsumo(boleta.sku.to_i, boleta.amount) #mover los insumos
+        #despacharPedidoB2c(sku, cantidad, direccion, total_plata, id_boleta)
+      end
+
+
     end
 
     def create
