@@ -67,6 +67,7 @@ class InvoicesController < ApplicationController
         @invoice.boleta = true
         @invoice.invoiceid = temp_boleta["_id"]
         @invoice.status = temp_boleta["estado"]
+        @invoice.amount = cantidad
         if @invoice.save!
           boleta = temp_invoice.parse
 
