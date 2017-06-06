@@ -94,6 +94,10 @@ class InvoicesController < ApplicationController
 
     end
 
+    def fail
+    end
+
+
     def create
     end
 
