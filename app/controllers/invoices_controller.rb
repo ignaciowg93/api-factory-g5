@@ -85,8 +85,9 @@ class InvoicesController < ApplicationController
     def confirm_boleta
       id = params["_id"]
       if Invoice.where(invoiceid: id ).exists?
-        boleta = Invoice.where(invoiceid: id ).first
-        boleta.status = "pagada"
+        @boleta = Invoice.where(invoiceid: id ).first
+        @boleta.status = "pagada"
+        render partial: 'invoices/ok'
         #moverInsumo(boleta.sku.to_i, boleta.amount) #mover los insumos
         #despacharPedidoB2c(sku, cantidad, direccion, total_plata, id_boleta)
       end
@@ -95,6 +96,7 @@ class InvoicesController < ApplicationController
     end
 
     def fail
+      render partial: 'invoices/fail'
     end
 
 
