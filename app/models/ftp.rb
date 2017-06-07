@@ -1,0 +1,2 @@
+class Ftp < ApplicationRecord
+end
