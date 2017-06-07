@@ -10,10 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170602033503) do
+ActiveRecord::Schema.define(version: 20170605184836) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "accounts", force: :cascade do |t|
+    t.string   "invoice_id"
+    t.string   "_id"
+    t.string   "tipo"
+    t.boolean  "paid"
+    t.datetime "date_to_pay"
+    t.boolean  "cuota"
+    t.integer  "amount"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
 
   create_table "active_admin_comments", force: :cascade do |t|
     t.string   "namespace"
