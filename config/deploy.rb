@@ -1,4 +1,9 @@
 # config valid only for current version of Capistrano
+
+# NO estoy seguro aun, hagamoslo correr y luego al deploy
+# require 'whenever/capistrano'
+
+
 lock "3.8.1"
 
 set :application, "deployapp"
@@ -6,6 +11,11 @@ set :repo_url, "git@github.com:ignaciowg93/api-factory-g5.git"
 set :rbenv_path, '/home/deploy/.rbenv'
 set :deploy_to, '/home/deploy/deployapp'
 set :branch, ENV['BRANCH'] if ENV['BRANCH']
+
+# NO estoy seguro aun, hagamoslo correr y luego al deploy
+# set :whenever_environment, defer { stage }
+# set :whenever_command, 'bundle exec whenever'
+
 # Add this in config/deploy.rb
 # and run 'cap production deploy seed' to seed your database
 desc "deploy app for the first time (expects pre-created but empty DB)"
