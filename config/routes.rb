@@ -15,7 +15,7 @@ Rails.application.routes.draw do
 
   get 'tienda/ok/:_id' => 'invoices#confirm_boleta'
 
-  get 'tienda/fail' => 'boletas#fail'
+  get 'tienda/fail' => 'invoices#fail'
 #
 
 #Ordenes de Compra
