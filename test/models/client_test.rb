@@ -8,6 +8,7 @@
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #  token      :string
+#  gnumber    :string
 #
 
 require 'test_helper'

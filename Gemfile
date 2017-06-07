@@ -40,6 +40,7 @@ group :development do
   gem 'capistrano-passenger', '~> 0.2.0'
   gem 'capistrano-rbenv', '~> 2.1'
   gem 'web-console'
+  gem 'annotate'
 
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
