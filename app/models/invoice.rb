@@ -31,7 +31,7 @@ class Invoice < ApplicationRecord
 
 
 
-  def create_invoice(po_id )
+  def create_invoice(po_id)
     # Crea la factura y retorna el objeto JSON.
   end
 end

@@ -396,7 +396,7 @@ class InteractionController < ApplicationController
   end
 
   def generate_header(data)
-    hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Rails.configuration.secret.encode("ASCII"), data.encode("ASCII"))
+    hmac = OpenSSL::HMAC.digest(OpenSSL::Diges*t.new('sha1'), Rails.configuration.secret.encode("ASCII"), data.encode("ASCII"))
     signature = Base64.encode64(hmac).chomp
     auth_header = "INTEGRACION grupo5:" + signature
     auth_header
