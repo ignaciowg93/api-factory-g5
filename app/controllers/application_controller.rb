@@ -724,7 +724,7 @@ class ApplicationController < ActionController::Base
         'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/'
       elsif gnumber == "7"
         'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/'
-      else
+      else  
         'http://integra17-' + gnumber + '.ing.puc.cl/purchase_orders/'
       end
     end

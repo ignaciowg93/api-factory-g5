@@ -28,4 +28,10 @@ class Invoice < ApplicationRecord
   belongs_to :purchase_order, optional: true
 
   validates :invoiceid, uniqueness: true
+
+
+
+  def create_invoice(po_id )
+    # Crea la factura y retorna el objeto JSON.
+  end
 end

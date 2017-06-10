@@ -85,32 +85,32 @@ panel "Órdenes de compras finalizadas (cantidad):" do
 
 ## STOCK POR ALMACEN
 
-    columns do
-      column do
-        panel "Almacenes" do
-          almacenesHash = get_warehouse
-          table_for almacenesHash.each do
-            column :_id do |almacen|
-              almacen["_id"]
-            end
-            column :usedSpace do |almacen|
-              almacen["usedSpace"]
-            end
-            column :type do |almacen|
-              if (almacen["pulmon"])
-                "Pulmón"
-              elsif (almacen["despacho"])
-                "Despacho"
-              elsif (almacen["recepcion"])
-                "Recepción"
-              else
-                "Intermedio"
-              end
-            end
-          end
-        end
-      end
-    end
+    # columns do
+    #   column do
+    #     panel "Almacenes" do
+    #       almacenesHash = get_warehouse
+    #       table_for almacenesHash.each do
+    #         column :_id do |almacen|
+    #           almacen["_id"]
+    #         end
+    #         column :usedSpace do |almacen|
+    #           almacen["usedSpace"]
+    #         end
+    #         column :type do |almacen|
+    #           if (almacen["pulmon"])
+    #             "Pulmón"
+    #           elsif (almacen["despacho"])
+    #             "Despacho"
+    #           elsif (almacen["recepcion"])
+    #             "Recepción"
+    #           else
+    #             "Intermedio"
+    #           end
+    #         end
+    #       end
+    #     end
+    #   end
+    # end
 
     columns do
           column do

@@ -14,7 +14,7 @@ module ActiveAdmin::ViewHelper
         stock_final = 0
           # desarrollo
 
-        bodega_sist = "https://integracion-2017-prod.herokuapp.com/bodega/" # desarrollo
+        bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega/" # desarrollo
         #Mandar a la bodega. Get sku de stock.
         data = "GET"
         hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Rails.configuration.secret.encode("ASCII"), data.encode("ASCII"))
@@ -66,7 +66,7 @@ module ActiveAdmin::ViewHelper
       signature = Base64.encode64(hmac).chomp
       auth_header = "INTEGRACION grupo5:" + signature
       # pedimos el arreglo de almacenes
-      almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-prod.herokuapp.com/bodega/almacenes")
+      almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/almacenes")
       if almacenes.code == 200
           almacenes.parse.each do |almacen|
               if(!almacen["despacho"])
@@ -74,7 +74,7 @@ module ActiveAdmin::ViewHelper
                     hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
                     signature = Base64.encode64(hmac).chomp
                     auth_header = "INTEGRACION grupo5:" + signature
-                    route_to_get = "https://integracion-2017-prod.herokuapp.com/bodega/skusWithStock?almacenId=" + almacen["_id"]
+                    route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/skusWithStock?almacenId=" + almacen["_id"]
                     products_array = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
                     if products_array.code == 200
                         products_array.parse.each do |product|
@@ -93,7 +93,7 @@ module ActiveAdmin::ViewHelper
         stock_final = 0
         data = "GET"
         auth_header = generate_header(data)
-        bodega_sist = "https://integracion-2017-prod.herokuapp.com/bodega/" # desarrollo
+        bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega/" # desarrollo
         # pedimos el arreglo de almacenes
         almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get(bodega_sist + "almacenes")
         almacenesP = JSON.parse almacenes.to_s

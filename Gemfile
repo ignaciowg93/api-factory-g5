@@ -29,6 +29,7 @@ gem 'bootstrap-sass', '3.3.6'
 gem "http"  #https://github.com/httprb/http/tree/2-x-stable
 gem 'activeadmin'
 gem 'rufus-scheduler', '~> 3.2', '>= 3.2.2'
+gem 'whenever'
 
 group :development, :test do
   gem 'byebug', platform: :mri

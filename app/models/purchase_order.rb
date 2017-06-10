@@ -20,5 +20,33 @@
 #  updated_at    :datetime         not null
 #
 
+require 'http'
+require 'digest'
 class PurchaseOrder < ApplicationRecord
+base_route = "https://integracion-2017-dev.herokuapp.com/oc/"
+
+  def self.getPurchaseOrder(id)
+    #TODO GEt the pruchase order form the server. And return a Json parse of the PurchaseORder.
+    orden = orden = HTTP.get(base_route+"obtener/"+id)
+    return orden
+  end
+
+  def self.receivePurchaseOrder(id)
+    #TODO Mark your Purcase Order as received
+  end
+
+  def self.rejectPurchaseOrder(id,motivo)
+    #TODO reject the purhcase order from the system
+  end
+
+  def self.createPurchaseOrder(channel,amount,sku,supplier,unit_price, notes, client, delivery_date)
+    # TODO crete the purchase Order and send a Json response.
+  end
+
+
+  def check_purchase_order(_id )
+      #TODO chequar si existe si no ir a uscarla al sistema del profe y crearla. Retorna true si la crea o encuentra, false en caso contrario.
+  end
+
+
 end
