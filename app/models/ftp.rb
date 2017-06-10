@@ -10,7 +10,7 @@ class Ftp < ApplicationRecord
     puts 'Esto es un test'
   end
 
-    @@tiempo_inicio = Time.new(2017, 6, 7, 5, 0, 0, "+00:00")
+    @@tiempo_inicio = Time.new(2017, 6, 7, 5, 0, 0, "+00:00") # cambiar fecha
 
 
     def self.tiempo_inicio
@@ -82,31 +82,80 @@ class Ftp < ApplicationRecord
 
                             #Revisa nuestros SKU y ve si el precio de compra es mayor o menor.
 
-                            if orden_sku == "20"
-                                    if orden_de_compra['precioUnitario'].to_i> 1612 #precio sku 20
+                            if orden_sku == "3"
+                                    if orden_de_compra['precioUnitario'].to_i> 117 #precio sku 3
                                         seguir = true
                                         orden_precio = orden_de_compra['precioUnitario']
                                     end
 
                             end
-                            if orden_sku == "46"
-                                    if orden_de_compra['precioUnitario'].to_i> 8514 #precio sku 46
+                            if orden_sku == "5"
+                                    if orden_de_compra['precioUnitario'].to_i> 428 #precio sku 5
                                         seguir = true
                                         orden_precio = orden_de_compra['precioUnitario']
                                     end
                             end
-                            if orden_sku == "48"
-                                    if orden_de_compra['precioUnitario'].to_i> 6627 #precio sku 48
+                            if orden_sku == "7"
+                                    if orden_de_compra['precioUnitario'].to_i> 290 #precio sku 7
+                                        seguir = true
+                                        orden_precio = orden_de_compra['precioUnitario']
+                                    end
+
+                            end
+                            if orden_sku == "9"
+                                    if orden_de_compra['precioUnitario'].to_i> 350 #precio sku 9
+                                        seguir = true
+                                        orden_precio = orden_de_compra['precioUnitario']
+                                    end
+                            end
+                            if orden_sku == "11"
+                                    if orden_de_compra['precioUnitario'].to_i> 247 #precio sku 11
+                                        seguir = true
+                                        orden_precio = orden_de_compra['precioUnitario']
+                                    end
+
+                            end
+                            if orden_sku == "15"
+                                    if orden_de_compra['precioUnitario'].to_i> 276 #precio sku 15
+                                        seguir = true
+                                        orden_precio = orden_de_compra['precioUnitario']
+                                    end
+
+                            end
+                            if orden_sku == "17"
+                                    if orden_de_compra['precioUnitario'].to_i> 821 #precio sku 17
+                                        seguir = true
+                                        orden_precio = orden_de_compra['precioUnitario']
+                                    end
+
+                            end
+                            if orden_sku == "22"
+                                    if orden_de_compra['precioUnitario'].to_i> 336 #precio sku 22
+                                        seguir = true
+                                        orden_precio = orden_de_compra['precioUnitario']
+                                    end
+
+                            end
+                            if orden_sku == "25"
+                                    if orden_de_compra['precioUnitario'].to_i> 93 #precio sku 25
+                                        seguir = true
+                                        orden_precio = orden_de_compra['precioUnitario']
+                                    end
+
+                            end
+                            if orden_sku == "52"
+                                    if orden_de_compra['precioUnitario'].to_i> 410 #precio sku 52
                                         seguir = true
                                         orden_precio = orden_de_compra['precioUnitario']
                                     end
 
                             end
                             if orden_sku == "56"
-                                    if orden_de_compra['precioUnitario'].to_i> 5052 #precio sku 56
+                                    if orden_de_compra['precioUnitario'].to_i> 479 #precio sku 56
                                         seguir = true
                                         orden_precio = orden_de_compra['precioUnitario']
                                     end
+
                             end
 
 
@@ -145,4 +194,6 @@ class Ftp < ApplicationRecord
 
       puts "Termine el ftp"
     end
+end
+
 end
