@@ -46,6 +46,17 @@ base_route = "https://integracion-2017-dev.herokuapp.com/oc/"
     end
   end
 
+  def self.acceptPurchaseOrder(poid,motivo)
+    #TODO reject the purhcase order from the system
+    aviso_sistema = HTTP.headers(accept: "application/json").post(Rails.configuration.base_route_oc+"recepcionar/"+poid,
+    json: {_id: poid})
+    if(aviso_sistema == 200)
+      return true
+    else
+      return false
+    end
+  end
+
   def self.createPurchaseOrder(channel,amount,sku,supplier,unit_price, notes, client, delivery_date)
     # TODO crete the purchase Order and send a Json response.
   end
