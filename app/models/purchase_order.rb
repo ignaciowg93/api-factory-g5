@@ -61,8 +61,26 @@ class PurchaseOrder < ApplicationRecord
     return false
   end
 
-  def self.rejectPurchaseOrder(id,motivo)
+  def self.rejectPurchaseOrder(poid,motivo)
     #TODO reject the purhcase order from the system
+    aviso_sistema = HTTP.headers(accept: "application/json").post(Rails.configuration.base_route_oc+"rechazar/"+poid,
+    json: {_id: poid, rechazo: motivo})
+    if(aviso_sistema == 200)
+      return true
+    else
+      return false
+    end
+  end
+
+  def self.acceptPurchaseOrder(poid,motivo)
+    #TODO reject the purhcase order from the system
+    aviso_sistema = HTTP.headers(accept: "application/json").post(Rails.configuration.base_route_oc+"recepcionar/"+poid,
+    json: {_id: poid})
+    if(aviso_sistema == 200)
+      return true
+    else
+      return false
+    end
   end
 
   def self.createPurchaseOrder(channel,amount,sku,supplier,unit_price, notes, delivery_date)
