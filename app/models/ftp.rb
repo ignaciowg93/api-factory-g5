@@ -108,7 +108,7 @@ class Ftp < ApplicationRecord
                         orden_sku = thing.at_xpath('//sku').content
                         orden_qty = thing.at_xpath('//qty').content
                         #Consulta el stock por SKU
-                        respuesta = Warehouse.consultar(orden_sku)
+                        respuesta = Warehouse.consultar_sku(orden_sku)
                         seguir = false
                         existe_oc = PurchaseOrder.check_purchase_order(orden_id)
                         #Retorna true si existe, false si
