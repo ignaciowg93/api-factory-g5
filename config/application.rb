@@ -42,6 +42,10 @@ module ApiFactoryG5
     config.intermedio_id_2 = "5910c0ba0e42840004f6ea7b" #590baa76d6b4ec00049029db
     config.my_id = "5910c0910e42840004f6e684" #prod
     config.time_zone = 'Santiago'
+    config.host = 'integra17dev.ing.puc.cl'
+    config.port = '22'
+    config.ftp_user = 'grupo5'
+    config.ftp_pass = 'jR4mgD9tb6BNk2WM'
 
     # config.secret = 'W1gCjv8gpoE4JnR'
     # config.base_route_oc = "https://integracion-2017-dev.herokuapp.com/oc/"

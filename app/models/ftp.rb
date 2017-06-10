@@ -37,10 +37,10 @@ class Ftp < ApplicationRecord
 
     def self.ordenes_compra()
       puts "Parto el ftp"
-      host = 'integra17dev.ing.puc.cl'
-      port = '22'
-      user = 'grupo5'
-      password = 'jR4mgD9tb6BNk2WM'
+      host = Rails.configuration.host
+      port = Rails.configuration.port
+      user = Rails.configuration.ftp_user
+      password = Rails.configuration.ftp_pass
 
       tiempo_mayor_local = tiempo_inicio
 
