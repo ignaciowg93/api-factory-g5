@@ -14,6 +14,7 @@ require 'digest'
 class Warehouse < ApplicationRecord
     has_many :products
 
+
     def self.consultar_sku(product)
       stock = get_stock_by_sku(product)
       JSON.parse({stock: stock , sku: product.sku }.to_json)
@@ -133,6 +134,10 @@ class Warehouse < ApplicationRecord
       signature = Base64.encode64(hmac).chomp
       auth_header = "INTEGRACION grupo5:" + signature
       auth_header
+    end
+
+    def dispatch_order(order_id, sku, qty, price)
+      #TODO despacha la cantidad solicitada.
     end
 
 
