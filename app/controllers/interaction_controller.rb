@@ -86,7 +86,7 @@ class InteractionController < ApplicationController
                         HTTP.headers(accept: "application/json").patch(group_route(grupo) +poid + '/accepted')
 
                         # Despachar
-                        to_despacho_and_delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario, 0)
+                        to_despacho_and_delivery(sku, cantidad, params[:id_store_reception], poid, precioUnitario, "b2b")
                     end
                   end
               end
@@ -145,8 +145,6 @@ class InteractionController < ApplicationController
     end
   end
 
-
-
   def mandar_a_producir(quantity, product, sku)
     puts "en mandar a producir"
     remaining = quantity
@@ -192,6 +190,7 @@ class InteractionController < ApplicationController
         @production_order = ProductionOrder.new
         @production_order.sku = sku
         @production_order.amount =  to_produce
+        # FIXME guardar hora de entrega
         if @production_order.save!
           if production_order.code == 200
             puts("en el if: #{production_order.parse}")
@@ -226,7 +225,7 @@ class InteractionController < ApplicationController
       sleep(15)
     end
     order = order.parse
-    to_despacho_and_delivery(order[0]["sku"], order[0]["cantidad"].to_i, almacen_recepcion, orden_id, order[0]["precioUnitario"], order[0]["cantidadDespachada"].to_i)
+    to_despacho_and_delivery(order[0]["sku"], order[0]["cantidad"].to_i, almacen_recepcion, orden_id, order[0]["precioUnitario"], "b2b")
   end
 
   def to_despacho_and_delivery(sku, qty, almacen_recepcion, ordenId, precio, cantidad_despachada)
@@ -396,7 +395,7 @@ class InteractionController < ApplicationController
   end
 
   def generate_header(data)
-    hmac = OpenSSL::HMAC.digest(OpenSSL::Diges*t.new('sha1'), Rails.configuration.secret.encode("ASCII"), data.encode("ASCII"))
+    hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Rails.configuration.secret.encode("ASCII"), data.encode("ASCII"))
     signature = Base64.encode64(hmac).chomp
     auth_header = "INTEGRACION grupo5:" + signature
     auth_header
