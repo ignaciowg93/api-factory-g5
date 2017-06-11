@@ -3,17 +3,8 @@ require 'net/ssh'
 require 'net/sftp'
 class Ftp < ApplicationRecord
 
-<<<<<<< HEAD
     @@tiempo_inicio = Time.new(2017, 6, 7, 5, 0, 0, "+00:00")
-=======
 
-
-  def self.prueba
-    puts 'Esto es un test'
-  end
-
-    @@tiempo_inicio = Time.new(2017, 6, 7, 5, 0, 0, "+00:00") # cambiar fecha
->>>>>>> 3f18d8b73751a406b46f8073ea1a33506f024613
 
     def self.prueba
       puts 'Esto es un test'
@@ -120,6 +111,7 @@ class Ftp < ApplicationRecord
                                   seguir = true
                                   orden_precio = orden_de_compra['precioUnitario']
                               end
+                            end
 
                             if orden_sku == "3"
                                     if orden_de_compra['precioUnitario'].to_i> 117 #precio sku 3
@@ -215,7 +207,6 @@ class Ftp < ApplicationRecord
                     end
                     #break
                 end
-
         end
         if tiempo_mayor_local > tiempo_inicio
             tiempo_inicio = tiempo_mayor_local
@@ -223,6 +214,5 @@ class Ftp < ApplicationRecord
 
       puts "Termine el ftp"
     end
-end
-
+  end
 end
