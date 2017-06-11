@@ -66,13 +66,37 @@ class PurchaseOrdersController < ApplicationController
         return
     end
 
-    HTTP.headers(accept: 'application/json').patch(group_route(grupo) + params[:id] + '/accepted')
-    # Procesar PO
-    render json: { ok: 'OC aceptada. Se procederá a despacho al momento de aceptar y notificar factura enviada' }, status: 200
-    Thread.new do
-      # TODO: Crear factura
-      # Notificar envio factura
-      # TODO: To_despacho and delivery desde /invoices/:id/accepted
+    #Procesar PO
+    #grupo = Client.find_by(name: order.client).gnumber
+    product = Product.find_by(sku: order.sku)
+    en_stock = Warehouse.get_stock_by_sku(product)
+
+    if en_stock < order.amount
+      motivo = 'Sin stock suficiente para cumplir'
+      PurchaseOrder.rejectPurchaseOrder(params[:id], motivo)
+      order.update(status: 'rechazada', rejection: motivo)
+      #No es motivo en vez de rechazo?
+      HTTP.headers(accept: 'application/json').patch(group_route(grupo) + params[:id] + '/rejected',
+                                                     json: { cause: rechazo })
+    else # deberíamos revisar precios también
+
+      #Reservar unidades
+      product.stock_reservado += order.amount
+      product.save
+      PurchaseOrder.acceptPurchaseOrder(params[:id])
+      order.update(status: 'aceptada')
+      HTTP.headers(accept: 'application/json').patch(group_route(grupo) + params[:id] + '/accepted')
+
+      render json: { ok: 'OC 2 aceptada. Se procederá a despacho al momento de aceptar y notificar factura enviada' }, status: 200
+      Thread.new do
+        puts "estoy en thread"
+        # Crear factura
+        puts "invoice responde #{Invoice.create_invoice(params[:id], false)} !"
+        # Notificar envio factura
+        sent_notification = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").put("#{client_url}invoices/#{factura_id}", json: {bank_account: Rails.configuration.banco_id})
+        puts sent_notification.to_s
+        # TODO: To_despacho and delivery desde /invoices/:id/accepted
+      end
     end
   end
 

@@ -30,12 +30,17 @@ class Invoice < ApplicationRecord
   validates :invoiceid, uniqueness: true
 
 
+  def self.imprimir()
+    return "en invoice"
+  end
 
   def self.create_invoice(po_id, boleta)
     # Crea la factura y retorna el objeto JSON.
+    factura = HTTP.headers(accept: "application/json").put(Rails.configuration.base_route_factura, json: {oc: po_id})
     3.times do
       factura = HTTP.headers(accept: "application/json").put(Rails.configuration.base_route_factura, json: {oc: po_id})
       if factura.code == 200
+        puts factura.to_s
         fact = factura.parse
         fact_temp = Invoice.new
 
