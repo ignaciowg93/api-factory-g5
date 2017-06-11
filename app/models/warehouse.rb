@@ -102,9 +102,8 @@ class Warehouse < ApplicationRecord
                 sleep(15)
               end
             elsif canal == "b2c" || canal == "ftp"
-              # FIXME: unauthorized
               route = "#{Rails.configuration.base_route_bodega}stock"
-              data = "DELETE#{product["_id"]}Distribuidor#{precio}"
+              data = "DELETE#{product["_id"]}distribuidor#{precio}#{ordenId}"
               loop do
                 deliver = HTTP.auth(generate_header(data)).headers(:accept => "application/json").delete(route, json: { productoId: product["_id"], oc: ordenId, direccion: "distribuidor", precio: precio})
                 puts deliver.body

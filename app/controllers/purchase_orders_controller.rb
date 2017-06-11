@@ -10,28 +10,12 @@ class PurchaseOrdersController < ApplicationController
   end
 
   def receive_ftp
-
-    # FIXME: deshardcodear tiempo de inicio. ## es necesario?
-    #tiempo_mayor_local = tiempo_inicio
-
     Net::SFTP.start(Rails.configuration.host, Rails.configuration.ftp_user,
     password: Rails.configuration.ftp_pass) do |sftp|
       sftp.dir.foreach("/pedidos") do |entry|
         next unless entry.file?()
         nombre_split = entry.longname.split
         nombre = nombre_split[8]
-        # mes = nombre_split[5]
-        # dia = nombre_split[6]
-        # horas = nombre_split[7].split(":")
-        # hora = horas[0]
-        # minuto = horas[1]
-        # tiempo = Time.new('2017', mes, dia, hora, minuto, '0', "+00:00")
-        # #Time.new(2002, 10, 31, 2, 2, 2, "+00:00")
-        # if tiempo > tiempo_inicio
-        #     if tiempo > tiempo_mayor_local
-        #         tiempo_mayor_local = tiempo
-        #     end
-        # end
 
         data = sftp.download!("/pedidos/"+entry.name)
         doc = Nokogiri::XML(data)
@@ -40,34 +24,13 @@ class PurchaseOrdersController < ApplicationController
 
         # Load PO, or create if not in db
         order = PurchaseOrder.find_by(_id: orden_id) || PurchaseOrder.new
-        # Check the order remains in the system.
+        # Check the order remains in the system, and can be served
         valid_order = order.check_purchase_order(orden_id)
         next unless valid_order
-
-        product = Product.find_by(sku: order.sku)
-        en_stock = Warehouse.consultar_sku(product)
-
-        if en_stock['stock'] < order.amount
-          motivo = 'Sin stock suficiente para cumplir'
-          PurchaseOrder.rejectPurchaseOrder(orden_id, motivo)
-          order.update(status: 'rechazada', rejection: motivo)
-        else
-          # Reservar unidades
-          # FIXME: reservar una sola vez
-          product.stock_reservado += order.amount
-          product.save
-          PurchaseOrder.acceptPurchaseOrder(orden_id)
-          order.update(status: 'aceptada')
-
-          # Despachar
-          Warehouse.to_despacho_and_delivery(order.sku, order.amount, nil,
-          orden_id, order.unit_price, "ftp")
-
-        end
+        # Despachar
+        Warehouse.to_despacho_and_delivery(order.sku, order.amount, nil,
+        orden_id, order.unit_price, "ftp")
       end
-      # if tiempo_mayor_local > tiempo_inicio
-      #     tiempo_inicio = tiempo_mayor_local
-      # end
     end
   end
 
@@ -94,36 +57,22 @@ class PurchaseOrdersController < ApplicationController
     order = PurchaseOrder.find_by(_id: params[:id]) || PurchaseOrder.new
     # Check order remains in the system, and setup if new
     valid_order = order.check_purchase_order(params[:id])
+    grupo = Client.find_by(name: order.client).gnumber
     unless valid_order
-      render(json: { error: 'Orden de compra inexistente' }, status: 404) &&
+      motivo = order.rejection || "Orden de compra inexistente"
+      HTTP.headers(accept: 'application/json').patch(group_route(grupo) + params[:id] + '/rejected',
+                                                     json: { cause: motivo })
+      render(json: { error: motivo }, status: 404) &&
         return
     end
 
+    HTTP.headers(accept: 'application/json').patch(group_route(grupo) + params[:id] + '/accepted')
     # Procesar PO
-    grupo = Client.find_by(name: order.client).gnumber
-    product = Product.find_by(sku: order.sku)
-    en_stock = Warehouse.get_stock_by_sku(product)
-
-    if en_stock < order.amount
-      motivo = 'Sin stock suficiente para cumplir'
-      PurchaseOrder.rejectPurchaseOrder(params[:id], motivo)
-      order.update(status: 'rechazada', rejection: motivo)
-      HTTP.headers(accept: 'application/json').patch(group_route(grupo) + params[:id] + '/rejected',
-                                                     json: { cause: rechazo })
-    else
-      # Reservar unidades
-      product.stock_reservado += order.amount
-      product.save
-      PurchaseOrder.acceptPurchaseOrder(params[:id])
-      order.update(status: 'aceptada')
-      HTTP.headers(accept: 'application/json').patch(group_route(grupo) + params[:id] + '/accepted')
-
-      render json: { ok: 'OC aceptada. Se procederá a despacho al momento de aceptar y notificar factura enviada' }, status: 200
-      Thread.new do
-        # TODO: Crear factura
-        # Notificar envio factura
-        # TODO: To_despacho and delivery desde /invoices/:id/accepted
-      end
+    render json: { ok: 'OC aceptada. Se procederá a despacho al momento de aceptar y notificar factura enviada' }, status: 200
+    Thread.new do
+      # TODO: Crear factura
+      # Notificar envio factura
+      # TODO: To_despacho and delivery desde /invoices/:id/accepted
     end
   end
 
