@@ -33,7 +33,7 @@ class PurchaseOrder < ApplicationRecord
     # TODO: reject the purhcase order from the system
     aviso_sistema = HTTP.headers(accept: 'application/json').post(Rails.configuration.base_route_oc + 'rechazar/' + poid,
                                                                   json: { _id: poid, rechazo: motivo })
-    if (aviso_sistema == 200)
+    if aviso_sistema.code == 200
       return true
     else
       return false
@@ -44,59 +44,58 @@ class PurchaseOrder < ApplicationRecord
     # TODO: reject the purhcase order from the system
     aviso_sistema = HTTP.headers(accept: 'application/json').post(Rails.configuration.base_route_oc + 'recepcionar/' + poid,
                                                                   json: { _id: poid })
-    if (aviso_sistema == 200)
+    if aviso_sistema.code == 200
       return true
     else
       return false
     end
   end
 
-  # True si la orden existe en el sistema,
-  # se registró en la db, y puede ser cumplida
-  def check_purchase_order(poid)
+  def self.check_purchase_order(poid, direccion)
     response = HTTP.headers(accept: 'application/json').get("#{Rails.configuration.base_route_oc}obtener/#{poid}")
     return false unless response.code == 200 && !response.parse.empty?
-    return false if status == 'finalizada'
-    return true if status == 'aceptada' # ya existe en la db, y se acepto.
 
-    if _id.nil?
-      orden = JSON.parse response.to_s
-      # Create if not in db
-      assign_attributes(
-        _id: orden[0]['_id'],
-        client: orden[0]['cliente'],
-        supplier: orden[0]['proveedor'],
-        sku: orden[0]['sku'],
-        delivery_date: orden[0]['fechaEntrega'],
-        amount: orden[0]['cantidad'].to_i,
-        delivered_qt: orden[0]['cantidadDespachada'],
-        unit_price: orden[0]['precioUnitario'],
-        channel: orden[0]['canal'],
-        notes: orden[0]['notas'],
-        rejection: orden[0]['rechazo'],
-        anullment: orden[0]['anulacion'],
-        created_at: orden[0]['created_at']
-      )
-    end
-
-    # check for stock
-    # return false if not enough
-    product = Product.find_by(sku: sku)
-    en_stock = Warehouse.get_stock_by_sku(product)
-    if en_stock < amount
-      motivo = 'Sin stock suficiente para cumplir'
-      PurchaseOrder.rejectPurchaseOrder(poid, motivo)
-      assign_attributes(status: 'rechazada', rejection: motivo)
-      save!
-      return false
-    else
-      product.stock_reservado += amount
-      product.save
-      PurchaseOrder.acceptPurchaseOrder(poid)
-      assign_attributes(status: 'aceptada')
-      return true if save!
-    end
+    orden = JSON.parse response.to_s
+    return true if PurchaseOrder.create!(
+      _id: orden[0]['_id'],
+      client: orden[0]['cliente'],
+      supplier: orden[0]['proveedor'],
+      sku: orden[0]['sku'],
+      delivery_date: orden[0]['fechaEntrega'],
+      amount: orden[0]['cantidad'].to_i,
+      delivered_qt: orden[0]['cantidadDespachada'],
+      unit_price: orden[0]['precioUnitario'],
+      channel: orden[0]['canal'],
+      notes: orden[0]['notas'],
+      rejection: orden[0]['rechazo'],
+      anullment: orden[0]['anulacion'],
+      created_at: orden[0]['created_at'],
+      direccion: direccion,
+      status: orden[0]['estado']
+    )
     false
   end
 
+  def can_be_served?
+    return false unless status == 'creada'
+    # Do not attend simultaneously same PO (status 'aceptada')
+    # FTP: Reject only if PO is expired
+
+    if Time.zone.now > delivery_date
+      motivo = 'Fuera de plazo'
+      PurchaseOrder.rejectPurchaseOrder(_id, motivo)
+      update!(status: 'rechazada', rejection: motivo)
+      return false
+    end
+
+    # TODO: check price (only B2B)
+    # Check stock
+    product = Product.find_by(sku: sku)
+    en_stock = Warehouse.get_stock_by_sku(product)
+    return false unless en_stock >= amount
+    product.stock_reservado += amount
+    return true if product.save && PurchaseOrder.acceptPurchaseOrder(_id) &&
+                   update!(status: 'aceptada')
+    false
+  end
 end
