@@ -1,8 +1,5 @@
 
-
 module ActiveAdmin::ViewHelper
-
-
     require 'http'
     require 'digest'
     base_route = "https://integracion-2017-dev.herokuapp.com/oc/"

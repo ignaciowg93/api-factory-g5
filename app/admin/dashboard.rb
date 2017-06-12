@@ -84,33 +84,30 @@ panel "Órdenes de compras finalizadas (cantidad):" do
    end
 
 ## STOCK POR ALMACEN
+    @almacenesHash = get_warehouse
+    columns do
+      column do
+        panel "Almacenes" do
+          table_for @almacenesHash.each do |almacen|
+            column :_id
+              almacen["_id"]
+            column :usedSpace
+              almacen["usedSpace"]
+            column :type
+              if (almacen["pulmon"])
+                "Pulmón"
+              elsif (almacen["despacho"])
+                "Despacho"
+              elsif (almacen["recepcion"])
+                "Recepción"
+              else
+                "Intermedio"
+              end
+            end
+          end
+        end
+      end
 
-    # columns do
-    #   column do
-    #     panel "Almacenes" do
-    #       almacenesHash = get_warehouse
-    #       table_for almacenesHash.each do
-    #         column :_id do |almacen|
-    #           almacen["_id"]
-    #         end
-    #         column :usedSpace do |almacen|
-    #           almacen["usedSpace"]
-    #         end
-    #         column :type do |almacen|
-    #           if (almacen["pulmon"])
-    #             "Pulmón"
-    #           elsif (almacen["despacho"])
-    #             "Despacho"
-    #           elsif (almacen["recepcion"])
-    #             "Recepción"
-    #           else
-    #             "Intermedio"
-    #           end
-    #         end
-    #       end
-    #     end
-    #   end
-    # end
 
     columns do
           column do
@@ -239,5 +236,52 @@ panel "Órdenes de compras finalizadas (cantidad):" do
     end
     #
 
-  end # content
+   # content
+
+
+  columns do
+        column do
+          panel "Órdenes de Compra FTP Recibidas" do
+            table_for PurchaseOrder.where(status: "creada", channel: "ftp").order('created_at desc') do
+              column("ID") {|poid| prod._id }
+              column("SKU") {|poid| prod.sku}
+              column("AMOUNT") {|poid| prod.amount}
+              column("DELIVERED AMOUNT") {|poid| prod.delivered_qt}
+            end
+          end
+        end
+      end
+
+      columns do
+            column do
+              panel "Órdenes de Compra FTP Rechazadas" do
+                table_for PurchaseOrder.where(status: "rechazada", channel: "ftp").order('created_at desc') do
+                  column("ID") {|poid| prod._id }
+                  column("SKU") {|poid| prod.sku}
+                  column("AMOUNT") {|poid| prod.amount}
+                  column("DELIVERED AMOUNT") {|poid| prod.delivered_qt}
+                  column("MOTIVO RECHAZO") {|poid| prod.rejected}
+
+                end
+              end
+            end
+          end
+
+
+          columns do
+                column do
+                  panel "Órdenes de Compra FTP Completadas" do
+                    table_for PurchaseOrder.where(status: "finalizada", channel: "ftp").order('created_at desc') do
+                      column("ID") {|poid| prod._id }
+                      column("SKU") {|poid| prod.sku}
+                      column("AMOUNT") {|poid| prod.amount}
+                      column("DELIVERED AMOUNT") {|poid| prod.delivered_qt}
+                    end
+                  end
+                end
+              end
+end
+
+
+
 end
