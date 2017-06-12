@@ -21,19 +21,7 @@ class Ftp < ApplicationRecord
         @@tiempo_inicio
     end
 
-    def self.prueba()
-      host = 'integra17dev.ing.puc.cl'
-      port = '22'
-      user = 'grupo5'
-      password = 'jR4mgD9tb6BNk2WM'
-      Net::SFTP.start(host,user, :password=>password) do |sftp|
-        sftp.dir.foreach("/pedidos") do |entry|
-          if entry.file?()
-            sftp.download!("/pedidos/"+entry.name, "/Users/TR/Desktop/test/"+entry.name)
-          end
-        end
-      end
-    end
+  
 
     def self.check_to_log()
       host = 'integra17dev.ing.puc.cl'
