@@ -69,14 +69,12 @@ class InvoicesController < ApplicationController
 
     def accepted
         begin
-            #@invoice = set_invoice
-            #@invoice.accepted = true
             factura = Invoice.find_by(invoiceid: params[:id])
             puts "Accepted - Me avisan desde factura #{factura.invoiceid}"
             sku = factura.sku
             qty = factura.amount
             orden_Id = factura.po_idtemp
-            oc = PurchaseOrder.find_by(_id: orden_id)
+            oc = PurchaseOrder.find_by(_id: orden_Id)
             almacen_recepcion = oc.direccion
             precio = oc.unit_price
             canal = "b2b"
@@ -84,34 +82,36 @@ class InvoicesController < ApplicationController
 
             if Invoice.check_accepted(params[:id])
               # en el sistema no existe un estado aceptado, así es que no lo puedo marcar
+              factura.accepted = true
+              #Change the status of a Invoice in the invoice system.
+              factura.save!
               render json: {ok: "Factura resuelta recibida exitosamente " }, status: 201
-              # se despacha
-              Thread.new do
-                Warehouse.to_despacho_and_delivery(sku, qty, almacen_recepcion, ordenId, precio, canal)
-                # notificar del despacho
-                despachado = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").patch("#{client_url}invoices/#{params[:id]}/delivered")
-              end
+              # se despacha (omitir el thread completo si se decide)
+              # Thread.new do
+              #   Warehouse.to_despacho_and_delivery(sku, qty, almacen_recepcion, ordenId, precio, canal)
+              #   # notificar del despacho
+              #   despachado = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").patch("#{client_url}invoices/#{params[:id]}/delivered")
+              # end
             else
               render json:{error: "Factura rechazada o anulada"}, status: 403
             end
         rescue ActiveRecord::RecordInvalid
-            render json:{error: "No se pudo enviar factura resuelta"}, status: 500
+          #have to validate de id. We generated this Invoice -> nunca pasa pq tira que la ruta no existe entonces
+            render json:{error: "No se pudo recibir resolucion factura - no se encuentra"}, status: 500
         end
-
-        #Change the status of a Invoice in the invoice system.
-        #have to validate de id. We generated this Invoice
     end
 
     def rejected
         begin
-            #@invoice = set_invoice
-            #@pinvoice.rejected = true
-            puts "Rejected - Me avisan desde factura #{Invoice.find_by(invoiceid: params[:id]).invoiceid}"
+            factura = Invoice.find_by(invoiceid: params[:id])
+            puts "Rejected - Me avisan desde factura #{factura.invoiceid}"
+            #Change the status of an Invoice in the system.
+            factura.rejected = true
+            factura.save!
             render json: {ok: "Factura resuelta recibida exitosamente" }, status: 201
         rescue ActiveRecord::RecordInvalid
-            render json:{error: "No se pudo enviar factura resuelta"}, status: 500
+            render json:{error: "No se pudo recibir resolucion factura"}, status: 500
         end
-        #Change the status of an Invoice in the system.
     end
 
     def paid
@@ -125,18 +125,27 @@ class InvoicesController < ApplicationController
       end
       begin
         transaction_rec = HTTP.headers(:accept => "application/json").get(Rails.configuration.base_route_banco + "trx/" + params[:id_transaction], :json => {:id_transaction => params[:id_transaction]})
+        puts "transaction es #{transaction_rec}"
         if transaction_rec.code == 200
           recibido = transaction_rec.parse[0]["monto"]
+          puts "recibido es #{recibido}"
           factura = Invoice.find_by(invoiceid: params[:id])
           por_pagar = factura.total_price
+          puts "por pagar es #{por_pagar}"
           if recibido >= por_pagar
-            # marca en el sistema como pagado
-            marca_pagado = HTTP.headers(:accept => "application/json").post(Rails.configuration.base_route_factura + "pay", :json => {:id => params[:id]})
-            # marca factura como pagado
-            factura.paid = true
-            factura.save!
-            #responde
-            render json: {ok: "Aviso de pago recibido exitosamente, confirmado." }, status: 201
+            # revisar que esté como pendiente en el sistema
+            if Invoice.por_pagar(params[:id])
+              # marca en el sistema como pagado
+              marca_pagado = HTTP.headers(:accept => "application/json").post(Rails.configuration.base_route_factura + "pay", :json => {:id => params[:id]})
+              puts "marca_pagado: #{marca_pagado}"
+              # marca factura como pagado
+              factura.paid = true
+              factura.save!
+              #responde
+              render json: {ok: "Aviso de pago recibido exitosamente, confirmado." }, status: 201
+            else
+              render json:{error: "Id no asociado a factura por pagar"}, status: 404
+            end
           else
             render json: {ok: "Transacción no cumple el monto" }, status: 404
           end

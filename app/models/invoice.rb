@@ -30,13 +30,35 @@ class Invoice < ApplicationRecord
   validates :invoiceid, uniqueness: true
 
 
-  def self.check_accepted(factura_id)
+  def self.por_pagar(factura_id)
+    factura = ""
     3.times do
-      factura = HTTP.headers(accept: "application/json").get(Rails.configuration.base_route_factura, json: {id: factura_id})
+      factura = HTTP.headers(accept: "application/json").get(Rails.configuration.base_route_factura + factura_id)
       if factura.code == 200
         break
       end
     end
+    puts "factura: #{factura.to_s}"
+    if factura.code == 200
+      pagado = factura.parse[0]["estado"]
+      if pagado != "pendiente"
+        return false
+      else
+        return true
+      end
+    end
+    return false
+  end
+
+  def self.check_accepted(factura_id)
+    factura = ""
+    3.times do
+      factura = HTTP.headers(accept: "application/json").get(Rails.configuration.base_route_factura + factura_id)
+      if factura.code == 200
+        break
+      end
+    end
+    puts "factura: #{factura.to_s}"
     if factura.code == 200
       pagado = factura.parse[0]["estado"]
       if pagado != "rechazada" && pagado != "anulada"
