@@ -75,9 +75,9 @@ class PurchaseOrdersController < ApplicationController
       motivo = 'Sin stock suficiente para cumplir'
       PurchaseOrder.rejectPurchaseOrder(params[:id], motivo)
       order.update(status: 'rechazada', rejection: motivo)
-      #No es motivo en vez de rechazo?
+      # TODO No es motivo en vez de rechazo?
       HTTP.headers(accept: 'application/json').patch(group_route(grupo) + params[:id] + '/rejected',
-                                                     json: { cause: rechazo })
+                                                      json: { cause: rechazo })
     else # deberíamos revisar precios también
 
       #Reservar unidades
