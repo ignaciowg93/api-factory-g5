@@ -36,14 +36,16 @@ class InvoicesController < ApplicationController
           return
       end
       resp = Invoice.rec_invoice(params[:id])
+      puts("resp es #{resp}")
       if !resp
         render json:{ok: "Factura no encontrada"} , status:400
       else
         render json:{ok: "Factura recibida exitosamente"} , status:200
         puts("Resp code es #{resp.code}")
+        to_put = ""
         Thread.new do
           to_put = Invoice.atender_factura(resp, params[:id], params[:bank_account])
-          puts to_put
+          puts "dentro del thread: #{to_put}"
         end
       end
 
@@ -147,6 +149,16 @@ class InvoicesController < ApplicationController
       #change the status of an Invoice inthe system. Check for the transaction.
     end
 
+    def delivered
+        begin
+            #TODO nada por ahora
+            render json: {ok: "Notificacion recibida exitosamente"}, status:201
+        rescue ActiveRecord::RecordInvalid
+            render json: {error: "No se pudo enviar notificacion"}, status: 500
+        end
+
+    end
+
 
 ###SELLING
 
@@ -209,16 +221,7 @@ class InvoicesController < ApplicationController
 
 
 
-    def delivered
-        begin
-            @invoice = set_invoice
-            @invoice.delivered = true
-            render json: {ok: "Notificacion recibida exitosamente"}, status:201
-        rescue ActiveRecord::RecordInvalid
-            render json: {error: "No se pudo enviar notificacion"}, status: 500
-        end
 
-    end
 
 private
 
