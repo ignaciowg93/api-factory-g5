@@ -48,7 +48,8 @@ Rails.application.routes.draw do
 
 ## Metodos manuales para dashboard
   post 'produce', to: 'interaction#produce'
-  put 'purchase_orders/:id', to: 'interaction#receive'
+  put 'purchase_orders/:id', to: 'purchase_orders#receive_b2b'
+  post 'purchase_orders/ftp', to: 'purchase_orders#receive_ftp'
   put 'despachar/:id', to: 'interaction#despachar'
 
   # temporary

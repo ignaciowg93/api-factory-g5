@@ -24,21 +24,127 @@ class InvoicesController < ApplicationController
 ###BUYING
 
     def receive
-        # We receive the invoice ID from the provider.  Recibimos la cuenta a la cual tenemos que transferir.
+      # revisar la factura
+      # aceptarla -> avisar al emisor de la factura -> pagarla -> avisar
+      # rechazarla -> avisar al emisor de la factura
+      bank_account_presence = params.key?(:bank_account) &&
+                                !params[:bank_account].nil? &&
+                                !params[:bank_account].empty?
+
+      unless bank_account_presence
+        render(json: { error: 'Identificador de la cuenta de pago inválido' }, status: 400) &&
+          return
+      end
+      resp = Invoice.rec_invoice(params[:id])
+      if !resp
+        render json:{ok: "Factura no encontrada"} , status:400
+      else
+        render json:{ok: "Factura recibida exitosamente"} , status:200
+        puts("Resp code es #{resp.code}")
+        Thread.new do
+          to_put = Invoice.atender_factura(resp, params[:id], params[:bank_account])
+          puts to_put
+        end
+      end
+
+        #
+        # # We receive the invoice ID from the provider.  Recibimos la cuenta a la cual tenemos que transferir.
+        # begin
+        #     @invoice = Invoice.new(invoice_params)
+        #     @invoice.invoiceid = params[:id]
+        #     if @invoice.save
+        #         @invoice.save!
+        #         render json: {ok: "notificación recibida exitosamente"} , status: 201
+        #     else
+        #         render json: {error: "No se pudo enviar resolución"}, status: 500
+        #     end
+        #  rescue ActiveRecord::RecordNotFound
+        #     render json:{error: "Id no asociado a Factura por resolver"}, status: 404
+        #  #rescue ActionController::ParameterMissing
+        #   #   render json:{error:"Falta algún parámetro"}, status: 422
+        #  end
+    end
+
+    def accepted
         begin
-            @invoice = Invoice.new(invoice_params)
-            @invoice.invoiceid = params[:id]
-            if @invoice.save
-                @invoice.save!
-                render json: {ok: "notificación recibida exitosamente"} , status: 201
+            #@invoice = set_invoice
+            #@invoice.accepted = true
+            factura = Invoice.find_by(invoiceid: params[:id])
+            puts "Accepted - Me avisan desde factura #{factura.invoiceid}"
+            sku = factura.sku
+            qty = factura.amount
+            orden_Id = factura.po_idtemp
+            oc = PurchaseOrder.find_by(_id: orden_id)
+            almacen_recepcion = oc.direccion
+            precio = oc.unit_price
+            canal = "b2b"
+            client_url = Client.find_by(name: factura.cliente).url
+
+            if Invoice.check_accepted(params[:id])
+              # en el sistema no existe un estado aceptado, así es que no lo puedo marcar
+              render json: {ok: "Factura resuelta recibida exitosamente " }, status: 201
+              # se despacha
+              Thread.new do
+                Warehouse.to_despacho_and_delivery(sku, qty, almacen_recepcion, ordenId, precio, canal)
+                # notificar del despacho
+                despachado = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").patch("#{client_url}invoices/#{params[:id]}/delivered")
+              end
             else
-                render json: {error: "No se pudo enviar resolución"}, status: 500
+              render json:{error: "Factura rechazada o anulada"}, status: 403
             end
-         rescue ActiveRecord::RecordNotFound
-            render json:{error: "Id no asociado a OC por resolver"}, status: 404
-         #rescue ActionController::ParameterMissing
-          #   render json:{error:"Falta algún parámetro"}, status: 422
-         end
+        rescue ActiveRecord::RecordInvalid
+            render json:{error: "No se pudo enviar factura resuelta"}, status: 500
+        end
+
+        #Change the status of a Invoice in the invoice system.
+        #have to validate de id. We generated this Invoice
+    end
+
+    def rejected
+        begin
+            #@invoice = set_invoice
+            #@pinvoice.rejected = true
+            puts "Rejected - Me avisan desde factura #{Invoice.find_by(invoiceid: params[:id]).invoiceid}"
+            render json: {ok: "Factura resuelta recibida exitosamente" }, status: 201
+        rescue ActiveRecord::RecordInvalid
+            render json:{error: "No se pudo enviar factura resuelta"}, status: 500
+        end
+        #Change the status of an Invoice in the system.
+    end
+
+    def paid
+      id_transaction_presence = params.key?(:id_transaction) &&
+                                !params[:id_transaction].nil? &&
+                                !params[:id_transaction].empty?
+
+      unless id_transaction_presence
+        render(json: { error: 'Debe entregar el id de una transacción' }, status: 400) &&
+          return
+      end
+      begin
+        transaction_rec = HTTP.headers(:accept => "application/json").get(Rails.configuration.base_route_banco + "trx/" + params[:id_transaction], :json => {:id_transaction => params[:id_transaction]})
+        if transaction_rec.code == 200
+          recibido = transaction_rec.parse[0]["monto"]
+          factura = Invoice.find_by(invoiceid: params[:id])
+          por_pagar = factura.total_price
+          if recibido >= por_pagar
+            # marca en el sistema como pagado
+            marca_pagado = HTTP.headers(:accept => "application/json").post(Rails.configuration.base_route_factura + "pay", :json => {:id => params[:id]})
+            # marca factura como pagado
+            factura.paid = true
+            factura.save!
+            #responde
+            render json: {ok: "Aviso de pago recibido exitosamente, confirmado." }, status: 201
+          else
+            render json: {ok: "Transacción no cumple el monto" }, status: 404
+          end
+        else
+          render json: {ok: "Transacción no existente" }, status: 404
+        end
+      rescue ActiveRecord::RecordNotFound
+          render json:{error: "Id no asociado a factura por pagar"}, status: 404
+      end
+      #change the status of an Invoice inthe system. Check for the transaction.
     end
 
 
@@ -101,40 +207,7 @@ class InvoicesController < ApplicationController
     end
 
 
-    def accepted
-        begin
-            @invoice = set_invoice
-            @invoice.accepted = true
-            render json: {ok: "Factura resuelta recibida exitosamente " }, status: 201
-        rescue ActiveRecord::RecordInvalid
-            render json:{error: "No se pudo enviar factura resuelta"}, status: 500
-        end
 
-        #Change the status of a Invoice in the invoice system.
-        #have to validate de id. We generated this Invoice
-    end
-
-    def rejected
-        begin
-            @invoice = set_invoice
-            @pinvoice.rejected = true
-            render json: {ok: "Factura resuelta recivida exitosamente" }, status: 201
-        rescue ActiveRecord::RecordInvalid
-            render json:{error: "No se pudo enviar factura resuelta"}, status: 500
-        end
-        #Change the status of an Invoice in the system.
-    end
-
-    def paid
-        begin
-            @invoice = set_invoice
-            @invoice.paid = true
-            render json: {ok: "Factura resuelta recibida exitosamente " }, status: 201
-        rescue ActiveRecord::RecordNotFound
-            render json:{error: "Id no asociado a OC por pagar"}, status: 404
-        end
-        #change the status of an Invoice inthe system. Check for the transaction.
-    end
 
     def delivered
         begin
@@ -150,7 +223,7 @@ class InvoicesController < ApplicationController
 private
 
     def invoice_params
-        params.require(:invoice).permit(:id,:rejected,:accepted, :paid,:delivered, :account,:date,:proveedor,:cliente,:price, :tax, :total_price ,:po_idtemp,:invoiceid ,:proveedor, :precio, :cantidad)
+        params.require(:invoice).permit(:id,:rejected,:accepted, :paid,:delivered, :bank_account,:date,:proveedor,:cliente,:price, :tax, :total_price ,:po_idtemp,:invoiceid ,:proveedor, :precio, :cantidad, :id_transaction)
     end
 
     def set_invoice

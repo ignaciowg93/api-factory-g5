@@ -56,7 +56,7 @@ module ActiveAdmin::ViewHelper
         #Busco el sku que necesito
         #Entregar elk Total
       stock_productos = Hash.new(0)
-      secret = "%hG4INNjIAYx9&0"#'W1gCjv8gpoE4JnR'
+      secret = Rails.configuration.secret
       #Mandar a la bodega. Get sku de stock.
       data = "GET"
       hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
@@ -71,7 +71,7 @@ module ActiveAdmin::ViewHelper
                     hmac = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), secret.encode("ASCII"), data.encode("ASCII"))
                     signature = Base64.encode64(hmac).chomp
                     auth_header = "INTEGRACION grupo5:" + signature
-                    route_to_get = "https://integracion-2017-dev.herokuapp.com/bodega/skusWithStock?almacenId=" + almacen["_id"]
+                    route_to_get = "#{Rails.configuration.base_route_bodega}skusWithStock?almacenId=" + almacen["_id"]
                     products_array = HTTP.auth(auth_header).headers(:accept => "application/json").get(route_to_get)
                     if products_array.code == 200
                         products_array.parse.each do |product|
