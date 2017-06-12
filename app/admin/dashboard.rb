@@ -262,7 +262,7 @@ panel "Órdenes de compras finalizadas (cantidad):" do
                   column("SKU") {|poid| poid.sku}
                   column("AMOUNT") {|poid| poid.amount}
                   column("DELIVERED AMOUNT") {|poid| poid.delivered_qt}
-                  column("MOTIVO RECHAZO") {|poid| poid.rejected}
+                  column("MOTIVO RECHAZO") {|poid| poid.rejection}
 
                 end
               end
