@@ -102,137 +102,6 @@ class Ftp < ApplicationRecord
                         orden_id = thing.at_xpath('//id').content
 
                         #Consulta el stock por SKU
-<<<<<<< HEAD
-
-                        # Load PO, or create if not in db
-                        order = PurchaseOrder.find_by(_id: orden_id) || PurchaseOrder.new
-                        # Check the order remains in the system.
-                        valid_order = order.check_purchase_order(orden_id)
-                        next unless valid_order
-
-
-
-
-
-
-
-                        product = Product.find_by(sku: order.sku)
-                        puts product
-                        en_stock = Warehouse.consultar_sku(product)
-
-                        puts "orden_id #{orden_id}, en_stock #{en_stock}"
-                        #Retorna true si existe, false si
-                        if en_stock['stock'].to_i > order.amount && order
-                          puts "hola"
-                          break
-                          # Se acepta orden de compra en el sistema
-                          # order.acceptPurchaseOrder(orden_id)
-                          # # Emitir factura
-                          # #
-                          # Warehouse.to_despacho_and_delivery(order.sku, order.amount, nil, orden_id, order.unit_price, "ftp")
-
-
-
-
-
-
-                            # orden_de_compra = PurchaseOrder.where(:_id => orden_id)
-                            # #Revisa nuestros SKU y ve si el precio de compra es mayor o menor.
-                            # if orden_sku == "20"
-                            #   if orden_de_compra['precioUnitario'].to_i> 1612 #precio sku 20
-                            #       seguir = true
-                            #       orden_precio = orden_de_compra['precioUnitario']
-                            #   end
-                            # end
-                            #
-                            # if orden_sku == "3"
-                            #         if orden_de_compra['precioUnitario'].to_i> 117 #precio sku 3
-                            #             seguir = true
-                            #             orden_precio = orden_de_compra['precioUnitario']
-                            #         end
-                            #
-                            # end
-                            # if orden_sku == "5"
-                            #         if orden_de_compra['precioUnitario'].to_i> 428 #precio sku 5
-                            #             seguir = true
-                            #             orden_precio = orden_de_compra['precioUnitario']
-                            #         end
-                            # end
-                            # if orden_sku == "7"
-                            #         if orden_de_compra['precioUnitario'].to_i> 290 #precio sku 7
-                            #             seguir = true
-                            #             orden_precio = orden_de_compra['precioUnitario']
-                            #         end
-                            #
-                            # end
-                            # if orden_sku == "9"
-                            #         if orden_de_compra['precioUnitario'].to_i> 350 #precio sku 9
-                            #             seguir = true
-                            #             orden_precio = orden_de_compra['precioUnitario']
-                            #         end
-                            # end
-                            # if orden_sku == "11"
-                            #         if orden_de_compra['precioUnitario'].to_i> 247 #precio sku 11
-                            #             seguir = true
-                            #             orden_precio = orden_de_compra['precioUnitario']
-                            #         end
-                            #
-                            # end
-                            # if orden_sku == "15"
-                            #         if orden_de_compra['precioUnitario'].to_i> 276 #precio sku 15
-                            #             seguir = true
-                            #             orden_precio = orden_de_compra['precioUnitario']
-                            #         end
-                            #
-                            # end
-                            # if orden_sku == "17"
-                            #         if orden_de_compra['precioUnitario'].to_i> 821 #precio sku 17
-                            #             seguir = true
-                            #             orden_precio = orden_de_compra['precioUnitario']
-                            #         end
-                            #
-                            # end
-                            # if orden_sku == "22"
-                            #         if orden_de_compra['precioUnitario'].to_i> 336 #precio sku 22
-                            #             seguir = true
-                            #             orden_precio = orden_de_compra['precioUnitario']
-                            #         end
-                            #
-                            # end
-                            # if orden_sku == "25"
-                            #         if orden_de_compra['precioUnitario'].to_i> 93 #precio sku 25
-                            #             seguir = true
-                            #             orden_precio = orden_de_compra['precioUnitario']
-                            #         end
-                            #
-                            # end
-                            # if orden_sku == "52"
-                            #         if orden_de_compra['precioUnitario'].to_i> 410 #precio sku 52
-                            #             seguir = true
-                            #             orden_precio = orden_de_compra['precioUnitario']
-                            #         end
-                            # end
-                            # if orden_sku == "56"
-                            #         if orden_de_compra['precioUnitario'].to_i> 479 #precio sku 56
-                            #             seguir = true
-                            #             orden_precio = orden_de_compra['precioUnitario']
-                            #         end
-                            #
-                            # end
-                            # if seguir
-                            #         #Va al sistema Orden de compra y la acepta
-                            #         PurchaseOrder.receivePurchaseOrder(orden_id)
-                            #         #Mueve el producto a la de despacho
-                            #         Warehouse.move_product(orden_sku, orden_qty)
-                            #         #Emite la boleta/factura
-                            #         Invoice.create_invoice(orden_id.to_s)
-                            #         #Despacha el pedido de la bodega
-                            #         Warehouse.dispatch_order(orden_id, orden_sku, orden_qty, orden_precio.to_s)
-                            # else
-                            #         PurchaseOrder.rejectPurchaseOrder(orden_id, "Esta por debajo del Precio")
-                            #         #puts "rechazar Oc por precio"
-                            # end
-=======
                         respuesta = Warehouse.consultar_sku(orden_sku)
                         seguir = false
                         existe_oc = PurchaseOrder.check_purchase_order(orden_id)
@@ -334,7 +203,7 @@ class Ftp < ApplicationRecord
                                     PurchaseOrder.rejectPurchaseOrder(orden_id, "Esta por debajo del Precio")
                                     #puts "rechazar Oc por precio"
                             end
->>>>>>> 7f499cd41127d32843e3f957622d4ec79d852cd0
+
                         else
                             PurchaseOrder.rejectPurchaseOrder(orden_id, "No tenemos stock")
                             #puts "rechazar Oc por stock" + orden_sku.to_s + " el stock" + orden_qty.to_s+ " con odId = "+ orden_id
