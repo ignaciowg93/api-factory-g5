@@ -60,7 +60,7 @@ class Warehouse < ApplicationRecord
       almacenes = JSON.parse response.to_s
     end
 
-    def self.to_despacho_and_delivery(sku, qty, almacen_recepcion, ordenId, precio, canal)
+    def self.to_despacho_and_delivery(sku, qty, direccion, ordenId, precio, canal)
       products = ""
       orden = PurchaseOrder.find_by(_id: ordenId)
       remaining = qty - orden.delivered_qt
@@ -94,18 +94,18 @@ class Warehouse < ApplicationRecord
             # Product delivery
             if canal == "b2b"
               route = "#{Rails.configuration.base_route_bodega}moveStockBodega"
-              data = "POST#{product["_id"]}#{almacen_recepcion}"
+              data = "POST#{product["_id"]}#{direccion}"
               loop do
-                deliver = HTTP.auth(generate_header(data)).headers(:accept => "application/json").post(route, json: { productoId: product["_id"], almacenId: almacen_recepcion, oc: ordenId, precio: precio})
+                deliver = HTTP.auth(generate_header(data)).headers(:accept => "application/json").post(route, json: { productoId: product["_id"], almacenId: direccion, oc: ordenId, precio: precio})
                 break if deliver.code == 200
                 sleep(60) if deliver.code == 429
                 sleep(15)
               end
             elsif canal == "b2c" || canal == "ftp"
               route = "#{Rails.configuration.base_route_bodega}stock"
-              data = "DELETE#{product["_id"]}distribuidor#{precio}#{ordenId}"
+              data = "DELETE#{product["_id"]}#{direccion}#{precio}#{ordenId}"
               loop do
-                deliver = HTTP.auth(generate_header(data)).headers(:accept => "application/json").delete(route, json: { productoId: product["_id"], oc: ordenId, direccion: "distribuidor", precio: precio})
+                deliver = HTTP.auth(generate_header(data)).headers(:accept => "application/json").delete(route, json: { productoId: product["_id"], oc: ordenId, direccion: direccion, precio: precio})
                 puts deliver.body
                 break if deliver.code == 200
                 sleep(60) if deliver.code == 429
