@@ -89,11 +89,8 @@ module ActiveAdmin::ViewHelper
     def get_warehouse
         stock_final = 0
         data = "GET"
-        auth_header = generate_header(data)
-        bodega_sist = "https://integracion-2017-dev.herokuapp.com/bodega/" # desarrollo
-        # pedimos el arreglo de almacenes
-        almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get(bodega_sist + "almacenes")
-        almacenesP = JSON.parse almacenes.to_s
+        response = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get(Rails.configuration.base_route_bodega + "almacenes")
+        almacenesP = JSON.parse response.to_s
         return almacenesP
     end
 
