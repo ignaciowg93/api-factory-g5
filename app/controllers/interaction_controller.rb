@@ -187,11 +187,12 @@ class InteractionController < ApplicationController
         puts("p_order antes")
         production_order = HTTP.auth(generate_header(data)).headers(:accept => "application/json").put(Rails.configuration.base_route_bodega + "fabrica/fabricar", :json => { :sku => sku, :cantidad => to_produce, :trxId =>  trx1.parse["_id"]})
         puts("p_order dsps")
-        @production_order = ProductionOrder.new
-        @production_order.sku = sku
-        @production_order.amount =  to_produce
+        production_order_to_save = ProductionOrder.new
+        production_order_to_save.sku = sku
+        production_order_to_save.amount =  to_produce
+        production_order_to_save.est_date = production_order.parse["disponible"]
         # FIXME guardar hora de entrega
-        if @production_order.save!
+        if production_order_to_save.save!
           if production_order.code == 200
             puts("en el if: #{production_order.parse}")
             # podría quizás guardar la fecha esperada de entrega, estado despachado, etc.
