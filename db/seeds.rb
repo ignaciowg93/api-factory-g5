@@ -116,7 +116,7 @@ p56 = Product.create(sku: '56', name: 'Hamburguesas de Pollo', processed: 1, pri
 
 Client.create(name: "5910c0910e42840004f6e680", url: "http://integra17-1.ing.puc.cl/", token: "", gnumber: "1") #prod
 Client.create(name: "5910c0910e42840004f6e681", url: "http://integra17-2.ing.puc.cl/", token: "", gnumber: "2")
-Client.create(name: "5910c0910e42840004f6e682", url: "http://integra17-3.ing.puc.cl/", token: "", gnumber: "3")
+Client.create(name: "590baa00d6b4ec0004902464", url: "http://integra17-3.ing.puc.cl/", token: "", gnumber: "3") # es de dev el name
 Client.create(name: "5910c0910e42840004f6e683", url: "http://integra17-4.ing.puc.cl/", token: "", gnumber: "4")
 Client.create(name: "5910c0910e42840004f6e684", url: "http://integra17-5.ing.puc.cl/", token: "", gnumber: "5")
 Client.create(name: "5910c0910e42840004f6e685", url: "http://integra17-6.ing.puc.cl/", token: "", gnumber: "6")

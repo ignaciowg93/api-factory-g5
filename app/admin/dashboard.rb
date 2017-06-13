@@ -84,11 +84,10 @@ panel "Órdenes de compras finalizadas (cantidad):" do
    end
 
 ## STOCK POR ALMACEN
-
+    almacenesHash = get_warehouse
     columns do
       column do
         panel "Almacenes" do
-          almacenesHash = get_warehouse
           table_for almacenesHash.each do
             column :_id do |almacen|
               almacen["_id"]
@@ -239,5 +238,78 @@ panel "Órdenes de compras finalizadas (cantidad):" do
     end
     #
 
-  end # content
+   # content
+
+
+  columns do
+        column do
+          panel "Órdenes de Compra FTP Recibidas" do
+            table_for PurchaseOrder.where(status: "creada", channel: "ftp").order('created_at desc') do
+              column("ID") {|poid| poid._id }
+              column("SKU") {|poid| poid.sku}
+              column("AMOUNT") {|poid| poid.amount}
+              column("DELIVERED AMOUNT") {|poid| poid.delivered_qt}
+            end
+          end
+        end
+      end
+
+      columns do
+            column do
+              panel "Órdenes de Compra FTP Rechazadas" do
+                table_for PurchaseOrder.where(status: "rechazada", channel: "ftp").order('created_at desc') do
+                  column("ID") {|poid| poid._id }
+                  column("SKU") {|poid| poid.sku}
+                  column("AMOUNT") {|poid| poid.amount}
+                  column("DELIVERED AMOUNT") {|poid| poid.delivered_qt}
+                  column("MOTIVO RECHAZO") {|poid| poid.rejection}
+
+                end
+              end
+            end
+          end
+
+
+      columns do
+            column do
+              panel "Órdenes de Compra FTP Completadas" do
+                table_for PurchaseOrder.where(status: "finalizada", channel: "ftp").order('created_at desc') do
+                  column("ID") {|poid| poid._id }
+                  column("SKU") {|poid| poid.sku}
+                  column("AMOUNT") {|poid| poid.amount}
+                  column("DELIVERED AMOUNT") {|poid| poid.delivered_qt}
+                end
+              end
+            end
+          end
+
+
+
+
+      panel "Órdenes de compras FTP " do
+           # line_chart   Content.pluck("download").uniq.map { |c| { title: c, data: Content.where(download: c).group_by_day(:updated_at, format: "%B %d, %Y").count }  }, discrete: true
+           # column_chart Content.group_by_hour_of_day(:updated_at, format: "%l %P").order(:download).count, {library: {title:'Downloads for all providers'}}
+           # column_chart Content.group(:title).order('download DESC').limit(5).sum(:download)
+           creadas = PurchaseOrder.where(status: 'creada').count
+           completas = PurchaseOrder.where(status: 'finalizada').count
+           rechazadas = PurchaseOrder.where(status: 'rechazada').count
+          # monto1 = 0
+           # PurchaseOrder.where(status: 'no_completada').each do |po_ord|
+           #   monto1 += (po_ord.amount * po_ord.unit_price)
+           # end
+           # monto2 = 0
+           # PurchaseOrder.where(status: 'finalizada').each do |po_ord|
+           #   monto2 += (po_ord.amount * po_ord.unit_price)
+           # end
+           pie_chart({"Recibidas" => creadas, "Completas" => completas , "Rechazadas" => rechazadas})
+           #scatter_chart [[incompletas,2], [completas,4]], xtitle: "Cantidad", ytitle: "Monto"
+       end
+
+
+
+
+
+
+end
+
 end

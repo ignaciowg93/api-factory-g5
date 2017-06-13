@@ -28,7 +28,8 @@ gem 'listen', '~> 3.0.5'
 gem 'bootstrap-sass', '3.3.6'
 gem "http"  #https://github.com/httprb/http/tree/2-x-stable
 gem 'activeadmin'
-gem 'rufus-scheduler', '~> 3.2', '>= 3.2.2'
+gem 'whenever'
+gem 'activesupport', '~> 5.0.3'
 
 group :development, :test do
   gem 'byebug', platform: :mri
@@ -40,6 +41,7 @@ group :development do
   gem 'capistrano-passenger', '~> 0.2.0'
   gem 'capistrano-rbenv', '~> 2.1'
   gem 'web-console'
+  gem 'annotate'
 
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
