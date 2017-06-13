@@ -49,13 +49,27 @@ Rails.application.routes.draw do
 #######
 # Metodos manuales para dashboard #
 ######
+
+# Producir
   post 'produce', to: 'interaction#produce'
+
+# Recepcionar orden de compra
   put 'purchase_orders/:id', to: 'purchase_orders#receive_b2b'
+
+# Atender orden de compra
+  post 'process/:id', to: 'purchase_orders#processPO_b2b'
+
+# Recepcionar y atender ordenes FTP
   post 'purchase_orders/ftp', to: 'purchase_orders#receive_ftp'
+
   put 'despachar/:id', to: 'interaction#despachar'
 
-# Comprar
+# Comprar B2B
   post 'buy', to: 'purchase_orders#generate_PO'
+
+# Setear status orden de compra, para reintentar con ella
+
+# Cancelar despacho de una PO reestablecer reservado cambiar cantidad despachada
 
 
   # temporary
