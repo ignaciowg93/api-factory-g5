@@ -56,6 +56,8 @@ class PurchaseOrder < ApplicationRecord
     return false unless response.code == 200 && !response.parse.empty?
 
     orden = JSON.parse response.to_s
+    # make sure proveedor
+    return false unless orden[0]['proveedor'].eql? Rails.configuration.my_id
     return true if PurchaseOrder.create!(
       _id: orden[0]['_id'],
       client: orden[0]['cliente'],

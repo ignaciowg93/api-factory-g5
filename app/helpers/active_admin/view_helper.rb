@@ -63,7 +63,7 @@ module ActiveAdmin::ViewHelper
       signature = Base64.encode64(hmac).chomp
       auth_header = "INTEGRACION grupo5:" + signature
       # pedimos el arreglo de almacenes
-      almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/almacenes")
+      almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get("#{Rails.configuration.base_route_bodega}almacenes")
       if almacenes.code == 200
           almacenes.parse.each do |almacen|
               if(!almacen["despacho"])

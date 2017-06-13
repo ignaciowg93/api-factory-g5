@@ -39,7 +39,7 @@ class Invoice < ApplicationRecord
       end
     end
     puts "factura: #{factura.to_s}"
-    if factura.code == 200
+    if factura.code == 200 && !factura.parse.empty?
       pagado = factura.parse[0]["estado"]
       if pagado != "pendiente"
         return false
@@ -59,7 +59,7 @@ class Invoice < ApplicationRecord
       end
     end
     puts "factura: #{factura.to_s}"
-    if factura.code == 200
+    if factura.code == 200 && !factura.parse.empty?
       pagado = factura.parse[0]["estado"]
       if pagado != "rechazada" && pagado != "anulada"
         return true
@@ -79,7 +79,7 @@ class Invoice < ApplicationRecord
     #factura = HTTP.headers(accept: "application/json").put(Rails.configuration.base_route_factura, json: {oc: po_id})
     3.times do
       factura = HTTP.headers(accept: "application/json").put(Rails.configuration.base_route_factura, json: {oc: po_id})
-      if factura.code == 200
+      if factura.code == 200 && !factura.parse.empty?
         fact = factura.parse
         fact_temp = Invoice.new
 
@@ -112,6 +112,9 @@ class Invoice < ApplicationRecord
     3.times do
       factura = HTTP.headers(accept: "application/json").get(Rails.configuration.base_route_factura + factura_id, json: {id: factura_id})
       if factura.code == 200
+        if factura.parse.empty?
+          return false
+        end
         break
       end
       sleep(20)

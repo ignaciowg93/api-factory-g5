@@ -31,7 +31,7 @@ module ApiFactoryG5
     config.middleware.use ActionDispatch::Cookies
 
 
-    # #PRODUCTION
+    #PRODUCTION
     # config.secret = "%hG4INNjIAYx9&0"
     # config.base_route_oc = "https://integracion-2017-prod.herokuapp.com/oc/"
     # config.base_route_bodega = "https://integracion-2017-prod.herokuapp.com/bodega/"
@@ -43,6 +43,10 @@ module ApiFactoryG5
     # config.pulmon_id = "5910c0ba0e42840004f6ea7c"
     # config.intermedio_id_1 = "5910c0b90e42840004f6e9ee"
     # config.intermedio_id_2 = "5910c0ba0e42840004f6ea7b"
+    # config.host = 'integra17.ing.puc.cl'
+    # config.port = '22'
+    # config.ftp_user = 'grupo5'
+    # config.ftp_pass = 'ARBQm2M5EwZn4GD3'
     # config.my_id = "5910c0910e42840004f6e684"
     # config.time_zone = 'Santiago'
 

@@ -9,6 +9,71 @@ class PurchaseOrdersController < ApplicationController
     @purchase_order = PurchaseOrder.new
   end
 
+  def generate_PO
+    # PO from us to others B2B
+    response = HTTP.headers(accept: 'application/json').put(
+      "#{Rails.configuration.base_route_oc}crear",
+      json: {
+        cliente: Rails.configuration.my_id,
+        proveedor: Client.find_by(gnumber: params[:grupo]).name,
+        sku: params[:sku],
+        fechaEntrega: params[:fechaEntrega] ||
+        (Time.zone.now + 3.day).to_f * 1000,
+        cantidad: params[:cantidad],
+        precioUnitario: params[:precioUnitario], # || automatico sacar
+        canal: 'b2b',
+        notas: params[:notas] || 'vacio'
+      }
+    )
+    unless response.code == 200
+      render(json: { error: 'No se pudo ingresar la orden en el sistema' },
+             status: 400)
+    end
+
+    orden = JSON.parse(response.body)
+    # Save to db
+    PurchaseOrder.create!(
+      _id: orden['_id'],
+      client: orden['cliente'],
+      supplier: orden['proveedor'],
+      sku: orden['sku'],
+      delivery_date: orden['fechaEntrega'],
+      amount: orden['cantidad'].to_i,
+      delivered_qt: orden['cantidadDespachada'],
+      unit_price: orden['precioUnitario'],
+      channel: orden['canal'],
+      notes: orden['notas'],
+      rejection: orden['rechazo'],
+      anullment: orden['anulacion'],
+      created_at: orden['created_at'],
+      status: orden['estado']
+    )
+
+    # Notificar
+    notification =
+      HTTP.headers(
+        accept: 'application/json',
+        'X-ACCESS-TOKEN' => Rails.configuration.my_id.to_s
+      ).put(
+        "#{Client.find_by(gnumber: params[:grupo]).url}purchase_orders/#{orden['_id']}",
+        json: {
+          payment_method: params[:payment_method] || 'contra_factura',
+          id_store_reception: Rails.configuration.recepcion_id
+        }
+      )
+
+    if notification.code == 200
+      render(json: { success: 'Orden ha sido recibida por el destinatario',
+                     _id: orden['_id'] },
+             status: 200)
+    else
+      render(json: { error: 'Request al proveedor no fue exitosa',
+                     response: JSON.parse(notification.body),
+                     _id: orden['_id'] },
+             status: 200)
+    end
+  end
+
   def receive_ftp
     # Automatically serve all requests, in order
     Net::SFTP.start(Rails.configuration.host, Rails.configuration.ftp_user,
@@ -29,7 +94,7 @@ class PurchaseOrdersController < ApplicationController
                 PurchaseOrder.find_by(_id: poid)
 
         next unless order && order.can_be_served?
-        # TODO: factura
+        Invoice.create_invoice(poid, false)
         Warehouse.to_despacho_and_delivery(order.sku, order.amount,
                                            order.direccion,
                                            poid, order.unit_price, 'ftp')
@@ -60,18 +125,14 @@ class PurchaseOrdersController < ApplicationController
       render(json: { error: 'Orden ya recepcionada' }, status: 400)
     elsif PurchaseOrder.check_purchase_order(params[:id],
                                              params[:id_store_reception])
-      render(json: { error: 'Orden recibida exitosamente. Se procederá a despacho al momento de aceptar y notificar factura enviada' }, status: 200)
+      render(json: { success: 'Orden recibida exitosamente. Se procederá a despacho al momento de aceptar y notificar factura por enviar' }, status: 200)
     else
-      grupo = Client.find_by(name: order.client).gnumber
-      motivo = 'Orden de compra inexistente'
-      HTTP.headers(accept: 'application/json').patch(group_route(grupo) + params[:id] + '/rejected',
-                                                     json: { cause: motivo })
-      render(json: { error: motivo }, status: 400)
+      render(json: { error: 'Orden de compra inválida' }, status: 400)
     end
   end
 
   def processPO_b2b
-
+    # FIXME: No se esta rechazando en ningun caso por ahora
     order = PurchaseOrder.find_by(_id: params[:id])
     return unless order && order.can_be_served?
 
@@ -79,11 +140,10 @@ class PurchaseOrdersController < ApplicationController
     grupo = Client.find_by(name: order.client).gnumber
     HTTP.headers(accept: 'application/json').patch(group_route(grupo) + params[:id] + '/accepted')
 
-    # Procesar PO
     Invoice.create_invoice(params[:id], false)
     # Notificar envio factura
-    sent_notification = HTTP.headers(:accept => 'application/json', 'X-ACCESS-TOKEN' => Rails.configuration.my_id.to_s).put("#{client_url}invoices/#{factura_id}", json: { bank_account: Rails.configuration.banco_id })
-    # TODO: To_despacho and delivery desde /invoices/:id/accepted
+    HTTP.headers(:accept => 'application/json', 'X-ACCESS-TOKEN' => Rails.configuration.my_id.to_s).put("#{client_url}invoices/#{factura_id}", json: { bank_account: Rails.configuration.banco_id })
+    # Se despacha al aceptar la factura
   end
 
   ## BUYING
