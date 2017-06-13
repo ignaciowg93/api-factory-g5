@@ -1,24 +1,18 @@
 class WarehousesController < ApplicationController
+  before_action :get_almacenes
 
+    def stocks
+      stocks = Warehouse.get_stocks
+      render(json: stocks, status: 200)
+    end
 
-    ##MÉTODOS
+    # Atender directamente una PO
+    def delivery
+      Warehouse.to_despacho_and_delivery(params[:id])
+    end
 
-    #Mandar Stock. Enviar JSON con un diccionario de sku's
-
-    #Recibir request de Sku's. Pedir a app aue lo haga.
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
+    def vaciar
+      Warehouse.vaciar_almacenes()
+    end
 
 end
