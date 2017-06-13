@@ -71,6 +71,9 @@ Rails.application.routes.draw do
 
 # Cancelar despacho de una PO reestablecer reservado cambiar cantidad despachada
 
-# GET SOTCK
+# GET STOCK
   get 'stocks', to: 'warehouses#stocks'
+
+  #vacia pulmon y recepcion
+  get 'vaciar_todo', to: 'warehouse#vaciar'
 end

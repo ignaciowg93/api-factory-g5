@@ -11,4 +11,8 @@ class WarehousesController < ApplicationController
       Warehouse.to_despacho_and_delivery(params[:id])
     end
 
+    def vaciar
+      Warehouse.vaciar_almacenes()
+    end
+
 end
