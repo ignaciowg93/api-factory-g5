@@ -114,11 +114,23 @@ p56 = Product.create(sku: '56', name: 'Hamburguesas de Pollo', processed: 1, pri
 # s562.sellers.create(seller: '4', time: 1.242)
 # s562.sellers.create(seller: '2', time: 2.609)
 
-Client.create(name: "5910c0910e42840004f6e680", url: "http://integra17-1.ing.puc.cl/", token: "", gnumber: "1") #prod
-Client.create(name: "5910c0910e42840004f6e681", url: "http://integra17-2.ing.puc.cl/", token: "", gnumber: "2")
-Client.create(name: "590baa00d6b4ec0004902464", url: "http://integra17-3.ing.puc.cl/", token: "", gnumber: "3") # es de dev el name
-Client.create(name: "5910c0910e42840004f6e683", url: "http://integra17-4.ing.puc.cl/", token: "", gnumber: "4")
-Client.create(name: "5910c0910e42840004f6e684", url: "http://integra17-5.ing.puc.cl/", token: "", gnumber: "5")
-Client.create(name: "5910c0910e42840004f6e685", url: "http://integra17-6.ing.puc.cl/", token: "", gnumber: "6")
-Client.create(name: "5910c0910e42840004f6e686", url: "http://integra17-7.ing.puc.cl/", token: "", gnumber: "7")
-Client.create(name: "5910c0910e42840004f6e687", url: "http://integra17-8.ing.puc.cl/", token: "", gnumber: "8")
+# # PROD
+# Client.create(name: "5910c0910e42840004f6e680", url: "http://integra17-1.ing.puc.cl/", token: "", gnumber: "1") #prod
+# Client.create(name: "5910c0910e42840004f6e681", url: "http://integra17-2.ing.puc.cl/", token: "", gnumber: "2")
+# Client.create(name: "590baa00d6b4ec0004902464", url: "http://integra17-3.ing.puc.cl/", token: "", gnumber: "3") # es de dev el name
+# Client.create(name: "5910c0910e42840004f6e683", url: "http://integra17-4.ing.puc.cl/", token: "", gnumber: "4")
+# Client.create(name: "5910c0910e42840004f6e684", url: "http://integra17-5.ing.puc.cl/", token: "", gnumber: "5")
+# Client.create(name: "5910c0910e42840004f6e685", url: "http://integra17-6.ing.puc.cl/", token: "", gnumber: "6")
+# Client.create(name: "5910c0910e42840004f6e686", url: "http://integra17-7.ing.puc.cl/", token: "", gnumber: "7")
+# Client.create(name: "5910c0910e42840004f6e687", url: "http://integra17-8.ing.puc.cl/", token: "", gnumber: "8")
+
+
+# DEV
+Client.create(name: "590baa00d6b4ec0004902462", url: "http://dev.integra17-1.ing.puc.cl/api", token: "", gnumber: "1")
+Client.create(name: "590baa00d6b4ec0004902463", url: "http://integra17-2.ing.puc.cl/", token: "", gnumber: "2")
+Client.create(name: "590baa00d6b4ec0004902464", url: "http://integra17-3.ing.puc.cl/", token: "", gnumber: "3")
+Client.create(name: "590baa00d6b4ec0004902465", url: "http://integra17-4.ing.puc.cl/", token: "", gnumber: "4")
+Client.create(name: "590baa00d6b4ec0004902466", url: "http://integra17-5.ing.puc.cl/", token: "", gnumber: "5")
+Client.create(name: "590baa00d6b4ec0004902467", url: "http://integra17-6.ing.puc.cl/", token: "", gnumber: "6")
+Client.create(name: "590baa00d6b4ec0004902468", url: "http://dev.integra17-7.ing.puc.cl/api", token: "", gnumber: "7")
+Client.create(name: "590baa00d6b4ec0004902469", url: "http://dev.integra17-8.ing.puc.cl/", token: "", gnumber: "8")
