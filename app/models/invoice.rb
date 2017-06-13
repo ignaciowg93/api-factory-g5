@@ -156,7 +156,7 @@ class Invoice < ApplicationRecord
       #notifico de factura aceptada al proveedor
       notification = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").patch("#{proveedor_url}invoices/#{factura_id}/accepted")
       #notification = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").patch("http://localhost:3000/invoices/#{factura_id}/accepted")
-      pago = Invoice.pagar_factura(1, cuenta_banco, factura_id)#(fact["total"], cuenta_banco, factura_id)
+      pago = Invoice.pagar_factura(fact["total"], cuenta_banco, factura_id)
       puts "banco responde #{pago}"
       if pago.code == 200
         inv.paid = true

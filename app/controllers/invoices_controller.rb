@@ -87,11 +87,11 @@ class InvoicesController < ApplicationController
               factura.save!
               render json: {ok: "Factura resuelta recibida exitosamente " }, status: 201
               # se despacha (omitir el thread completo si se decide)
-              # Thread.new do
-              #   Warehouse.to_despacho_and_delivery(sku, qty, almacen_recepcion, ordenId, precio, canal)
-              #   # notificar del despacho
-              #   despachado = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").patch("#{client_url}invoices/#{params[:id]}/delivered")
-              # end
+              Thread.new do
+                Warehouse.to_despacho_and_delivery(sku, qty, almacen_recepcion, ordenId, precio, canal)
+                # notificar del despacho
+                despachado = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").patch("#{client_url}invoices/#{params[:id]}/delivered")
+              end
             else
               render json:{error: "Factura rechazada o anulada"}, status: 403
             end
@@ -160,7 +160,16 @@ class InvoicesController < ApplicationController
 
     def delivered
         begin
-            #TODO nada por ahora
+            # marcar invoice delivered en BDD delivered
+            factura = Invoice.find_by(invoiceid: params[:id])
+            puts "Delivered - Me avisan desde factura #{factura.invoiceid}"
+            #Change the status of an Invoice in the system.
+            factura.delivered = true
+            factura.save!
+            # marcar OC completa en BDD
+            orden_Id = factura.po_idtemp
+            oc = PurchaseOrder.find_by(_id: orden_Id)
+            oc.update(status: "finalizada")
             render json: {ok: "Notificacion recibida exitosamente"}, status:201
         rescue ActiveRecord::RecordInvalid
             render json: {error: "No se pudo enviar notificacion"}, status: 500
