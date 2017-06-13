@@ -10,8 +10,6 @@ set :rbenv_path, '/home/deploy/.rbenv'
 set :deploy_to, '/home/deploy/deployapp'
 set :branch, ENV['BRANCH'] if ENV['BRANCH']
 
-require 'whenever/capistrano'
-
 
 # NO estoy seguro aun, hagamoslo correr y luego al deploy
 # set :whenever_environment, defer { stage }
