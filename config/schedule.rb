@@ -18,7 +18,7 @@
 # end
 
 # Learn more: http://github.com/javan/whenever
-
+env :PATH, ENV['PATH']
 
 
 every 2.minutes do
