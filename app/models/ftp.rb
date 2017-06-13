@@ -57,8 +57,8 @@ class Ftp < ApplicationRecord
     end
 
     def self.ordenes_compra()
-      # Automatically serve all requests, in order
-      Net::SFTP.start(Rails.configuration.host, Rails.configuration.ftp_user,
+        # Automatically serve all requests, in order
+        Net::SFTP.start(Rails.configuration.host, Rails.configuration.ftp_user,
                       password: Rails.configuration.ftp_pass) do |sftp|
         sftp.dir.foreach('/pedidos') do |entry|
           next unless entry.file?
@@ -76,7 +76,7 @@ class Ftp < ApplicationRecord
                   PurchaseOrder.find_by(_id: poid)
 
           next unless order && order.can_be_served?
-          # TODO: factura
+          Invoice.create_invoice(poid, false)
           Warehouse.to_despacho_and_delivery(order.sku, order.amount,
                                              order.direccion,
                                              poid, order.unit_price, 'ftp')
