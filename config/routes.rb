@@ -74,4 +74,7 @@ Rails.application.routes.draw do
 
   # temporary
   get 'stock', to: 'interaction#get_stocks'
+
+  #vacia pulmon y recepcion
+  get 'vaciar_todo', to: 'warehouse#vaciar'
 end

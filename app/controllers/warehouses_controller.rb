@@ -20,5 +20,8 @@ class WarehousesController < ApplicationController
     #
     #
     #
+    def vaciar
+      Warehouse.vaciar_almacenes()
+    end
 
 end
