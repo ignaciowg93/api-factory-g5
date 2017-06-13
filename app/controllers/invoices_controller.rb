@@ -38,10 +38,10 @@ class InvoicesController < ApplicationController
       resp = Invoice.rec_invoice(params[:id])
       puts("resp es #{resp}")
       if !resp
-        render json:{ok: "Factura no encontrada"} , status:400
+        render json:{error: "Factura no encontrada"} , status:400
       else
         render json:{ok: "Factura recibida exitosamente"} , status:200
-        puts("Resp code es #{resp.code}")
+        puts("Resp code es #{resp}")
         to_put = ""
         Thread.new do
           to_put = Invoice.atender_factura(resp, params[:id], params[:bank_account])
