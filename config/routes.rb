@@ -62,7 +62,7 @@ Rails.application.routes.draw do
 # Recepcionar y atender ordenes FTP
   post 'purchase_orders/ftp', to: 'purchase_orders#receive_ftp'
 
-  put 'despachar/:id', to: 'interaction#despachar'
+  put 'deliver/:id', to: 'warehouses#delivery'
 
 # Comprar B2B
   post 'buy', to: 'purchase_orders#generate_PO'
@@ -71,7 +71,6 @@ Rails.application.routes.draw do
 
 # Cancelar despacho de una PO reestablecer reservado cambiar cantidad despachada
 
-
-  # temporary
-  get 'stock', to: 'interaction#get_stocks'
+# GET SOTCK
+  get 'stocks', to: 'warehouses#stocks'
 end

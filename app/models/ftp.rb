@@ -76,10 +76,8 @@ class Ftp < ApplicationRecord
                   PurchaseOrder.find_by(_id: poid)
 
           next unless order && order.can_be_served?
-          # TODO: factura
-          Warehouse.to_despacho_and_delivery(order.sku, order.amount,
-                                             order.direccion,
-                                             poid, order.unit_price, 'ftp')
+          Invoice.create_invoice(poid, false)
+          Warehouse.to_despacho_and_delivery(poid)
         end
       end
     end

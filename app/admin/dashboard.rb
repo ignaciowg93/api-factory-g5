@@ -19,7 +19,7 @@ ActiveAdmin.register_page "Dashboard" do
 
     # STOCK POR PRODUCTO
 
-    @stock = find_qt_by_sku
+    @stock = Warehouse.get_stocks
     columns do
       column do
         panel "Stock" do

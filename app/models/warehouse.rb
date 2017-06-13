@@ -48,6 +48,40 @@ class Warehouse < ApplicationRecord
       stock - prod.stock_reservado > 0 ? (stock - prod.stock_reservado) : 0
     end
 
+    def self.get_stocks
+      stocks = Hash.new(0)
+      response = ""
+      @almacenes = get_almacenes
+      @almacenes.each do |almacen|
+        # No busca en despacho
+        next if almacen["despacho"]
+        data = "GET#{almacen["_id"]}"
+        loop do
+          response = HTTP.auth(generate_header(data)).headers(:accept => "application/json").get(Rails.configuration.base_route_bodega + "skusWithStock?almacenId=" + almacen["_id"])
+          break if response.code == 200
+          sleep(60) if response.code == 429
+          sleep(15)
+        end
+        products = JSON.parse response.to_s
+        products.each do |product|
+          # product["_id"] es el sku del producto
+          # FIXME: restar unidades reservadas
+          stocks[product["_id"]] += product["total"]
+        end
+      end
+       # Descontar stock reservado, de todos los sku (productos y supplies)
+      productos_db = Product.all
+      supplies_db = Supply.all
+
+      productos_db.each do |producto|
+        stocks[producto.sku] -= producto.stock_reservado
+      end
+      supplies_db.each do |supply|
+        stocks[supply.sku] -= supply.stock_reservado
+      end
+      stocks
+    end
+
     def self.get_almacenes
       data = "GET"
       response = ""
@@ -60,10 +94,15 @@ class Warehouse < ApplicationRecord
       almacenes = JSON.parse response.to_s
     end
 
-    def self.to_despacho_and_delivery(sku, qty, direccion, ordenId, precio, canal)
+    def self.to_despacho_and_delivery(poid)
       products = ""
-      orden = PurchaseOrder.find_by(_id: ordenId)
-      remaining = qty - orden.delivered_qt
+      orden = PurchaseOrder.find_by(_id: poid)
+      return unless orden
+      sku = orden.sku
+      precio = orden.unit_price
+      canal = orden.channel
+      direccion = orden.direccion
+      remaining = orden.amount - orden.delivered_qt
       prod = Product.find_by(sku: sku)
       @almacenes = get_almacenes
 
@@ -96,16 +135,16 @@ class Warehouse < ApplicationRecord
               route = "#{Rails.configuration.base_route_bodega}moveStockBodega"
               data = "POST#{product["_id"]}#{direccion}"
               loop do
-                deliver = HTTP.auth(generate_header(data)).headers(:accept => "application/json").post(route, json: { productoId: product["_id"], almacenId: direccion, oc: ordenId, precio: precio})
+                deliver = HTTP.auth(generate_header(data)).headers(:accept => "application/json").post(route, json: { productoId: product["_id"], almacenId: direccion, oc: poid, precio: precio})
                 break if deliver.code == 200
                 sleep(60) if deliver.code == 429
                 sleep(15)
               end
             elsif canal == "b2c" || canal == "ftp"
               route = "#{Rails.configuration.base_route_bodega}stock"
-              data = "DELETE#{product["_id"]}#{direccion}#{precio}#{ordenId}"
+              data = "DELETE#{product["_id"]}#{direccion}#{precio}#{poid}"
               loop do
-                deliver = HTTP.auth(generate_header(data)).headers(:accept => "application/json").delete(route, json: { productoId: product["_id"], oc: ordenId, direccion: direccion, precio: precio})
+                deliver = HTTP.auth(generate_header(data)).headers(:accept => "application/json").delete(route, json: { productoId: product["_id"], oc: poid, direccion: direccion, precio: precio})
                 puts deliver.body
                 break if deliver.code == 200
                 sleep(60) if deliver.code == 429
