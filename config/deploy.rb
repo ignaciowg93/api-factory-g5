@@ -2,8 +2,6 @@
 
 # NO estoy seguro aun, hagamoslo correr y luego al deploy
 # require 'whenever/capistrano'
-
-
 lock "3.8.1"
 
 set :application, "deployapp"
@@ -11,6 +9,7 @@ set :repo_url, "git@github.com:ignaciowg93/api-factory-g5.git"
 set :rbenv_path, '/home/deploy/.rbenv'
 set :deploy_to, '/home/deploy/deployapp'
 set :branch, ENV['BRANCH'] if ENV['BRANCH']
+
 
 # NO estoy seguro aun, hagamoslo correr y luego al deploy
 # set :whenever_environment, defer { stage }
@@ -37,6 +36,7 @@ task :initdb do
     end
   end
 end
+
 desc 'Runs rake db:seed'
 task :seed do
   on primary fetch(:migration_role) do

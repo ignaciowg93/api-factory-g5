@@ -17,7 +17,7 @@ Rails.application.routes.draw do
 
   get 'tienda/fail' => 'invoices#fail'
 #
-
+  get 'clients' => 'clients#all'
 #Ordenes de Compra
   #put 'purchase_orders/:id', to: 'purchase_orders#receive'
   #put 'purchase_orders/:id', to: 'application#receive'

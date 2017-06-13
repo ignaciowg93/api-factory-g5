@@ -233,6 +233,7 @@ class InvoicesController < ApplicationController
     def fail
     end
 
+
     def create
     end
 

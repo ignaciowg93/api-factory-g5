@@ -47,17 +47,18 @@ require 'digest'
 #     stock_final
 # end
 
-p3 = Product.create(sku: '3', name: 'Maíz', processed: 0, price: 117, sell_price: 120, lot: 30, ingredients: 0, dependent: 1, time: 1.726, stock_reservado: 0)
-p5 = Product.create(sku: '5', name: 'Yogur', processed: 1, price: 428, sell_price: 445,lot: 600, ingredients: 3, dependent: 0, time: 3.191, stock_reservado: 0)
-p7 = Product.create(sku: '7', name: 'Leche', processed: 0, price: 290, sell_price: 295,lot: 1000, ingredients: 0, dependent: 8, time: 1.441, stock_reservado: 0)
-p9 = Product.create(sku: '9', name: 'Carne', processed: 0, price: 350, sell_price: 355,lot: 620, ingredients: 0, dependent: 1, time: 2.846, stock_reservado: 0)
-p11 = Product.create(sku: '11', name: 'Margarina', processed: 1, price: 247, sell_price: 255,lot: 900, ingredients: 1, dependent: 0, time: 3.074, stock_reservado: 0)
-p15 = Product.create(sku: '15', name: 'Avena', processed: 0, price: 276, sell_price: 285,lot: 480, ingredients: 0, dependent: 1, time: 1.430, stock_reservado: 0)
-p17 = Product.create(sku: '17', name: 'Cereal Arroz', processed: 1, price: 821, sell_price: 830,lot: 1000, ingredients: 3, dependent: 0, time: 1.158, stock_reservado: 0)
-p22 = Product.create(sku: '22', name: 'Mantequilla', processed: 1, price: 336, sell_price: 345,lot: 400, ingredients: 1, dependent: 1, time: 1.832, stock_reservado: 0)
-p25 = Product.create(sku: '25', name: 'Azúcar', processed: 0, price: 93, sell_price: 95,lot: 560, ingredients: 0, dependent: 6, time: 2.785, stock_reservado: 0)
-p52 = Product.create(sku: '52', name: 'Harina Integral', processed: 1, price: 410, sell_price: 460,lot: 890, ingredients: 2, dependent: 2, time: 1.506, stock_reservado: 0)
-p56 = Product.create(sku: '56', name: 'Hamburguesas de Pollo', processed: 1, price: 479, sell_price: 500,lot: 620, ingredients: 2, dependent: 0, time: 1.533, stock_reservado: 0)
+# YA ESTAN CREADOS
+# p3 = Product.create(sku: '3', name: 'Maíz', processed: 0, price: 117, sell_price: 120, lot: 30, ingredients: 0, dependent: 1, time: 1.726, stock_reservado: 0)
+# p5 = Product.create(sku: '5', name: 'Yogur', processed: 1, price: 428, sell_price: 445,lot: 600, ingredients: 3, dependent: 0, time: 3.191, stock_reservado: 0)
+# p7 = Product.create(sku: '7', name: 'Leche', processed: 0, price: 290, sell_price: 295,lot: 1000, ingredients: 0, dependent: 8, time: 1.441, stock_reservado: 0)
+# p9 = Product.create(sku: '9', name: 'Carne', processed: 0, price: 350, sell_price: 355,lot: 620, ingredients: 0, dependent: 1, time: 2.846, stock_reservado: 0)
+# p11 = Product.create(sku: '11', name: 'Margarina', processed: 1, price: 247, sell_price: 255,lot: 900, ingredients: 1, dependent: 0, time: 3.074, stock_reservado: 0)
+# p15 = Product.create(sku: '15', name: 'Avena', processed: 0, price: 276, sell_price: 285,lot: 480, ingredients: 0, dependent: 1, time: 1.430, stock_reservado: 0)
+# p17 = Product.create(sku: '17', name: 'Cereal Arroz', processed: 1, price: 821, sell_price: 830,lot: 1000, ingredients: 3, dependent: 0, time: 1.158, stock_reservado: 0)
+# p22 = Product.create(sku: '22', name: 'Mantequilla', processed: 1, price: 336, sell_price: 345,lot: 400, ingredients: 1, dependent: 1, time: 1.832, stock_reservado: 0)
+# p25 = Product.create(sku: '25', name: 'Azúcar', processed: 0, price: 93, sell_price: 95,lot: 560, ingredients: 0, dependent: 6, time: 2.785, stock_reservado: 0)
+# p52 = Product.create(sku: '52', name: 'Harina Integral', processed: 1, price: 410, sell_price: 460,lot: 890, ingredients: 2, dependent: 2, time: 1.506, stock_reservado: 0)
+# p56 = Product.create(sku: '56', name: 'Hamburguesas de Pollo', processed: 1, price: 479, sell_price: 500,lot: 620, ingredients: 2, dependent: 0, time: 1.533, stock_reservado: 0)
 
 # s51 = p5.supplies.create(sku: '49', requierment: 228, stock_reservado: 0)
 # s51.sellers.create(seller: '3', time: 1.846)
@@ -126,11 +127,11 @@ p56 = Product.create(sku: '56', name: 'Hamburguesas de Pollo', processed: 1, pri
 
 
 # DEV
-Client.create(name: "590baa00d6b4ec0004902462", url: "http://dev.integra17-1.ing.puc.cl/api", token: "", gnumber: "1")
-Client.create(name: "590baa00d6b4ec0004902463", url: "http://integra17-2.ing.puc.cl/", token: "", gnumber: "2")
-Client.create(name: "590baa00d6b4ec0004902464", url: "http://integra17-3.ing.puc.cl/", token: "", gnumber: "3")
-Client.create(name: "590baa00d6b4ec0004902465", url: "http://integra17-4.ing.puc.cl/", token: "", gnumber: "4")
-Client.create(name: "590baa00d6b4ec0004902466", url: "http://integra17-5.ing.puc.cl/", token: "", gnumber: "5")
-Client.create(name: "590baa00d6b4ec0004902467", url: "http://integra17-6.ing.puc.cl/", token: "", gnumber: "6")
-Client.create(name: "590baa00d6b4ec0004902468", url: "http://dev.integra17-7.ing.puc.cl/api", token: "", gnumber: "7")
-Client.create(name: "590baa00d6b4ec0004902469", url: "http://dev.integra17-8.ing.puc.cl/", token: "", gnumber: "8")
+Client.find_by(gnumber: '1').update(name: "590baa00d6b4ec0004902462", url: "http://dev.integra17-1.ing.puc.cl/api")
+Client.find_by(gnumber: '2').update(name: "590baa00d6b4ec0004902463", url: "http://integra17-2.ing.puc.cl/")
+Client.find_by(gnumber: '3').update(name: "590baa00d6b4ec0004902464", url: "http://integra17-3.ing.puc.cl/")
+Client.find_by(gnumber: '4').update(name: "590baa00d6b4ec0004902465", url: "http://integra17-4.ing.puc.cl/")
+Client.find_by(gnumber: '5').update(name: "590baa00d6b4ec0004902466", url: "http://integra17-5.ing.puc.cl/")
+Client.find_by(gnumber: '6').update(name: "590baa00d6b4ec0004902467", url: "http://integra17-6.ing.puc.cl/")
+Client.find_by(gnumber: '7').update(name: "590baa00d6b4ec0004902468", url: "http://dev.integra17-7.ing.puc.cl/api")
+Client.find_by(gnumber: '8').update(name: "590baa00d6b4ec0004902469", url: "http://dev.integra17-8.ing.puc.cl/")

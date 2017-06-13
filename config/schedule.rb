@@ -18,9 +18,9 @@
 # end
 
 # Learn more: http://github.com/javan/whenever
+env :PATH, ENV['PATH']
 
 
-
-every 60.minutes do
-   runner "Ftp.conecta", :environment => "development", :output => 'log/check_status_update.log'
+every 30.minutes do
+   runner "Ftp.ordenes_compra", :enviroment => "production", :output => 'log/check_status_update.log'
 end
