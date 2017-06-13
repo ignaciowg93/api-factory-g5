@@ -127,11 +127,16 @@ require 'digest'
 
 
 # DEV
-Client.find_by(gnumber: '1').update(name: "590baa00d6b4ec0004902462", url: "http://dev.integra17-1.ing.puc.cl/api")
-Client.find_by(gnumber: '2').update(name: "590baa00d6b4ec0004902463", url: "http://integra17-2.ing.puc.cl/")
-Client.find_by(gnumber: '3').update(name: "590baa00d6b4ec0004902464", url: "http://integra17-3.ing.puc.cl/")
-Client.find_by(gnumber: '4').update(name: "590baa00d6b4ec0004902465", url: "http://integra17-4.ing.puc.cl/")
-Client.find_by(gnumber: '5').update(name: "590baa00d6b4ec0004902466", url: "http://integra17-5.ing.puc.cl/")
-Client.find_by(gnumber: '6').update(name: "590baa00d6b4ec0004902467", url: "http://integra17-6.ing.puc.cl/")
-Client.find_by(gnumber: '7').update(name: "590baa00d6b4ec0004902468", url: "http://dev.integra17-7.ing.puc.cl/api")
-Client.find_by(gnumber: '8').update(name: "590baa00d6b4ec0004902469", url: "http://dev.integra17-8.ing.puc.cl/")
+# Client.find_by(gnumber: '1').update(name: "590baa00d6b4ec0004902462", url: "http://dev.integra17-1.ing.puc.cl/api")
+# Client.find_by(gnumber: '2').update(name: "590baa00d6b4ec0004902463", url: "http://integra17-2.ing.puc.cl/")
+# Client.find_by(gnumber: '3').update(name: "590baa00d6b4ec0004902464", url: "http://integra17-3.ing.puc.cl/")
+# Client.find_by(gnumber: '4').update(name: "590baa00d6b4ec0004902465", url: "http://integra17-4.ing.puc.cl/")
+# Client.find_by(gnumber: '5').update(name: "590baa00d6b4ec0004902466", url: "http://integra17-5.ing.puc.cl/")
+# Client.find_by(gnumber: '6').update(name: "590baa00d6b4ec0004902467", url: "http://integra17-6.ing.puc.cl/")
+# Client.find_by(gnumber: '7').update(name: "590baa00d6b4ec0004902468", url: "http://dev.integra17-7.ing.puc.cl/api")
+# Client.find_by(gnumber: '8').update(name: "590baa00d6b4ec0004902469", url: "http://dev.integra17-8.ing.puc.cl/")
+
+
+# Reiniciar a 0 los stocks reservados
+Product.find_by(sku: '22').update(stock_reservado: 0)
+Product.find_by(sku: '7').update(stock_reservado: 0)
