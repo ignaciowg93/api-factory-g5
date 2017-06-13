@@ -21,6 +21,6 @@
 env :PATH, ENV['PATH']
 
 
-every 2.minutes do
+every 60.minutes do
    runner "Ftp.check_to_log", :enviroment => "production", :output => 'log/check_status_update.log'
 end
