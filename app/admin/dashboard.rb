@@ -245,10 +245,10 @@ panel "Órdenes de compras finalizadas (cantidad):" do
         column do
           panel "Órdenes de Compra FTP Recibidas" do
             table_for PurchaseOrder.where(status: "creada", channel: "ftp").order('created_at desc') do
-              column("ID") {|poid| prod._id }
-              column("SKU") {|poid| prod.sku}
-              column("AMOUNT") {|poid| prod.amount}
-              column("DELIVERED AMOUNT") {|poid| prod.delivered_qt}
+              column("ID") {|poid| poid._id }
+              column("SKU") {|poid| poid.sku}
+              column("AMOUNT") {|poid| poid.amount}
+              column("DELIVERED AMOUNT") {|poid| poid.delivered_qt}
             end
           end
         end
@@ -258,11 +258,11 @@ panel "Órdenes de compras finalizadas (cantidad):" do
             column do
               panel "Órdenes de Compra FTP Rechazadas" do
                 table_for PurchaseOrder.where(status: "rechazada", channel: "ftp").order('created_at desc') do
-                  column("ID") {|poid| prod._id }
-                  column("SKU") {|poid| prod.sku}
-                  column("AMOUNT") {|poid| prod.amount}
-                  column("DELIVERED AMOUNT") {|poid| prod.delivered_qt}
-                  column("MOTIVO RECHAZO") {|poid| prod.rejected}
+                  column("ID") {|poid| poid._id }
+                  column("SKU") {|poid| poid.sku}
+                  column("AMOUNT") {|poid| poid.amount}
+                  column("DELIVERED AMOUNT") {|poid| poid.delivered_qt}
+                  column("MOTIVO RECHAZO") {|poid| poid.rejected}
 
                 end
               end
@@ -274,10 +274,10 @@ panel "Órdenes de compras finalizadas (cantidad):" do
             column do
               panel "Órdenes de Compra FTP Completadas" do
                 table_for PurchaseOrder.where(status: "finalizada", channel: "ftp").order('created_at desc') do
-                  column("ID") {|poid| prod._id }
-                  column("SKU") {|poid| prod.sku}
-                  column("AMOUNT") {|poid| prod.amount}
-                  column("DELIVERED AMOUNT") {|poid| prod.delivered_qt}
+                  column("ID") {|poid| poid._id }
+                  column("SKU") {|poid| poid.sku}
+                  column("AMOUNT") {|poid| poid.amount}
+                  column("DELIVERED AMOUNT") {|poid| poid.delivered_qt}
                 end
               end
             end
