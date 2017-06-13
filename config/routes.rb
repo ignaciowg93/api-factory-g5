@@ -46,11 +46,17 @@ Rails.application.routes.draw do
 
   get 'products', to: 'product#index'
 
-## Metodos manuales para dashboard
+#######
+# Metodos manuales para dashboard #
+######
   post 'produce', to: 'interaction#produce'
   put 'purchase_orders/:id', to: 'purchase_orders#receive_b2b'
   post 'purchase_orders/ftp', to: 'purchase_orders#receive_ftp'
   put 'despachar/:id', to: 'interaction#despachar'
+
+# Comprar
+  post 'buy', to: 'purchase_orders#generate_PO'
+
 
   # temporary
   get 'stock', to: 'interaction#get_stocks'
