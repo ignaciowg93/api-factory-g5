@@ -22,5 +22,5 @@
 
 
 every 60.minutes do
-   runner "Ftp.conecta", :environment => "development", :output => 'log/check_status_update.log'
+   runner "Ftp.conecta", :output => 'log/check_status_update.log'
 end
