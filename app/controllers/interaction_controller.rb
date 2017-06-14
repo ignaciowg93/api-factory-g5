@@ -11,7 +11,7 @@ class InteractionController < ApplicationController
 
     sku = params[:sku]
     puts "sku= #{sku}"
-    quantity = params[:quantity]
+    quantity = params[:quantity].to_i
     product = (Product.find_by sku: sku)
 
     # Definir lote de produccion
