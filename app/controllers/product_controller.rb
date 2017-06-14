@@ -13,7 +13,7 @@ require 'rest-client'
 # require 'typhoeus'
 
 class ProductController < ApplicationController
-    almacen_base_url = "https://integracion-2017-prod.herokuapp.com/bodega/almacenes"
+    almacen_base_url = "#{Rails.configuration.base_route_bodega}almacenes"#"https://integracion-2017-prod.herokuapp.com/bodega/almacenes"
     stock_productos = Hash.new(0)
 
     def index
