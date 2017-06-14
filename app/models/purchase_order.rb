@@ -71,7 +71,7 @@ class PurchaseOrder < ApplicationRecord
       notes: orden[0]['notas'],
       rejection: orden[0]['rechazo'],
       anullment: orden[0]['anulacion'],
-      created_at: orden[0]['created_at'],
+      created_at_system: orden[0]['created_at'],
       direccion: direccion,
       status: orden[0]['estado']
     )
