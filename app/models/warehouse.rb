@@ -20,7 +20,10 @@ class Warehouse < ApplicationRecord
   end
 
   def self.get_stock_by_sku(prod) # FIXME: producto en vez de sku
+    puts 'llegue al metodo'
+    puts prod
     sku = prod.sku
+    puts sku
     stock = 0
     response = ''
     @almacenes = get_almacenes
@@ -320,15 +323,18 @@ class Warehouse < ApplicationRecord
 
   # ------------- ** --------------
   def self.revisar(sku)
-    producto = (Product.find_by sku: sku)
-    stock = consultar_sku(producto) #Obtengo el stock actual de maiz
+    producto = (Product.find_by(sku: sku))
+    # puts 'voy a llamar ge stock by sku con: #{producto.sku}'
+    stock = get_stock_by_sku(producto) #Obtengo el stock actual de maiz
     stock_minimo = 1000 #Stock minimo que debe haber de la materia prima
+    # puts 'entrando al stock'
+    puts stock
     if stock <= stock_minimo #Si tenemos menos stock del que deberia haber
       dif = stock_minimo - stock
       #lotes = dif/60 #Esto da un numero int (3/2 = 1)
       #Esto no es necesario porque lo hace dentro del produce
-      puts "deberia mandar a prod"
-      #produce(:sku=>sku,quantity=>dif) #Se manda a hacer Dif
+      #puts "deberia mandar a prod"
+      Warehouse.produce(sku, dif) #Se manda a hacer Dif
     end
   end
 
@@ -337,11 +343,11 @@ class Warehouse < ApplicationRecord
 
   ### -------------- ** --------------------
   #Estos son los metodos de Interaction, movi Produce,  mandar_a_producir, move_to_despacho y get_almacenes
-  def produce
+  def self.produce(sku,quantity)
 
-    sku = params[:sku]
-    puts "sku= #{sku}"
-    quantity = params[:quantity].to_i
+    # sku = params[sku]
+    #puts "sku= #{sku}"
+    # quantity = params[:quantity].to_i
     product = (Product.find_by sku: sku)
 
     # Definir lote de produccion
@@ -375,19 +381,19 @@ class Warehouse < ApplicationRecord
         # Mover unidades a almacen de despacho
         my_supplies.each do |supply|
           puts "1- muevo a despacho"
-          move_to_despacho(supply.requierment, supply.sku)
+          Warehouse.move_to_despacho(supply.requierment, supply.sku)
         end
         # Producir un solo lote
-        mandar_a_producir(lot,product, sku)
+        Warehouse.mandar_a_producir(lot,product, sku)
       end
     else
       puts "no procesado"
       # Producir todo
-      mandar_a_producir(to_produce, product, sku)
+      Warehouse.mandar_a_producir(to_produce, product, sku)
     end
   end
 
-  def mandar_a_producir(quantity, product, sku)
+  def self.mandar_a_producir(quantity, product, sku)
     puts "en mandar a producir"
     remaining = quantity
     # Producir
@@ -456,7 +462,7 @@ class Warehouse < ApplicationRecord
     end
   end
 
-  def move_to_despacho(qty, sku)
+  def self.move_to_despacho(qty, sku)
     products = ""
     remaining = qty
     while remaining > 0 do
