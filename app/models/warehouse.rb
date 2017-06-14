@@ -13,7 +13,6 @@ require 'digest'
 
 class Warehouse < ApplicationRecord
   has_many :products
-  before_action :get_almacenes
 
   def self.consultar_sku(product)
     stock = get_stock_by_sku(product)
@@ -320,20 +319,18 @@ class Warehouse < ApplicationRecord
  
 
   # ------------- ** --------------
-  def revisar(sku)
+  def self.revisar(sku)
     producto = (Product.find_by sku: sku)
-    stock = consultar_sku(producto).stock #Obtengo el stock actual de maiz
+    stock = consultar_sku(producto) #Obtengo el stock actual de maiz
     stock_minimo = 1000 #Stock minimo que debe haber de la materia prima
     if stock <= stock_minimo #Si tenemos menos stock del que deberia haber
       dif = stock_minimo - stock
       #lotes = dif/60 #Esto da un numero int (3/2 = 1)
       #Esto no es necesario porque lo hace dentro del produce
-      produce(:sku=>sku,quantity=>dif) #Se manda a hacer Dif
+      puts "deberia mandar a prod"
+      #produce(:sku=>sku,quantity=>dif) #Se manda a hacer Dif
     end
   end
-
-
-
 
 
 
