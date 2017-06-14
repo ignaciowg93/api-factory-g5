@@ -5,21 +5,17 @@ class Ftp < ApplicationRecord
 
 
 
-    @@tiempo_inicio = Time.new(2017, 6, 7, 5, 0, 0, "+00:00")
+    # @@tiempo_inicio = Time.new(2017, 6, 7, 5, 0, 0, "+00:00")
 
 
-  def self.prueba
-    puts 'Esto es un test'
-  end
-
-    def self.tiempo_inicio
-        @@tiempo_inicio
-    end
+    # def self.tiempo_inicio
+    #     @@tiempo_inicio
+    # end
 
 
-    def self.ultimo_tiempo()
-        @@tiempo_inicio
-    end
+    # def self.ultimo_tiempo()
+    #     @@tiempo_inicio
+    # end
 
 
 
@@ -83,7 +79,7 @@ class Ftp < ApplicationRecord
       end
     end
 
+
+
   
-
-
 end
