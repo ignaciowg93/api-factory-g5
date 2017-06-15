@@ -19,7 +19,7 @@ set :branch, ENV['BRANCH'] if ENV['BRANCH']
 # and run 'cap production deploy seed' to seed your database
 desc "deploy app for the first time (expects pre-created but empty DB)"
 task :cold do
-  before 'deploy:migrate', 'deploy:initdb'
+  before 'deploy:initdb', 'deploy:migrate'
   invoke 'deploy'
 end
 
@@ -52,7 +52,7 @@ task :seed do
 end
 
 desc 'Runs rake db:reset'
-task :reset do
+task :db_reset do
   on primary fetch(:migration_role) do
     within release_path do
       with rails_env: fetch(:rails_env) do        
