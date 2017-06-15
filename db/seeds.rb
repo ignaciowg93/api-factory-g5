@@ -58,7 +58,7 @@ p17 = Product.create(sku: '17', name: 'Cereal Arroz', processed: 1, price: 821, 
 p22 = Product.create(sku: '22', name: 'Mantequilla', processed: 1, price: 336, sell_price: 403,lot: 400, ingredients: 1, dependent: 1, time: 1.832, stock_reservado: 0)
 p25 = Product.create(sku: '25', name: 'Azúcar', processed: 0, price: 93, sell_price: 111,lot: 560, ingredients: 0, dependent: 6, time: 2.785, stock_reservado: 0)
 p52 = Product.create(sku: '52', name: 'Harina Integral', processed: 1, price: 410, sell_price: 492,lot: 890, ingredients: 2, dependent: 2, time: 1.506, stock_reservado: 0)
-p56 = Product.create(sku: '56', name: 'Hamburguesas de Pollo', processed: 1, price: 479, sell_price: 574.8,lot: 620, ingredients: 2, dependent: 0, time: 1.533, stock_reservado: 0)
+p56 = Product.create(sku: '56', name: 'Hamburguesas de Pollo', processed: 1, price: 479, sell_price: 574,lot: 620, ingredients: 2, dependent: 0, time: 1.533, stock_reservado: 0)
 
 s51 = p5.supplies.create(sku: '49', requierment: 228, stock_reservado: 0)
 s51.sellers.create(seller: '3', time: 1.846)
