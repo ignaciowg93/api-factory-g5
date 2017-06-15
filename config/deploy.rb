@@ -56,11 +56,11 @@ task :reset do
   on primary fetch(:migration_role) do
     within release_path do
       with rails_env: fetch(:rails_env) do        
-        execute :rake "db:reset DISABLE_DATABASE_ENVIRONMENT_CHECK=1"
-        #execute :rake 'db:environment:set RAILS_ENV=production'
-        #execute :rake 'db:schema:load RAILS_ENV=production DISABLE_DATABASE_ENVIRONMENT_CHECK=1'
-        #execute :rake 'db:migrate'
-        #execute :rake 'db:seed'
+        execute :rake, 'db:reset DISABLE_DATABASE_ENVIRONMENT_CHECK=1'
+        execute :rake, 'db:environment:set RAILS_ENV=production'
+        execute :rake, 'db:schema:load RAILS_ENV=production DISABLE_DATABASE_ENVIRONMENT_CHECK=1'
+        execute :rake, 'db:migrate'
+        execute :rake, 'db:seed'
       end
     end
   end
