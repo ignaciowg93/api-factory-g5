@@ -206,6 +206,44 @@ class InvoicesController < ApplicationController
         @invoice.status = temp_boleta["estado"]
         @invoice.amount = cantidad
         @invoice.sku = sku
+        response = HTTP.headers(accept: 'application/json').put(
+          "#{Rails.configuration.base_route_oc}crear",
+          json: {
+            cliente: temp_boleta[cliente],
+            proveedor: Rails.configuration.my_id,
+            sku: sku,
+            fechaEntrega: (Time.zone.now + 3.day).to_f * 1000,
+            cantidad: cantidad,
+            precioUnitario: temp_boleta["bruto"].to_i/cantidad,
+            canal: 'b2c',
+            notas: 'vacio'
+          }
+        )
+        unless response.code == 200
+          render(json: { error: 'No se pudo ingresar la orden en el sistema' },
+                 status: 400)
+        end
+
+        orden = JSON.parse(response.body)
+        # Save to db
+        PurchaseOrder.create!(
+          _id: orden['_id'],
+          client: orden['cliente'],
+          supplier: orden['proveedor'],
+          sku: orden['sku'],
+          delivery_date: orden['fechaEntrega'],
+          amount: orden['cantidad'].to_i,
+          delivered_qt: orden['cantidadDespachada'],
+          unit_price: orden['precioUnitario'],
+          channel: orden['canal'],
+          notes: orden['notas'],
+          rejection: orden['rechazo'],
+          anullment: orden['anulacion'],
+          created_at: orden['created_at'],
+          status: orden['estado']
+        )
+        @invoice.po_idtemp = orden['_id']
+
         if @invoice.save!
           boleta = temp_invoice.parse
 
@@ -220,17 +258,21 @@ class InvoicesController < ApplicationController
 
     def confirm_boleta
       id = params["_id"]
-      if Invoice.where(invoiceid: id ).exists?
+      if Invoice.where(invoiceid: id ).exist?
         boleta = Invoice.where(invoiceid: id ).first
-        boleta.status = "pagada"
-        #moverInsumo(boleta.sku.to_i, boleta.amount) #mover los insumos
-        #despacharPedidoB2c(sku, cantidad, direccion, total_plata, id_boleta)
+        boleta.update(status: "pagada")
+        poid = boleta.po_idtemp
+        Warehouse.to_despacho_and_delivery(poid)
       end
 
 
     end
 
     def fail
+      id = params["_id"]
+      boleta = Invoice.find_by(invoiceid: id )
+      if !boleta.nil?
+        boleta.status = "cancelada"
     end
 
 
