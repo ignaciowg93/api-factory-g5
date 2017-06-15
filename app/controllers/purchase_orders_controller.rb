@@ -147,6 +147,7 @@ class PurchaseOrdersController < ApplicationController
   ## BUYING
 
   def accepted
+    #FIXME chequear que no esten vacios
     order = PurchaseOrder.find_by(_id: params[:id])
     # Retrieve from the system
     oc = HTTP.headers(accept: 'application/json').get(Rails.configuration.base_route_oc + 'obtener/' + params[:id])
