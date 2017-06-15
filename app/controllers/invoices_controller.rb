@@ -264,8 +264,6 @@ class InvoicesController < ApplicationController
         poid = boleta.po_idtemp
         Warehouse.to_despacho_and_delivery(poid)
       end
-
-
     end
 
     def fail
@@ -273,6 +271,9 @@ class InvoicesController < ApplicationController
       boleta = Invoice.find_by(invoiceid: id )
       if !boleta.nil?
         boleta.status = "cancelada"
+        poid = boleta.po_idtemp
+        PurchaseOrder.find_by(_id: poid).update(anullment: "cancelada")
+      end
     end
 
 
