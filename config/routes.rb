@@ -76,4 +76,12 @@ Rails.application.routes.draw do
 
   #vacia pulmon y recepcion
   get 'vaciar_todo', to: 'warehouse#vaciar'
+
+  get 'admin/log/production', to: 'application#production_log'
+
+  get 'admin/log/development', to: 'application#development_log'
+
+  get 'admin/log/check', to: 'application#check_status_update_log'
+
+
 end
