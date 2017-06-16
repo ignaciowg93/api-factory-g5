@@ -257,7 +257,7 @@ panel "Órdenes de compras finalizadas (cantidad):" do
       columns do
             column do
               panel "Órdenes de Compra FTP Rechazadas" do
-                table_for PurchaseOrder.where(status: "rechazada", channel: "ftp").order('created_at desc') do
+                table_for PurchaseOrder.where(status: "rechazada", channel: "ftp").order('updated_at desc') do
                   column("ID") {|poid| poid._id }
                   column("SKU") {|poid| poid.sku}
                   column("AMOUNT") {|poid| poid.amount}
@@ -273,7 +273,7 @@ panel "Órdenes de compras finalizadas (cantidad):" do
       columns do
             column do
               panel "Órdenes de Compra FTP Completadas" do
-                table_for PurchaseOrder.where(status: "finalizada", channel: "ftp").order('created_at desc') do
+                table_for PurchaseOrder.where(status: "finalizada", channel: "ftp").order('updated_at desc') do
                   column("ID") {|poid| poid._id }
                   column("SKU") {|poid| poid.sku}
                   column("AMOUNT") {|poid| poid.amount}
@@ -282,9 +282,6 @@ panel "Órdenes de compras finalizadas (cantidad):" do
               end
             end
           end
-
-
-
 
       panel "Órdenes de compras FTP " do # TODO ALTA FILTRAR POR CANAL
            # line_chart   Content.pluck("download").uniq.map { |c| { title: c, data: Content.where(download: c).group_by_day(:updated_at, format: "%B %d, %Y").count }  }, discrete: true
@@ -305,10 +302,25 @@ panel "Órdenes de compras finalizadas (cantidad):" do
            #scatter_chart [[incompletas,2], [completas,4]], xtitle: "Cantidad", ytitle: "Monto"
        end
 
-
-
-
-
+       columns do
+         creadas = [ PurchaseOrder.where(status: ['creada', 'aceptada']).count,
+                    "Recibidas"]
+         completas = [ PurchaseOrder.where(status: 'finalizada').count,
+                      "Completadas"]
+         rechazadas = [ PurchaseOrder.where(status: 'rechazada').count,
+                       "Rechazadas"]
+         total = creadas[0] + completas[0] + rechazadas[0]
+         ordenes_ftp = [creadas, completas, rechazadas]
+             column do
+               panel "Resumen ordenes de compra FTP" do
+                 table_for ordenes_ftp do
+                   column('Estado') {|orden| orden[1]}
+                   column("Total") {|orden| orden[0] }
+                   column("Porcentaje") {|orden| orden[0].to_f/total*100}
+                 end
+               end
+             end
+           end
 
 end
 
