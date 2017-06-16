@@ -293,6 +293,11 @@ class Warehouse < ApplicationRecord
   # -------------  ** ----------
   # Procesados, como no se manda a producir automaticamente se 
 
+  def self.revisar_margarina()
+    sku = '11'
+    revisar(sku)
+  end
+
  def self.revisar_yogur()
     sku = '5'
     revisar(sku)

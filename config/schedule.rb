@@ -25,42 +25,46 @@ every 30.minutes do
    runner "Ftp.ordenes_compra", :enviroment => "production", :output => 'log/check_status_update.log'
 end
 
-every 30.minutes do
+every 113.minutes do
    runner "Warehouse.revisar_maiz", :enviroment => "production", :output => 'log/maiz.log'
 end
 
-every 30.minutes do
-   runner "Warehouse.revisar_leche", :enviroment => "production", :output => 'log/leche.log'
-end
-
-every 30.minutes do
-   runner "Warehouse.revisar_carne", :enviroment => "production", :output => 'log/carne.log'
-end
-
-every 30.minutes do
-   runner "Warehouse.revisar_avena", :enviroment => "production", :output => 'log/avena.log'
-end
-
-every 30.minutes do
-   runner "Warehouse.revisar_azucar", :enviroment => "production", :output => 'log/azucar.log'
-end
-
-every 30.minutes do
+every 201.minutes do
    runner "Warehouse.revisar_yogur", :enviroment => "production", :output => 'log/yogur.log'
 end
 
-every 30.minutes do
+every 95.minutes do
+   runner "Warehouse.revisar_leche", :enviroment => "production", :output => 'log/leche.log'
+end
+
+every 180.minutes do
+   runner "Warehouse.revisar_carne", :enviroment => "production", :output => 'log/carne.log'
+end
+
+every 194.minutes do
+   runner "Warehouse.revisar_margarina", :enviroment => "production", :output => 'log/margarina.log'
+end
+
+every 95.minutes do
+   runner "Warehouse.revisar_avena", :enviroment => "production", :output => 'log/avena.log'
+end
+
+every 80.minutes do
    runner "Warehouse.cereal_arroz", :enviroment => "production", :output => 'log/arroz.log'
 end
 
-every 30.minutes do
+every 120.minutes do
    runner "Warehouse.mantequilla", :enviroment => "production", :output => 'log/mantequilla.log'
 end
 
-every 30.minutes do
+every 177.minutes do
+   runner "Warehouse.revisar_azucar", :enviroment => "production", :output => 'log/azucar.log'
+end
+
+every 100.minutes do
    runner "Warehouse.harina_integral", :enviroment => "production", :output => 'log/harina_integral.log'
 end
 
-every 30.minutes do
+every 101.minutes do
    runner "Warehouse.hamburguesas_pollo", :enviroment => "production", :output => 'log/hamburguesas_pollo.log'
 end
