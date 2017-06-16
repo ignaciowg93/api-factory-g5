@@ -62,15 +62,15 @@ class ApplicationController < ActionController::Base
       if File.exist? 'log/production.log'
         @tail = `tail -n 200 log/production.log`
       else
-        @tail = 'No se encuentro production.log'
+        @tail = 'No se encontro production.log'
       end
     end
 
     def development_log      
-      if File.exist? 'log/development_log.log'
-        @tail = `tail -n 200 log/development_log.log`
+      if File.exist? 'log/development.log'
+        @tail = `tail -n 200 log/development.log`
       else
-        @tail = 'No se encuentro development_log.log'
+        @tail = 'No se encontro development.log'
       end
     end
 
@@ -78,7 +78,7 @@ class ApplicationController < ActionController::Base
       if File.exist? 'log/check_status_update.log'
         @tail = `tail -n 200 log/check_status_update.log`
       else
-        @tail = 'No se encuentro check_status_update.log'
+        @tail = 'No se encontro check_status_update.log'
       end
     end
 
