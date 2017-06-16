@@ -75,7 +75,7 @@ Rails.application.routes.draw do
   get 'stocks', to: 'warehouses#stocks'
 
   #vacia pulmon y recepcion
-  get 'vaciar_todo', to: 'warehouse#vaciar'
+  get 'vaciar_todo', to: 'warehouses#vaciar'
 
   get 'admin/log/production', to: 'application#production_log'
 
