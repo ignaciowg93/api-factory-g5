@@ -83,5 +83,7 @@ Rails.application.routes.draw do
 
   get 'admin/log/check', to: 'application#check_status_update_log'
 
+  get 'spree', to: redirect('https://stark-garden-87198.herokuapp.com/')
+
 
 end
