@@ -206,7 +206,7 @@ class InvoicesController < ApplicationController
         @invoice.status = temp_boleta["estado"]
         @invoice.amount = cantidad
         @invoice.sku = sku
-        response = HTTP.headers(accept: 'application/json').put(
+        /response = HTTP.headers(accept: 'application/json').put(
           "#{Rails.configuration.base_route_oc}crear",
           json: {
             cliente: temp_boleta[cliente],
@@ -243,7 +243,7 @@ class InvoicesController < ApplicationController
           created_at: orden['created_at'],
           status: orden['estado']
         )
-        @invoice.po_idtemp = orden['_id']
+        @invoice.po_idtemp = orden['_id']/
 
         if @invoice.save!
           boleta = temp_invoice.parse
