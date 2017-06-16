@@ -214,19 +214,19 @@ class InvoicesController < ApplicationController
             sku: sku,
             fechaEntrega: (Time.zone.now + 3.day).to_f * 1000,
             cantidad: cantidad,
-            precioUnitario: temp_boleta["bruto"].to_i/cantidad.to_i,
+            precioUnitario: precio_final.to_i/cantidad.to_i,
             canal: 'b2c',
             notas: 'vacio'
           }
         )
         puts "AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-        puts response
         unless response.code == 200
           render(json: { error: 'No se pudo ingresar la orden en el sistema' },
                  status: 400)
         end
         orden = JSON.parse(response.body)
         # Save to db
+        puts orden['_id']
         PurchaseOrder.create!(
           _id: orden['_id'],
           client: orden['cliente'],
@@ -247,7 +247,8 @@ class InvoicesController < ApplicationController
 
         if @invoice.save!
           boleta = temp_invoice.parse
-
+          puts "BBBBBBBBBBBBBBBBBBBBBB"
+          puts boleta
           render json: {_id: boleta["_id"]}
         else
           puts("Problemas al crear el invoice de un boleta")
