@@ -191,7 +191,7 @@ class InvoicesController < ApplicationController
       cantidad = params["cantidad"]
       sku = params["sku"]
       temp_invoice = HTTP.headers(:accept => "application/json").put("https://integracion-2017-prod.herokuapp.com/sii/boleta", :json => { :proveedor =>proveedor , :cliente => cliente , :total => precio_final })
-      puts(temp_invoice)
+      Rails.logger.debug (temp_invoice)
       temp_result = temp_invoice.to_s
       if temp_invoice.code == 200
         temp_boleta = temp_invoice.parse
@@ -209,8 +209,8 @@ class InvoicesController < ApplicationController
         response = HTTP.headers(accept: 'application/json').put(
           "#{Rails.configuration.base_route_oc}crear",
           json: {
-            cliente: temp_boleta[cliente],
-            proveedor: Rails.configuration.my_id,
+            cliente: temp_boleta["cliente"],
+            proveedor: Rails.configuration.my_id, 
             sku: sku,
             fechaEntrega: (Time.zone.now + 3.day).to_f * 1000,
             cantidad: cantidad,
@@ -219,6 +219,8 @@ class InvoicesController < ApplicationController
             notas: 'vacio'
           }
         )
+        Rails.logger.debug "AAAAAAAAAAAAAAAAA"
+        Rails.logger.debug response
         puts "AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
         unless response.code == 200
           render(json: { error: 'No se pudo ingresar la orden en el sistema' },
@@ -226,7 +228,7 @@ class InvoicesController < ApplicationController
         end
         orden = JSON.parse(response.body)
         # Save to db
-        puts orden['_id']
+        Rails.logger.debug orden['_id']
         PurchaseOrder.create!(
           _id: orden['_id'],
           client: orden['cliente'],
