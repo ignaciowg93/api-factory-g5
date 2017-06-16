@@ -445,6 +445,7 @@ class Warehouse < ApplicationRecord
         production_order_to_save.amount =  to_produce
         production_order_to_save.est_date = production_order.parse["disponible"]
         # FIXME guardar hora de entrega
+        Rails.logger.debug "Es en mandar a producir"
         if production_order_to_save.save!
           if production_order.code == 200
             puts("en el if: #{production_order.parse}")
