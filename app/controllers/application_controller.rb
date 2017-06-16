@@ -58,6 +58,30 @@ class ApplicationController < ActionController::Base
         end
     end
 
+    def production_log      
+      if File.exist? 'log/production.log'
+        @tail = `tail -n 200 log/production.log`
+      else
+        @tail = 'No se encuentro production.log'
+      end
+    end
+
+    def development_log      
+      if File.exist? 'log/development_log.log'
+        @tail = `tail -n 200 log/development_log.log`
+      else
+        @tail = 'No se encuentro development_log.log'
+      end
+    end
+
+    def check_status_update_log      
+      if File.exist? 'log/check_status_update.log'
+        @tail = `tail -n 200 log/check_status_update.log`
+      else
+        @tail = 'No se encuentro check_status_update.log'
+      end
+    end
+
     private
 
     def group_route(client)

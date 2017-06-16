@@ -147,14 +147,17 @@ class PurchaseOrdersController < ApplicationController
   ## BUYING
 
   def accepted
+    #FIXME chequear que no esten vacios
     order = PurchaseOrder.find_by(_id: params[:id])
     # Retrieve from the system
-    oc = HTTP.headers(accept: 'application/json').get('https://integracion-2017-dev.herokuapp.com/oc/obtener/' + params[:id])
+    oc = HTTP.headers(accept: 'application/json').get(Rails.configuration.base_route_oc + 'obtener/' + params[:id])
     unless oc.code == 200
       render(json: { error: 'Orden de compra no encontrada' }, status: 404) &&
         return
     end
+    puts oc.parse
     unless oc.parse[0]['estado'] == 'aceptada'
+      puts "aca adentro"
       render(json: { error: 'Orden de compra no se encuentra aceptada en el sistema' }, status: 400) &&
         return
     end
@@ -178,7 +181,7 @@ class PurchaseOrdersController < ApplicationController
     end
     @purchase_order = PurchaseOrder.find_by(_id: params[:id])
     if @purchase_order.status == 'creada'
-      oc = HTTP.headers(accept: 'application/json').get('https://integracion-2017-dev.herokuapp.com/oc/obtener/' + params[:id])
+      oc = HTTP.headers(accept: 'application/json').get(Rails.configuration.base_route_oc + 'obtener/' + params[:id])
       if oc.code == 200
         orden_compra = oc.parse
         if orden_compra['estado'] == 'rechazada'

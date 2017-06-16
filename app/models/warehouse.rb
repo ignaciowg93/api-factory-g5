@@ -223,7 +223,7 @@ class Warehouse < ApplicationRecord
         products = HTTP.auth(generate_header(data)).headers(accept: 'application/json').get(url)
         puts(products.code)
         break if products.code == 200
-        sleep(40)
+        sleep(60)
       end
       puts "\nlinea 191\n"
       next unless products.code == 200 && !products.parse.empty?

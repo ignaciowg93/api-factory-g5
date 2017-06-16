@@ -286,7 +286,7 @@ panel "Órdenes de compras finalizadas (cantidad):" do
 
 
 
-      panel "Órdenes de compras FTP " do
+      panel "Órdenes de compras FTP " do # TODO ALTA FILTRAR POR CANAL
            # line_chart   Content.pluck("download").uniq.map { |c| { title: c, data: Content.where(download: c).group_by_day(:updated_at, format: "%B %d, %Y").count }  }, discrete: true
            # column_chart Content.group_by_hour_of_day(:updated_at, format: "%l %P").order(:download).count, {library: {title:'Downloads for all providers'}}
            # column_chart Content.group(:title).order('download DESC').limit(5).sum(:download)
