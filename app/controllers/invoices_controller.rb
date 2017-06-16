@@ -219,12 +219,12 @@ class InvoicesController < ApplicationController
             notas: 'vacio'
           }
         )
+        puts "AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        puts response
         unless response.code == 200
           render(json: { error: 'No se pudo ingresar la orden en el sistema' },
                  status: 400)
         end
-        puts "AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-        puts response
         orden = JSON.parse(response.body)
         # Save to db
         PurchaseOrder.create!(
