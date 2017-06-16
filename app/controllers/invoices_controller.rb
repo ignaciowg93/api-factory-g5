@@ -210,7 +210,7 @@ class InvoicesController < ApplicationController
           "#{Rails.configuration.base_route_oc}crear",
           json: {
             cliente: temp_boleta["cliente"],
-            proveedor: Rails.configuration.my_id,
+            proveedor: Rails.configuration.my_id, 
             sku: sku,
             fechaEntrega: (Time.zone.now + 3.day).to_f * 1000,
             cantidad: cantidad,

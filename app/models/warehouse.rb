@@ -460,7 +460,7 @@ class Warehouse < ApplicationRecord
             sleep(60)
           else
             a = production_order.to_s
-            puts("error en p_order: #{a}")
+            Rails.logger.debug ("error en p_order: #{a}")
           end
         end
       end
