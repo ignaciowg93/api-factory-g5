@@ -191,7 +191,7 @@ class InvoicesController < ApplicationController
       cantidad = params["cantidad"]
       sku = params["sku"]
       temp_invoice = HTTP.headers(:accept => "application/json").put("https://integracion-2017-prod.herokuapp.com/sii/boleta", :json => { :proveedor =>proveedor , :cliente => cliente , :total => precio_final })
-      Rails.logger.debug(temp_invoice)
+      Rails.logger.debug (temp_invoice)
       temp_result = temp_invoice.to_s
       if temp_invoice.code == 200
         temp_boleta = temp_invoice.parse
@@ -206,7 +206,44 @@ class InvoicesController < ApplicationController
         @invoice.status = temp_boleta["estado"]
         @invoice.amount = cantidad
         @invoice.sku = sku
-        
+        response = HTTP.headers(accept: 'application/json').put(
+          "#{Rails.configuration.base_route_oc}crear",
+          json: {
+            cliente: temp_boleta[cliente],
+            proveedor: Rails.configuration.my_id,
+            sku: sku,
+            fechaEntrega: (Time.zone.now + 3.day).to_f * 1000,
+            cantidad: cantidad,
+            precioUnitario: precio_final.to_i/cantidad.to_i,
+            canal: 'b2c',
+            notas: 'vacio'
+          }
+        )
+        puts "AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        unless response.code == 200
+          render(json: { error: 'No se pudo ingresar la orden en el sistema' },
+                 status: 400)
+        end
+        orden = JSON.parse(response.body)
+        # Save to db
+        Rails.logger.debug orden['_id']
+        PurchaseOrder.create!(
+          _id: orden['_id'],
+          client: orden['cliente'],
+          supplier: orden['proveedor'],
+          sku: orden['sku'],
+          delivery_date: orden['fechaEntrega'],
+          amount: orden['cantidad'].to_i,
+          delivered_qt: orden['cantidadDespachada'],
+          unit_price: orden['precioUnitario'],
+          channel: orden['canal'],
+          notes: orden['notas'],
+          rejection: orden['rechazo'],
+          anullment: orden['anulacion'],
+          created_at: orden['created_at'],
+          status: orden['estado']
+        )
+        @invoice.po_idtemp = orden['_id']
 
         if @invoice.save!
           boleta = temp_invoice.parse
@@ -226,8 +263,8 @@ class InvoicesController < ApplicationController
       if Invoice.where(invoiceid: id ).exist?
         boleta = Invoice.where(invoiceid: id ).first
         boleta.update(status: "pagada")
-        # poid = boleta.po_idtemp
-        # Warehouse.to_despacho_and_delivery(poid)
+        poid = boleta.po_idtemp
+        Warehouse.to_despacho_and_delivery(poid)
       end
     end
 
@@ -236,8 +273,8 @@ class InvoicesController < ApplicationController
       boleta = Invoice.find_by(invoiceid: id )
       if !boleta.nil?
         boleta.status = "cancelada"
-        # poid = boleta.po_idtemp
-        # PurchaseOrder.find_by(_id: poid).update(anullment: "cancelada")
+        poid = boleta.po_idtemp
+        PurchaseOrder.find_by(_id: poid).update(anullment: "cancelada")
       end
     end
 
