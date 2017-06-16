@@ -244,7 +244,7 @@ panel "Órdenes de compras finalizadas (cantidad):" do
   columns do
         column do
           panel "Órdenes de Compra FTP Recibidas" do
-            table_for PurchaseOrder.where(status: "creada", channel: "ftp").order('created_at desc') do
+            table_for PurchaseOrder.where(status: ["creada", "aceptada"], channel: "ftp").order('updated_at desc') do
               column("ID") {|poid| poid._id }
               column("SKU") {|poid| poid.sku}
               column("AMOUNT") {|poid| poid.amount}
@@ -290,7 +290,7 @@ panel "Órdenes de compras finalizadas (cantidad):" do
            # line_chart   Content.pluck("download").uniq.map { |c| { title: c, data: Content.where(download: c).group_by_day(:updated_at, format: "%B %d, %Y").count }  }, discrete: true
            # column_chart Content.group_by_hour_of_day(:updated_at, format: "%l %P").order(:download).count, {library: {title:'Downloads for all providers'}}
            # column_chart Content.group(:title).order('download DESC').limit(5).sum(:download)
-           creadas = PurchaseOrder.where(status: 'creada').count
+           creadas = PurchaseOrder.where(status: ['creada', 'aceptada']).count
            completas = PurchaseOrder.where(status: 'finalizada').count
            rechazadas = PurchaseOrder.where(status: 'rechazada').count
           # monto1 = 0
