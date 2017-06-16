@@ -48,6 +48,7 @@ require 'digest'
 # end
 
 # YA ESTAN CREADOS
+
 p3 = Product.create(sku: '3', name: 'Maíz', processed: 0, price: 117, sell_price: 140, lot: 30, ingredients: 0, dependent: 1, time: 1.726, stock_reservado: 0)
 p5 = Product.create(sku: '5', name: 'Yogur', processed: 1, price: 428, sell_price: 513,lot: 600, ingredients: 3, dependent: 0, time: 3.191, stock_reservado: 0)
 p7 = Product.create(sku: '7', name: 'Leche', processed: 0, price: 290, sell_price: 348,lot: 1000, ingredients: 0, dependent: 8, time: 1.441, stock_reservado: 0)
