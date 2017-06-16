@@ -219,6 +219,8 @@ class InvoicesController < ApplicationController
             notas: 'vacio'
           }
         )
+        Rails.logger.debug "AAAAAAAAAAAAAAAAA"
+        Rails.logger.debug response
         puts "AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
         unless response.code == 200
           render(json: { error: 'No se pudo ingresar la orden en el sistema' },
