@@ -7,5 +7,5 @@ class TransactionsController < ApplicationController
     @transaction = Transaction.new
   end
 
-  
+
 end

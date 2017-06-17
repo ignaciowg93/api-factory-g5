@@ -12,4 +12,7 @@ ActiveAdmin.register Invoice do
 #   permitted
 # end
 
+
+
+permit_params  :invoiceid,:accepted,:rejected,:delivered,:paid,:account,:price,:tax,:total_price,:proveedor,:cliente,:date,:po_idtemp, :boleta,:status,:amount,:sku
 end

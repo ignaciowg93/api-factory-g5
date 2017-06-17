@@ -12,4 +12,17 @@ ActiveAdmin.register Transaction do
 #   permitted
 # end
 
+form do |f|
+    f.inputs "Transaction Details" do
+      f.input :_id
+      f.input :origin
+      f.input :destiny
+      f.input :amount
+      f.check_box :state
+    end
+    f.actions
+  end
+
+permit_params :_id, :origin,:destiny,:amount ,:state
+
 end

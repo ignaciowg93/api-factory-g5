@@ -13,6 +13,26 @@ ActiveAdmin.register PurchaseOrder do
 #   permitted
 # end
 
+form do |f|
+    f.inputs "PurchaseOrder Details" do
+      f.input :_id
+      f.input :client
+      f.input :supplier
+      f.input :sku
+      f.select_date :delivery_date
+      f.input :amount
+      f.input :delivered_qt
+      f.input :unit_price
+      f.input :channel
+      f.input :status
+      f.input :notes
+      f.input :rejection
+      f.input :anullment
+      f.check_box :state
+    end
+    f.actions
+  end
 
+permit_params :_id, :client, :supplier, :sku,:delivery_date,:amount,:delivered_qt,:unit_price,:channel,:status,:notes,:rejection,:anullment
 
 end

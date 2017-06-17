@@ -14,4 +14,7 @@ ActiveAdmin.register Product do
 # end
 
 
+
+permit_params  :sku,:name,:price, :processed,:lot,:ingredients,:dependant, :time,:sell_price,:stock_reservado, :warehouse_id
+
 end

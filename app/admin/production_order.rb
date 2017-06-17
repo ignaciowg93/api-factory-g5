@@ -13,5 +13,16 @@ ActiveAdmin.register ProductionOrder do
 # end
 
 
+form do |f|
+    f.inputs "ProductionOrder Details" do
+      f.input :oc_id
+      f.input :sku
+      f.input :amount
+      f.select_date :est_date
+    end
+    f.actions
+  end
+
+permit_params  :sku,:amount,:oc_id, :est_date
 
 end
