@@ -33,7 +33,7 @@ class InteractionController < ApplicationController
         my_supplies.each do |supply|
           # Verificar que haya stock
           stocks = Warehouse.get_stocks
-          if supply.requierment >= stocks[supply.sku]
+          if supply.requierment > stocks[supply.sku]
             remain = supply.requierment - stocks[supply.sku]
             # FIXME: Solo se produce si hay stock
             # # Abastecerse del resto
