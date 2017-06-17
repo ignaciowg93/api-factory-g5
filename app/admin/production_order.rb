@@ -18,7 +18,7 @@ form do |f|
       f.input :oc_id
       f.input :sku
       f.input :amount
-      f.select_date :est_date
+      f.date_field :est_date
     end
     f.actions
   end

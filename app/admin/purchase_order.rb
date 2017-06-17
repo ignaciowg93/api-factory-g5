@@ -19,7 +19,7 @@ form do |f|
       f.input :client
       f.input :supplier
       f.input :sku
-      f.select_date :delivery_date
+      f.date_field :delivery_date
       f.input :amount
       f.input :delivered_qt
       f.input :unit_price
@@ -28,7 +28,6 @@ form do |f|
       f.input :notes
       f.input :rejection
       f.input :anullment
-      f.check_box :state
     end
     f.actions
   end
