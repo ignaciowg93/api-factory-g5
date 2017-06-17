@@ -21,9 +21,9 @@
 env :PATH, ENV['PATH']
 
 
-# every 30.minutes do
-#    runner "Ftp.ordenes_compra", :enviroment => "production", :output => 'log/check_status_update.log'
-# end
+every 30.minutes do
+  runner "Ftp.ordenes_compra", :enviroment => "production", :output => 'log/check_status_update.log'
+end
 
 # # every 113.minutes do
 # every 6.hours do
