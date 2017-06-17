@@ -287,9 +287,9 @@ panel "Órdenes de compras finalizadas (cantidad):" do
            # line_chart   Content.pluck("download").uniq.map { |c| { title: c, data: Content.where(download: c).group_by_day(:updated_at, format: "%B %d, %Y").count }  }, discrete: true
            # column_chart Content.group_by_hour_of_day(:updated_at, format: "%l %P").order(:download).count, {library: {title:'Downloads for all providers'}}
            # column_chart Content.group(:title).order('download DESC').limit(5).sum(:download)
-           creadas = PurchaseOrder.where(status: ['creada', 'aceptada']).count
-           completas = PurchaseOrder.where(status: 'finalizada').count
-           rechazadas = PurchaseOrder.where(status: 'rechazada').count
+           creadas = PurchaseOrder.where(status: ['creada', 'aceptada'], channel: "ftp").count
+           completas = PurchaseOrder.where(status: 'finalizada', channel: "ftp").count
+           rechazadas = PurchaseOrder.where(status: 'rechazada', channel: "ftp").count
           # monto1 = 0
            # PurchaseOrder.where(status: 'no_completada').each do |po_ord|
            #   monto1 += (po_ord.amount * po_ord.unit_price)
@@ -303,11 +303,11 @@ panel "Órdenes de compras finalizadas (cantidad):" do
        end
 
        columns do
-         creadas = [ PurchaseOrder.where(status: ['creada', 'aceptada']).count,
+         creadas = [ PurchaseOrder.where(status: ['creada', 'aceptada'], channel: "ftp").count,
                     "Recibidas"]
-         completas = [ PurchaseOrder.where(status: 'finalizada').count,
+         completas = [ PurchaseOrder.where(status: 'finalizada', channel: "ftp").count,
                       "Completadas"]
-         rechazadas = [ PurchaseOrder.where(status: 'rechazada').count,
+         rechazadas = [ PurchaseOrder.where(status: 'rechazada', channel: "ftp").count,
                        "Rechazadas"]
          total = creadas[0] + completas[0] + rechazadas[0]
          ordenes_ftp = [creadas, completas, rechazadas]
