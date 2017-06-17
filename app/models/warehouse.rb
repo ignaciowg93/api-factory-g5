@@ -291,7 +291,7 @@ class Warehouse < ApplicationRecord
   # -------------  ** ----------
 
   # -------------  ** ----------
-  # Procesados, como no se manda a producir automaticamente se 
+  # Procesados, como no se manda a producir automaticamente se
 
   def self.revisar_margarina()
     sku = '11'
@@ -324,7 +324,7 @@ class Warehouse < ApplicationRecord
   end
 
   # -------------  ** ----------
- 
+
 
   # ------------- ** --------------
   def self.revisar(sku)
@@ -374,12 +374,13 @@ class Warehouse < ApplicationRecord
         my_supplies.each do |supply|
           # Verificar que haya stock
           stocks = get_stocks
-          if supply.requierment >= stocks[supply.sku]
+          if supply.requierment > stocks[supply.sku]
             remain = supply.requierment - stocks[supply.sku]
             # FIXME: Solo se produce si hay stock
             # # Abastecerse del resto
             # abastecimiento_mp(sku, supply.sku, remain, fecha, Rails.configuration.recepcion_id)
-            render json: {error: "Faltan #{remain} unidades de sku #{supply.sku}"}, status: 400
+            #render json: {error: "Faltan #{remain} unidades de sku #{supply.sku}"}, status: 400
+            puts "Faltan #{remain} unidades de sku #{supply.sku}"
             return
           end
         end
@@ -440,29 +441,29 @@ class Warehouse < ApplicationRecord
         puts("p_order antes")
         production_order = HTTP.auth(generate_header(data)).headers(:accept => "application/json").put(Rails.configuration.base_route_bodega + "fabrica/fabricar", :json => { :sku => sku, :cantidad => to_produce, :trxId =>  trx1.parse["_id"]})
         puts("p_order dsps")
-        production_order_to_save = ProductionOrder.new
-        production_order_to_save.sku = sku
-        production_order_to_save.amount =  to_produce
-        production_order_to_save.est_date = production_order.parse["disponible"]
         # FIXME guardar hora de entrega
-        Rails.logger.debug "Es en mandar a producir"
-        if production_order_to_save.save!
-          if production_order.code == 200
-            puts("en el if: #{production_order.parse}")
-            # podría quizás guardar la fecha esperada de entrega, estado despachado, etc.
-            # guradar orden de produccion
-            if longest_time < production_order.parse["disponible"]
-              longest_time = production_order.parse["disponible"]
-            end
-            remaining -= 5000
-          elsif production_order.code == 429
-            puts("en el else if")
-            #esperar 1 minuto
-            sleep(60)
-          else
-            a = production_order.to_s
-            Rails.logger.debug ("error en p_order: #{a}")
+        if production_order.code == 200
+          Rails.logger.debug "Es en mandar a producir"
+          production_order_to_save = ProductionOrder.new
+          production_order_to_save.sku = sku
+          production_order_to_save.amount =  to_produce
+          production_order_to_save.est_date = production_order.parse["disponible"]
+          production_order.save!
+          puts("en el if: #{production_order.parse}")
+          # podría quizás guardar la fecha esperada de entrega, estado despachado, etc.
+          # guradar orden de produccion
+          if longest_time < production_order.parse["disponible"]
+            longest_time = production_order.parse["disponible"]
           end
+          remaining -= 5000
+        elsif production_order.code == 429
+          puts("en el else if")
+          #esperar 1 minuto
+          sleep(60)
+        else
+          a = production_order.to_s
+          Rails.logger.debug ("error en p_order: #{a}")
+          puts("error en p_order: #{a}")
         end
       end
     end
@@ -471,10 +472,12 @@ class Warehouse < ApplicationRecord
   def self.move_to_despacho(qty, sku)
     products = ""
     remaining = qty
+    #@almacenes = get_almacenes
     while remaining > 0 do
       @almacenes.each do |almacen|
         next if almacen["despacho"]
         limit = (remaining if remaining < 200) || 200
+        puts "limit es #{limit}"
         data = "GET#{almacen["_id"]}#{sku}" #GETalmacenIdsku
         route = "#{Rails.configuration.base_route_bodega}stock?almacenId=#{almacen["_id"]}&sku=#{sku}&limit=#{limit}"
         loop do
@@ -494,7 +497,9 @@ class Warehouse < ApplicationRecord
             sleep(15)
           end
           remaining -= 1
+          puts "ahora quedan #{remaining}"
         end
+        break if remaining == 0
       end
     end
   end

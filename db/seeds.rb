@@ -144,5 +144,8 @@ require 'digest'
 # Product.find_by(sku: '7').update(stock_reservado: 0)
 
 #Cambios cami
-PurchaseOrder.find_by(_id: '594378cfab8042000470337f').update(delivered_qt: 70)
-PurchaseOrder.find_by(_id: '594378cfab8042000470337f').update(status: 'finalizada')
+# PurchaseOrder.find_by(_id: '594378cfab8042000470337f').update(delivered_qt: 70)
+# PurchaseOrder.find_by(_id: '594378cfab8042000470337f').update(status: 'finalizada')
+
+ProductionOrder.destroy_all(sku: "17")
+ProductionOrder.create(sku:"17", amount:1000, est_date:"2017-06-17T00:22:53.225Z")
