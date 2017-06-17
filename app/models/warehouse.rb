@@ -379,7 +379,7 @@ class Warehouse < ApplicationRecord
             # FIXME: Solo se produce si hay stock
             # # Abastecerse del resto
             # abastecimiento_mp(sku, supply.sku, remain, fecha, Rails.configuration.recepcion_id)
-            #render json: {error: "Faltan #{remain} unidades de sku #{supply.sku}"}, status: 400
+            render json: {error: "Faltan #{remain} unidades de sku #{supply.sku}"}, status: 400
             puts "Faltan #{remain} unidades de sku #{supply.sku}"
             return
           end
