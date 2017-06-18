@@ -88,7 +88,7 @@ class InvoicesController < ApplicationController
               render json: {ok: "Factura resuelta recibida exitosamente " }, status: 201
               # se despacha (omitir el thread completo si se decide)
               Thread.new do
-                Warehouse.to_despacho_and_delivery(ordenId)
+                Warehouse.to_despacho_and_delivery(orden_Id)
                 # notificar del despacho
                 despachado = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").patch("#{client_url}invoices/#{params[:id]}/delivered")
               end
@@ -210,7 +210,7 @@ class InvoicesController < ApplicationController
           "#{Rails.configuration.base_route_oc}crear",
           json: {
             cliente: temp_boleta["cliente"],
-            proveedor: Rails.configuration.my_id, 
+            proveedor: Rails.configuration.my_id,
             sku: sku,
             fechaEntrega: (Time.zone.now + 3.day).to_f * 1000,
             cantidad: cantidad,

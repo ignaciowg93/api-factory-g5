@@ -33,7 +33,7 @@ class InteractionController < ApplicationController
         my_supplies.each do |supply|
           # Verificar que haya stock
           stocks = Warehouse.get_stocks
-          if supply.requierment >= stocks[supply.sku]
+          if supply.requierment > stocks[supply.sku]
             remain = supply.requierment - stocks[supply.sku]
             # FIXME: Solo se produce si hay stock
             # # Abastecerse del resto
@@ -48,16 +48,16 @@ class InteractionController < ApplicationController
           move_to_despacho(supply.requierment, supply.sku)
         end
         # Producir un solo lote
-        mandar_a_producir(lot,product, sku)
+        mandar_a_producir(lot,product, sku, lot)
       end
     else
       puts "no procesado"
       # Producir todo
-      mandar_a_producir(to_produce, product, sku)
+      mandar_a_producir(to_produce, product, sku, lot)
     end
   end
 
-  def mandar_a_producir(quantity, product, sku)
+  def mandar_a_producir(quantity, product, sku, lot)
     puts "en mandar a producir"
     remaining = quantity
     # Producir
