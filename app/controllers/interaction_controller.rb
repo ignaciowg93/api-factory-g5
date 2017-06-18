@@ -48,16 +48,16 @@ class InteractionController < ApplicationController
           move_to_despacho(supply.requierment, supply.sku)
         end
         # Producir un solo lote
-        mandar_a_producir(lot,product, sku)
+        mandar_a_producir(lot,product, sku, lot)
       end
     else
       puts "no procesado"
       # Producir todo
-      mandar_a_producir(to_produce, product, sku)
+      mandar_a_producir(to_produce, product, sku, lot)
     end
   end
 
-  def mandar_a_producir(quantity, product, sku)
+  def mandar_a_producir(quantity, product, sku, lot)
     puts "en mandar a producir"
     remaining = quantity
     # Producir
