@@ -91,6 +91,8 @@ class InvoicesController < ApplicationController
                 Warehouse.to_despacho_and_delivery(orden_Id)
                 # notificar del despacho
                 despachado = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").patch("#{client_url}invoices/#{params[:id]}/delivered")
+                factura.delivered = true
+                factura.save!
               end
             else
               render json:{error: "Factura rechazada o anulada"}, status: 403
@@ -134,18 +136,18 @@ class InvoicesController < ApplicationController
           puts "por pagar es #{por_pagar}"
           if recibido >= por_pagar
             # revisar que esté como pendiente en el sistema
-            if Invoice.por_pagar(params[:id])
-              # marca en el sistema como pagado
-              marca_pagado = HTTP.headers(:accept => "application/json").post(Rails.configuration.base_route_factura + "pay", :json => {:id => params[:id]})
-              puts "marca_pagado: #{marca_pagado}"
-              # marca factura como pagado
-              factura.paid = true
-              factura.save!
-              #responde
-              render json: {ok: "Aviso de pago recibido exitosamente, confirmado." }, status: 201
-            else
-              render json:{error: "Id no asociado a factura por pagar"}, status: 404
-            end
+            #if Invoice.por_pagar(params[:id]) TODO lo saqué porque a veces los otros las marcaban pagadas
+            # marca en el sistema como pagado
+            marca_pagado = HTTP.headers(:accept => "application/json").post(Rails.configuration.base_route_factura + "pay", :json => {:id => params[:id]})
+            puts "marca_pagado: #{marca_pagado}"
+            # marca factura como pagado
+            factura.paid = true
+            factura.save!
+            #responde
+            render json: {ok: "Aviso de pago recibido exitosamente, confirmado." }, status: 201
+            # else
+            #   render json:{error: "Id no asociado a factura por pagar"}, status: 404
+            # end
           else
             render json: {ok: "Transacción no cumple el monto" }, status: 404
           end
