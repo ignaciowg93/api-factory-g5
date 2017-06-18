@@ -159,7 +159,7 @@ class Invoice < ApplicationRecord
       #notifico de factura aceptada al proveedor
       notification = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").patch("#{proveedor_url}invoices/#{factura_id}/accepted")
       #notification = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").patch("http://localhost:3000/invoices/#{factura_id}/accepted")
-      pago = Invoice.pagar_factura(fact["total"], cuenta_banco, factura_id)
+      pago = Invoice.pagar_factura(fact["total"], cuenta_banco, factura_id, proveedor_url)
       puts "banco responde #{pago}"
       if pago.code == 200
         inv.paid = true
@@ -187,11 +187,11 @@ class Invoice < ApplicationRecord
   end
 
 
-  def self.pagar_factura(monto, cuenta_cliente, factura_id)
+  def self.pagar_factura(monto, cuenta_cliente, factura_id, proveedor_url)
     trx = HTTP.headers(:accept => "application/json").put(Rails.configuration.base_route_banco + "trx", :json => { :monto => monto, :origen => Rails.configuration.banco_id, :destino => cuenta_cliente})
     #return trx.code
     if trx.code == 200
-      notification = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").patch("#{client_url}invoices/#{factura_id}/paid", json: {id_transaction: trx.parse["_id"]})
+      notification = HTTP.headers(:accept => "application/json", "X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").patch("#{proveedor_url}invoices/#{factura_id}/paid", json: {id_transaction: trx.parse["_id"]})
     end
     return trx
   end
