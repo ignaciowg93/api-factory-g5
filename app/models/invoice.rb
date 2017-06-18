@@ -25,7 +25,7 @@
 #
 
 class Invoice < ApplicationRecord
-  belongs_to :purchase_order, optional: true
+#  belongs_to :purchase_order, optional: true
 
   validates :invoiceid, uniqueness: true
 
