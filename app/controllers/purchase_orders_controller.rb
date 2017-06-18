@@ -135,12 +135,13 @@ class PurchaseOrdersController < ApplicationController
     return unless order && order.can_be_served?
 
     PurchaseOrder.acceptPurchaseOrder(params[:id])
-    grupo = Client.find_by(name: order.client).gnumber
+    client = Client.find_by(name: order.client)
+    grupo = client.gnumber
     HTTP.headers(accept: 'application/json').patch(group_route(grupo) + params[:id] + '/accepted')
 
     Invoice.create_invoice(params[:id], false)
     # Notificar envio factura
-    HTTP.headers(:accept => 'application/json', 'X-ACCESS-TOKEN' => Rails.configuration.my_id.to_s).put("#{client_url}invoices/#{factura_id}", json: { bank_account: Rails.configuration.banco_id })
+    HTTP.headers(:accept => 'application/json', 'X-ACCESS-TOKEN' => Rails.configuration.my_id.to_s).put("#{client.url}invoices/#{factura_id}", json: { bank_account: Rails.configuration.banco_id })
     # Se despacha al aceptar la factura
   end
 

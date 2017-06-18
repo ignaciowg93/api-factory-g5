@@ -390,16 +390,16 @@ class Warehouse < ApplicationRecord
           Warehouse.move_to_despacho(supply.requierment, supply.sku)
         end
         # Producir un solo lote
-        Warehouse.mandar_a_producir(lot,product, sku)
+        Warehouse.mandar_a_producir(lot,product, sku, lot)
       end
     else
       puts "no procesado"
       # Producir todo
-      Warehouse.mandar_a_producir(to_produce, product, sku)
+      Warehouse.mandar_a_producir(to_produce, product, sku, lot)
     end
   end
 
-  def self.mandar_a_producir(quantity, product, sku)
+  def self.mandar_a_producir(quantity, product, sku, lot)
     puts "en mandar a producir"
     remaining = quantity
     # Producir
