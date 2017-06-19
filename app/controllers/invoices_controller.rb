@@ -264,7 +264,10 @@ class InvoicesController < ApplicationController
 
     def confirm_boleta
       id = params["_id"]
+      Rails.logger.debug "AAAAAA"
+      Rails.logger.debug id
       @boleta = Invoice.find_by(invoiceid: id )
+      Rails.logger.debug @boleta
       if !@boleta.nil?
         
         @boleta.update(status: "pagada")
@@ -275,6 +278,7 @@ class InvoicesController < ApplicationController
 
     def fail
       id = params["_id"]
+      
       @boleta = Invoice.find_by(invoiceid: id )
       if !@boleta.nil?
         @boleta.update(status: "cancelada")
