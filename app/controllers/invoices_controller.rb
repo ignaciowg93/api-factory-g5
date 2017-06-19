@@ -264,20 +264,21 @@ class InvoicesController < ApplicationController
 
     def confirm_boleta
       id = params["_id"]
-      if Invoice.where(invoiceid: id ).exist?
-        boleta = Invoice.where(invoiceid: id ).first
-        boleta.update(status: "pagada")
-        poid = boleta.po_idtemp
+      @boleta = Invoice.find_by(invoiceid: id )
+      if !@boleta.nil?
+        
+        @boleta.update(status: "pagada")
+        poid = @boleta.po_idtemp
         Warehouse.to_despacho_and_delivery(poid)
       end
     end
 
     def fail
       id = params["_id"]
-      boleta = Invoice.find_by(invoiceid: id )
-      if !boleta.nil?
-        boleta.status = "cancelada"
-        poid = boleta.po_idtemp
+      @boleta = Invoice.find_by(invoiceid: id )
+      if !@boleta.nil?
+        @boleta.update(status: "cancelada")
+        poid = @boleta.po_idtemp
         PurchaseOrder.find_by(_id: poid).update(anullment: "cancelada")
       end
     end
