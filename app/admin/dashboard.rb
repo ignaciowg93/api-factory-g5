@@ -202,7 +202,7 @@ panel "Órdenes de compras finalizadas (cantidad):" do
 
 
 
-       pie_chart({"Aprobadas" => monto1, "Rechazadas" => monto2})
+       pie_chart({"Completas" => monto1, "Incompletas" => monto2})
        #pie_chart({"Football" => 10, "Basketball" => 5})
        ##
        # line_chart result.each(:as => :hash) { |item|
@@ -212,12 +212,11 @@ panel "Órdenes de compras finalizadas (cantidad):" do
 
     columns do
       column do
-        panel "Transacciones Aprobadas" do
-          table_for Transaction.where(:state ==true).order('created_at desc') do
-            column("ID") {|tran| tran._id }
-            column("ORIGEN") {|tran| tran.origin }
-            column("DESTINO") {|tran| tran.destiny }
-            column("MONTO") {|tran| tran.amount }
+        panel "Transacciones(compras) Completadas" do
+          table_for Invoice.where(status: "pagada", boleta: true).order('created_at desc') do
+            column("ID") {|tran| tran.invoiceid }
+            column("CLIENTE") {|tran| tran.cliente }
+            column("MONTO") {|tran| tran.total_price }
 
           end
         end
@@ -227,13 +226,11 @@ panel "Órdenes de compras finalizadas (cantidad):" do
 
     columns do
       column do
-        panel "Transacciones Rechazadas" do
-          table_for Transaction.where(:state ==false).order('created_at desc') do
-            column("ID") {|tran| tran._id }
-            column("ORIGEN") {|tran| tran.origin }
-            column("DESTINO") {|tran| tran.destiny }
-            column("MONTO") {|tran| tran.amount }
-
+        panel "Transacciones(compras) interrumpidas" do
+          table_for Invoice.where(boleta: true).where.not(status: "pagada").order('created_at desc') do
+            column("ID") {|tran| tran.invoiceid }
+            column("CLIENTE") {|tran| tran.cliente }
+            column("MONTO") {|tran| tran.total_price }
           end
         end
       end
