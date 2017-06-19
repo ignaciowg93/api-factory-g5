@@ -194,8 +194,10 @@ panel "Órdenes de compras finalizadas (cantidad):" do
        # line_chart   Content.pluck("download").uniq.map { |c| { title: c, data: Content.where(download: c).group_by_day(:updated_at, format: "%B %d, %Y").count }  }, discrete: true
        # column_chart Content.group_by_hour_of_day(:updated_at, format: "%l %P").order(:download).count, {library: {title:'Downloads for all providers'}}
        # column_chart Content.group(:title).order('download DESC').limit(5).sum(:download)
-       monto1 = Transaction.where(state: true).count
-       monto2 = Transaction.where(state: false).count
+       #monto1 = Transaction.where(state: true).count
+       #monto2 = Transaction.where(state: false).count
+       monto1 = Invoice.where(status: "pagada", boleta: true).count
+       monto2 = Transaction.where(boleta: true).count - monto1
 
 
 
