@@ -99,7 +99,7 @@ class Invoice < ApplicationRecord
         fact_temp.amount = fact["oc"]["cantidad"]
         fact_temp.sku = fact["oc"]["sku"]
         if fact_temp.save!
-          return true
+          return fact_temp
         end
       end
       sleep(20)
