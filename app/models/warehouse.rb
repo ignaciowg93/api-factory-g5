@@ -139,6 +139,7 @@ class Warehouse < ApplicationRecord
               sleep(60) if deliver.code == 429
               sleep(15)
             end
+
           elsif canal == 'b2c' || canal == 'ftp'
             route = "#{Rails.configuration.base_route_bodega}stock"
             data = "DELETE#{product['_id']}#{direccion}#{precio}#{poid}"

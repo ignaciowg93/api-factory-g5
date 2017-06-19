@@ -245,7 +245,8 @@ class InvoicesController < ApplicationController
           rejection: orden['rechazo'],
           anullment: orden['anulacion'],
           created_at: orden['created_at'],
-          status: orden['estado']
+          status: orden['estado'],
+          direccion: orden['cliente'] 
         )
         @invoice.po_idtemp = orden['_id']
 
