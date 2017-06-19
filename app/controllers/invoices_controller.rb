@@ -271,7 +271,7 @@ class InvoicesController < ApplicationController
       if !@boleta.nil?        
         @boleta.update(status: "pagada")
         poid = @boleta.po_idtemp
-        Warehouse.to_despacho_and_delivery(poid)
+        Warehouse.to_despacho_and_delivery(poid)        
       end
     end
 
