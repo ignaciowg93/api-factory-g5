@@ -1,14 +1,15 @@
+</br>
 <h1>Tu compra se ha realizado con éxito!!</h1>
-
+</br>
 
 <h3>Cliente: <%= @boleta.cliente %></h3>
 <h3>Proveedor: <%= @boleta.proveedor %></h3>
-<h3>Bruto: <%= @boleta.bruto %></h3>
-<h3>IVA: <%= @boleta.iva %></h3>
-<h3>Total: <%= @boleta.total %></h3>
+<h3>Bruto: <%= @boleta.price %></h3>
+<h3>IVA: <%= @boleta.tax %></h3>
+<h3>Total: <%= @boleta.total_price %></h3>
 <h3>id invoice: <%= @boleta._id %></h3>
 <h3>Sku: <%= @boleta.sku %></h3>
-<h3>Cantidad: <%= @boleta.cantidad %></h3>
-<h3>Direccion: <%= @boleta.direccion %></h3>
-    
+<h3>Cantidad: <%= @boleta.amount %></h3>
+</br>
+
 <%= link_to "Regresar a la tienda", spree_path %>
