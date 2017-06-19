@@ -197,7 +197,7 @@ panel "Órdenes de compras finalizadas (cantidad):" do
        #monto1 = Transaction.where(state: true).count
        #monto2 = Transaction.where(state: false).count
        monto1 = Invoice.where(status: "pagada", boleta: true).count
-       monto2 = Transaction.where(boleta: true).count - monto1
+       monto2 = Invoice.where(boleta: true).count - monto1
 
 
 
