@@ -270,8 +270,10 @@ class InvoicesController < ApplicationController
       Rails.logger.debug @boleta.po_idtemp
       if !@boleta.nil?        
         @boleta.update(status: "pagada")
-        poid = @boleta.po_idtemp
-        Warehouse.to_despacho_and_delivery(poid)        
+        Thread.new do
+          poid = @boleta.po_idtemp
+          Warehouse.to_despacho_and_delivery(poid)
+        end        
       end
     end
 
