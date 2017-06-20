@@ -26,9 +26,9 @@ every 30.minutes do
 end
 
 # # every 113.minutes do
-# every 6.hours do
-#    runner "Warehouse.revisar_maiz", :enviroment => "production", :output => 'log/maiz.log'
-# end
+every 6.hours do
+   runner "Warehouse.revisar_maiz", :enviroment => "production", :output => 'log/maiz.log'
+end
 
 # # every 201.minutes do
 # every 6.hours do

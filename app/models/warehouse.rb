@@ -332,7 +332,7 @@ class Warehouse < ApplicationRecord
     producto = (Product.find_by(sku: sku))
     # puts 'voy a llamar ge stock by sku con: #{producto.sku}'
     stock = get_stock_by_sku(producto) #Obtengo el stock actual de maiz
-    stock_minimo = 1000 #Stock minimo que debe haber de la materia prima
+    stock_minimo = 2000 #Stock minimo que debe haber de la materia prima
     # puts 'entrando al stock'
     puts stock
     if stock <= stock_minimo #Si tenemos menos stock del que deberia haber
