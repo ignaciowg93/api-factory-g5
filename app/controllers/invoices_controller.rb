@@ -126,7 +126,7 @@ class InvoicesController < ApplicationController
           return
       end
       begin
-        transaction_rec = HTTP.headers(:accept => "application/json").get(Rails.configuration.base_route_banco + "trx/" + params[:id_transaction], :json => {:id_transaction => params[:id_transaction]})
+        transaction_rec = HTTP.headers(:accept => "application/json").get(Rails.configuration.base_route_banco + "trx/" + params[:id_transaction])
         puts "transaction es #{transaction_rec}"
         if transaction_rec.code == 200
           recibido = transaction_rec.parse[0]["monto"]
@@ -246,7 +246,7 @@ class InvoicesController < ApplicationController
           anullment: orden['anulacion'],
           created_at: orden['created_at'],
           status: orden['estado'],
-          direccion: orden['cliente'] 
+          direccion: orden['cliente']
         )
         @invoice.po_idtemp = orden['_id']
 
@@ -269,18 +269,18 @@ class InvoicesController < ApplicationController
       Rails.logger.debug id
       @boleta = Invoice.find_by(invoiceid: id )
       Rails.logger.debug @boleta.po_idtemp
-      if !@boleta.nil?        
+      if !@boleta.nil?
         @boleta.update(status: "pagada")
         Thread.new do
           poid = @boleta.po_idtemp
           Warehouse.to_despacho_and_delivery(poid)
-        end        
+        end
       end
     end
 
     def fail
       id = params["_id"]
-      
+
       @boleta = Invoice.find_by(invoiceid: id )
       if !@boleta.nil?
         @boleta.update(status: "cancelada")

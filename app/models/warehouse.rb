@@ -211,6 +211,57 @@ class Warehouse < ApplicationRecord
     end
   end
 
+  def self.vaciar_recepcion
+    # revisar el almacen intermedio principal y ver su capacidad
+    almacenes_req = HTTP.auth(generate_header('GET')).headers(accept: 'application/json').get(Rails.configuration.base_route_bodega + 'almacenes')
+    almacenes = almacenes_req.parse
+    capacidad_disponible1 = 0
+    capacidad_disponible2 = 0
+    # quizas conviene cortar el loop, aunque no es mucha pega
+    almacenes.each do |almacen|
+      if almacen['_id'] == Rails.configuration.intermedio_id_1
+        capacidad_disponible1 = almacen['totalSpace'] - almacen['usedSpace']
+      elsif almacen['_id'] == Rails.configuration.intermedio_id_2
+        capacidad_disponible2 = almacen['totalSpace'] - almacen['usedSpace']
+      end
+    end
+    # mover skus en recepcion
+    data = "GET#{Rails.configuration.recepcion_id}"
+    skus = HTTP.auth(generate_header(data)).headers(accept: 'application/json').get(Rails.configuration.base_route_bodega + "skusWithStock?almacenId=#{Rails.configuration.recepcion_id}")
+    puts skus.parse
+    # aplicar mover(sku_qty)
+    skus.parse.each do |alm_prod|
+      # mover cada sku
+      mover_prods(alm_prod['_id'], alm_prod['total'], Rails.configuration.recepcion_id, capacidad_disponible1, capacidad_disponible2)
+    end
+  end
+
+  def self.vaciar_pulmon
+    # revisar el almacen intermedio principal y ver su capacidad
+    almacenes_req = HTTP.auth(generate_header('GET')).headers(accept: 'application/json').get(Rails.configuration.base_route_bodega + 'almacenes')
+    almacenes = almacenes_req.parse
+    capacidad_disponible1 = 0
+    capacidad_disponible2 = 0
+    # quizas conviene cortar el loop, aunque no es mucha pega
+    almacenes.each do |almacen|
+      if almacen['_id'] == Rails.configuration.intermedio_id_1
+        capacidad_disponible1 = almacen['totalSpace'] - almacen['usedSpace']
+      elsif almacen['_id'] == Rails.configuration.intermedio_id_2
+        capacidad_disponible2 = almacen['totalSpace'] - almacen['usedSpace']
+      end
+    end
+    puts "capacidad disponible alm1: #{capacidad_disponible1}, alm2: #{capacidad_disponible2}"
+    # mover skus en pulmon
+    data = "GET#{Rails.configuration.pulmon_id}"
+    skus = HTTP.auth(generate_header(data)).headers(accept: 'application/json').get(Rails.configuration.base_route_bodega + "skusWithStock?almacenId=#{Rails.configuration.pulmon_id}")
+    puts skus.parse
+    # aplicar mover(sku_qty)
+    skus.parse.each do |alm_prod|
+      # mover cada sku
+      mover_prods(alm_prod['_id'], alm_prod['total'], Rails.configuration.pulmon_id, capacidad_disponible1, capacidad_disponible2)
+    end
+  end
+
   def self.mover_prods(sku, remaining, almacen_id, capacidad1, capacidad2)
     puts 'metodo mover_prods (linea 177)'
     data = 'GET' + almacen_id + sku
@@ -332,7 +383,7 @@ class Warehouse < ApplicationRecord
     producto = (Product.find_by(sku: sku))
     # puts 'voy a llamar ge stock by sku con: #{producto.sku}'
     stock = get_stock_by_sku(producto) #Obtengo el stock actual de maiz
-    stock_minimo = 2000 #Stock minimo que debe haber de la materia prima
+    stock_minimo = 1000 #Stock minimo que debe haber de la materia prima
     # puts 'entrando al stock'
     puts stock
     if stock <= stock_minimo #Si tenemos menos stock del que deberia haber
@@ -449,7 +500,7 @@ class Warehouse < ApplicationRecord
           production_order_to_save.sku = sku
           production_order_to_save.amount =  to_produce
           production_order_to_save.est_date = production_order.parse["disponible"]
-          production_order.save!
+          production_order_to_save.save!
           puts("en el if: #{production_order.parse}")
           # podría quizás guardar la fecha esperada de entrega, estado despachado, etc.
           # guradar orden de produccion
