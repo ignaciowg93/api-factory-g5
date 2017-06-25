@@ -31,6 +31,7 @@ require 'rest-client'
 require 'net/http'
 require 'uri'
 require 'typhoeus'
+require 'bunny'
 
 class Product < ApplicationRecord
 
@@ -60,7 +61,7 @@ class Product < ApplicationRecord
 	def self.crear_string(data)
 		string_hash = "INTEGRACION grupo5:"
 		header_agregar = string_hash+encrypt(data)
-	end	
+	end
 
 
 	def self.getAuth()
@@ -83,7 +84,7 @@ class Product < ApplicationRecord
 		# pedimos el arreglo de almacenes
 		almacenes = HTTP.auth(auth_header).headers(:accept => "application/json").get("https://integracion-2017-dev.herokuapp.com/bodega/almacenes")
 		puts 'resultado:'
-		puts almacenes	
+		puts almacenes
 		return almacenes
 	end
 
@@ -179,5 +180,32 @@ class Product < ApplicationRecord
     	end
     	stock
     end
+
+		def self.revisar_ofertas()
+			STDOUT.sync = true
+			conn = Bunny.new("amqp://hwlepmrs:uPDTlJqmGIB95x7jdafvpBMBb-pK7PPV@fish.rmq.cloudamqp.com/hwlepmrs")
+			conn.start
+
+			ch = conn.create_channel
+			q  = ch.queue("ofertas", :auto_delete => true)
+			x  = ch.default_exchange
+
+
+			q.subscribe do |delivery_info, metadata, payload|
+			  puts payload
+			  payload = JSON.parse(payload)
+			  #msg_tp = "MENSAJE DE PRUEBA DESDE API"
+			  if !payload["publicar"]
+					product = (Product.find_by sku: payload["sku"]).name
+			    to_publi = "Ahora+nuestro+#{product}+a+tan+solo+$#{payload["precio"]}!"
+			    publi = HTTP.post("https://graph.facebook.com/307193066399367/feed?message=#{to_publi}&access_token=EAADxlJnEikwBAMhlvuWmPkZAX6kWLDhZACdjf7O1QKfzHwd3UBMqZCD76yObHWGZCAhvWhGOG9hHe9Bz4nu4m8hspeCkt7I5zWmXm0IPzTmmiZAWNkpkSSLtyopmv3RjGEPk24ZCg6rD8kpO76oen3ZCkWhEj391bHXVXXvnxNvF8OcgVTtLzep")
+			    puts publi
+			  end
+			  sleep(5)
+
+			end
+			sleep 1.0
+			conn.close
+		end
 
 end

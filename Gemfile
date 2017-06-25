@@ -30,6 +30,9 @@ gem "http"  #https://github.com/httprb/http/tree/2-x-stable
 gem 'activeadmin'
 gem 'whenever'
 gem 'activesupport', '~> 5.0.3'
+gem 'json'
+gem 'redis'
+gem 'bunny'
 
 group :development, :test do
   gem 'byebug', platform: :mri
