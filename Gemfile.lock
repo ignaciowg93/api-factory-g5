@@ -56,6 +56,7 @@ GEM
       public_suffix (~> 2.0, >= 2.0.2)
     airbrussh (1.2.0)
       sshkit (>= 1.6.1, != 1.7.0)
+    amq-protocol (2.2.0)
     annotate (2.7.2)
       activerecord (>= 3.2, < 6.0)
       rake (>= 10.4, < 13.0)
@@ -73,6 +74,8 @@ GEM
       thor (~> 0.19)
     buftok (0.2.0)
     builder (3.2.3)
+    bunny (2.7.0)
+      amq-protocol (>= 2.2.0)
     byebug (9.0.6)
     capistrano (3.8.1)
       airbrussh (>= 1.0.0)
@@ -233,6 +236,7 @@ GEM
     rb-inotify (0.9.8)
       ffi (>= 0.5.0)
     rdoc (4.3.0)
+    redis (3.3.3)
     responders (2.4.0)
       actionpack (>= 4.2.0, < 5.3)
       railties (>= 4.2.0, < 5.3)
@@ -318,6 +322,7 @@ DEPENDENCIES
   activesupport (~> 5.0.3)
   annotate
   bootstrap-sass (= 3.3.6)
+  bunny
   byebug
   capistrano (~> 3.7, >= 3.7.1)
   capistrano-passenger (~> 0.2.0)
@@ -332,12 +337,14 @@ DEPENDENCIES
   http
   jbuilder (~> 2.5)
   jquery-rails
+  json
   listen (~> 3.0.5)
   net-sftp
   net-ssh
   pg (= 0.18.4)
   puma (~> 3.0)
   rails (~> 5.0.0, >= 5.0.0.1)
+  redis
   rest-client
   rf-rest-open-uri
   ruby-hmac
