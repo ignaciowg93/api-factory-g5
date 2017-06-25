@@ -20,9 +20,9 @@
 # Learn more: http://github.com/javan/whenever
 env :PATH, ENV['PATH']
 
-every 5.minutes do
-   runner "Product.revisar_ofertas", :enviroment => "production", :output => 'log/ofertas.log'
-end
+# every 5.minutes do
+#    runner "Product.revisar_ofertas", :enviroment => "production", :output => 'log/ofertas.log'
+# end
 
 every 1.hour do
    runner "Warehouse.vaciar_pulmon", :enviroment => "production", :output => 'log/pulmon.log'
