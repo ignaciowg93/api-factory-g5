@@ -195,9 +195,9 @@ class Product < ApplicationRecord
 			  puts payload
 			  payload = JSON.parse(payload)
 			  #msg_tp = "MENSAJE DE PRUEBA DESDE API"
-			  if !payload["publicar"]
+			  if payload["publicar"]
 					product = (Product.find_by sku: payload["sku"]).name
-			    to_publi = "Ahora+nuestro+#{product}+a+tan+solo+$#{payload["precio"]}!"
+					to_publi = "Ahora+nuestro+sku+#{payload["sku"]}+a+tan+solo+$#{payload["precio"]}.+Aprovecha+esta+oferta+con+el+codigo+#{payload["codigo"]}!"
 			    publi = HTTP.post("https://graph.facebook.com/307193066399367/feed?message=#{to_publi}&access_token=EAADxlJnEikwBAMhlvuWmPkZAX6kWLDhZACdjf7O1QKfzHwd3UBMqZCD76yObHWGZCAhvWhGOG9hHe9Bz4nu4m8hspeCkt7I5zWmXm0IPzTmmiZAWNkpkSSLtyopmv3RjGEPk24ZCg6rD8kpO76oen3ZCkWhEj391bHXVXXvnxNvF8OcgVTtLzep")
 			    puts publi
 			  end
