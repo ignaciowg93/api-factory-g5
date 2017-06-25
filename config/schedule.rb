@@ -20,7 +20,7 @@
 # Learn more: http://github.com/javan/whenever
 env :PATH, ENV['PATH']
 
-every 2.hours do
+every 30.minutes do
    runner "Product.revisar_ofertas", :enviroment => "production", :output => 'log/ofertas.log'
 end
 
