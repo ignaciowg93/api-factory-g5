@@ -322,7 +322,7 @@ DEPENDENCIES
   activesupport (~> 5.0.3)
   annotate
   bootstrap-sass (= 3.3.6)
-  bunny
+  bunny (>= 2.7.0)
   byebug
   capistrano (~> 3.7, >= 3.7.1)
   capistrano-passenger (~> 0.2.0)

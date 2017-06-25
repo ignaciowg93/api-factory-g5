@@ -32,7 +32,7 @@ gem 'whenever'
 gem 'activesupport', '~> 5.0.3'
 gem 'json'
 gem 'redis'
-gem 'bunny'
+gem "bunny", ">= 2.7.0"
 
 group :development, :test do
   gem 'byebug', platform: :mri

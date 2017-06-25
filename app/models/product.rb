@@ -18,8 +18,8 @@
 #  stock_reservado :integer
 #
 
-require "http"
 require 'rubygems'
+require "http"
 require 'base64'
 require 'cgi'
 require 'hmac-sha1'
