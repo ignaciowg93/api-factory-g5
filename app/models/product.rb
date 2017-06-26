@@ -212,9 +212,10 @@ class Product < ApplicationRecord
 						publi_twitter = client.update(to_publi_tweet)
 						#client.update_with_media("I'm tweeting with @gem!", File.new("/path/to/media.png"))
 						puts publi
-     			else
-						puts("Producto no es nuestro")
-         	end
+                    end
+     		  else
+				puts("Producto no es nuestro")
+         	  end
 			  sleep(5)
 			end
 			sleep 1.0
