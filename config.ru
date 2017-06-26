@@ -14,7 +14,7 @@ if defined?(PhusionPassenger) # otherwise it breaks rake commands if you put thi
 
        $rabbitmq_channel    = $rabbitmq_connection.create_channel
 
-       q  = $rabbitmq_channel.queue("ofertas", :auto_delete => true)
+        q  = $rabbitmq_channel.queue("ofertas", :auto_delete => true)
    			x  = $rabbitmq_channel.default_exchange
 
 
@@ -29,12 +29,12 @@ if defined?(PhusionPassenger) # otherwise it breaks rake commands if you put thi
    			    puts publi
    			  end
    			  sleep(5)
+        end
     end
   end
-
   PhusionPassenger.on_event(:stopping_worker_process) do
     if $rabbitmq_connection
-      $rabbitmq_connection.close
+        $rabbitmq_connection.close
     end
   end
 end
