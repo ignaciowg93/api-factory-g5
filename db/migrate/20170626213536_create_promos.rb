@@ -3,7 +3,7 @@ class CreatePromos < ActiveRecord::Migration[5.0]
     create_table :promos do |t|
       t.string :sku
       t.integer :precio
-      t.dateime :inicio
+      t.datetime :inicio
       t.datetime :fin
       t.string :codigo
 
