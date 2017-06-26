@@ -2,7 +2,7 @@
 
 # NO estoy seguro aun, hagamoslo correr y luego al deploy
 # require 'whenever/capistrano'
-lock "3.8.1"
+lock "3.8.2"
 
 set :application, "deployapp"
 set :repo_url, "git@github.com:ignaciowg93/api-factory-g5.git"
