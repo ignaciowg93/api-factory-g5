@@ -217,7 +217,7 @@ class Product < ApplicationRecord
 			  sleep(5)
 			end
 			sleep 1.0
+			conn.close
 		end
-		conn.close
 
 end
