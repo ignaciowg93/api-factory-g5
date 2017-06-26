@@ -203,17 +203,18 @@ class Product < ApplicationRecord
 			  payload = JSON.parse(payload)
 			  #msg_tp = "MENSAJE DE PRUEBA DESDE API"
 			  if payload["publicar"]
-			 		begin
-						product = (Product.find_by sku: payload["sku"]).name
-						to_publi = "Ahora+nuestro+#{product}+a+tan+solo+$#{payload["precio"]}.+Aprovecha+esta+oferta+con+el+codigo+#{payload["codigo"]}!"
+					product = (Product.find_by sku: payload["sku"])
+					if product != nil
+						product = product.name
+						to_publi = "Ahora+nuestro+#{product}+a+tan+solo+$#{payload["precio"].split(' ').join('+')}.+Aprovecha+esta+oferta+con+el+codigo+#{payload["codigo"]}!"
 						publi = HTTP.post("https://graph.facebook.com/307193066399367/feed?message=#{to_publi}&access_token=EAADxlJnEikwBAMhlvuWmPkZAX6kWLDhZACdjf7O1QKfzHwd3UBMqZCD76yObHWGZCAhvWhGOG9hHe9Bz4nu4m8hspeCkt7I5zWmXm0IPzTmmiZAWNkpkSSLtyopmv3RjGEPk24ZCg6rD8kpO76oen3ZCkWhEj391bHXVXXvnxNvF8OcgVTtLzep")
 						to_publi_tweet = "Ahora nuestro #{product} a tan solo $#{payload["precio"]}. Aprovecha esta oferta con el codigo #{payload["codigo"]}!"
 						publi_twitter = client.update(to_publi_tweet)
+						#client.update_with_media("I'm tweeting with @gem!", File.new("/path/to/media.png"))
 						puts publi
-       		rescue ActiveRecord::RecordNotFound
+     			else
 						puts("Producto no es nuestro")
-	         end
-			  end
+         	end
 			  sleep(5)
 			end
 			sleep 1.0
