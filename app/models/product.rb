@@ -182,6 +182,5 @@ class Product < ApplicationRecord
     	stock
     end
 
-	
 
 end

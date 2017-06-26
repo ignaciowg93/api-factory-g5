@@ -50,6 +50,31 @@ module ApiFactoryG5
     config.my_id = "5910c0910e42840004f6e684"
     config.time_zone = 'Santiago'
 
+
+    config.fb_images = {
+    "sku3"	=> "http://ve.emedemujer.com/wp-content/uploads/sites/2/2016/11/harina-de-ma%C3%ADz-660x400.jpg",
+
+    "sku5" => "https://c1.staticflickr.com/1/91/206868656_ed0c78d9ec_b.jpg",
+
+    "sku7"	=> "http://www.smartia.digital/sm-upload/2017/06/Paulina%20Monarrez%20Dia%20Mundial%20de%20la%20leche%20(4).jpg",
+
+    "sku9"	=> "https://calidadcarnecita.files.wordpress.com/2012/02/blog-curro1.jpg",
+
+    "sku11"	=> "https://i.ytimg.com/vi/Vrbfyax_T6s/hqdefault.jpg",
+
+    "sku15"	=> "http://nutricionsinmas.com/wp-content/uploads/2015/09/saco-de-avena-580x400.jpg",
+
+    "sku17"	=> "https://previews.123rf.com/images/dpimborough/dpimborough1407/dpimborough140700016/29816145-Puffed-cereal-de-arroz-y-az-car-pasta-de-arroz-que-se-forma-en-las-formas-de-arroz-Foto-de-archivo.jpg",
+
+    "sku22"	=> "https://ichef-1.bbci.co.uk/news/ws/624/amz/worldservice/live/assets/images/2016/01/08/160108125918_butter_624x351_thinkstock_nocredit.jpg",
+
+    "sku25"	=> "http://s3.amazonaws.com/lahora-cl-bkt/wp-content/uploads/2016/11/01175453/azucar.jpg",
+
+    "sku52"	=> "http://static.vix.com/es/sites/default/files/styles/large/public/imj/vivirsalud/H/Harina-refinada-o-harina-integral-1.jpg?itok=_So-PaeW",
+
+    "sku56"	=> "https://t1.uc.ltmcdn.com/images/1/3/2/img_como_hacer_hamburguesas_de_pollo_33231_600.jpg",
+    }
+
     # # DEVELOPMENT
     # config.secret = 'W1gCjv8gpoE4JnR'
     # config.base_route_oc = "https://integracion-2017-dev.herokuapp.com/oc/"
