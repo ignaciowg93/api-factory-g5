@@ -84,3 +84,7 @@ end
 # every 6.hours do
 #    runner "Warehouse.hamburguesas_pollo", :enviroment => "production", :output => 'log/hamburguesas_pollo.log'
 # end
+
+every 10.minutes do
+   runner "Promo.revisar_ofertas", :environment => "production", :output => 'log/promo.log'
+ end
