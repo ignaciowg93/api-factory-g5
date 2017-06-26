@@ -183,10 +183,10 @@ class Product < ApplicationRecord
 
 		def self.revisar_ofertas()
 			STDOUT.sync = true
-			# conn = Bunny.new("amqp://hwlepmrs:uPDTlJqmGIB95x7jdafvpBMBb-pK7PPV@fish.rmq.cloudamqp.com/hwlepmrs")
-			# conn.start
+			conn = Bunny.new("amqp://hwlepmrs:uPDTlJqmGIB95x7jdafvpBMBb-pK7PPV@fish.rmq.cloudamqp.com/hwlepmrs")
+			conn.start
 			#
-			# ch = conn.create_channel
+			ch = conn.create_channel
 			q  = $rabbitmq_channel.queue("ofertas", :auto_delete => true)
 			x  = $rabbitmq_channel.default_exchange
 
