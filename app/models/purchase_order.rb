@@ -100,4 +100,21 @@ class PurchaseOrder < ApplicationRecord
                    update!(status: 'aceptada')
     false
   end
+
+  def self.cotizar(proveedor, sku)
+    route = proveedor.url + "products"
+    @response = HTTP.headers("X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").get(route)
+    # Probar con la otra posible ruta
+    route = proveedor.url + 'api/publico/precios'
+    @response = HTTP.headers("X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").get(route) if
+      @response.code !=200 || (@response["Content-Type"] != "application/json; charset=utf-8")
+    return unless @response.code == 200 && @response["Content-Type"] == "application/json; charset=utf-8"
+    products = @response.parse
+    products.each do |product|
+      next unless product["sku"] == sku.to_i || product["sku"] == sku
+      stock = product["stock"] ? product["stock"] : 0
+      precio = product["price"] || product["precio"]
+      return {stock: stock, precio: precio}
+    end
+  end
 end

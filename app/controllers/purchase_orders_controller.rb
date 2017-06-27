@@ -11,16 +11,24 @@ class PurchaseOrdersController < ApplicationController
 
   def generate_PO
     # PO from us to others B2B
+    proveedor = Client.find_by(gnumber: params[:grupo])
+    cotizar = PurchaseOrder.cotizar(proveedor, params[:sku])
+    # Si no se puede leer de la api, se asume que se reviso manualmente
+    unless cotizar.nil? || cotizar[:stock] >= params[:cantidad]
+      render(json: { error: "No disponen de stock suficiente. Stock: #{cotizar[:stock]}" },
+             status: 400)
+    end
+
     response = HTTP.headers(accept: 'application/json').put(
       "#{Rails.configuration.base_route_oc}crear",
       json: {
         cliente: Rails.configuration.my_id,
-        proveedor: Client.find_by(gnumber: params[:grupo]).name,
+        proveedor: proveedor.name,
         sku: params[:sku],
         fechaEntrega: params[:fechaEntrega] ||
         (Time.zone.now + 3.day).to_f * 1000,
         cantidad: params[:cantidad],
-        precioUnitario: params[:precioUnitario], # || automatico sacar
+        precioUnitario: params[:precioUnitario] || cotizar[:precio],
         canal: 'b2b',
         notas: params[:notas] || 'vacio'
       }
