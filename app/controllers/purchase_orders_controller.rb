@@ -14,7 +14,7 @@ class PurchaseOrdersController < ApplicationController
     proveedor = Client.find_by(gnumber: params[:grupo])
     cotizar = PurchaseOrder.cotizar(proveedor, params[:sku])
     # Si no se puede leer de la api, se asume que se reviso manualmente
-    unless cotizar.nil? || cotizar[:stock] >= params[:cantidad]
+    unless cotizar.nil? || cotizar[:stock] >= params[:cantidad].to_i
       render(json: { error: "No disponen de stock suficiente. Stock: #{cotizar[:stock]}" },
              status: 400)
     end
