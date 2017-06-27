@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
 #Productos
-  get 'products/', to: 'product#index'
+  # get 'products/', to: 'product#index'
 
 #
   # Agregar el Metodo find para buscar un producto con el id como parametro
@@ -42,9 +42,9 @@ Rails.application.routes.draw do
 
 ####Lista de Precios
 
-  get 'api/publico/precios', to: 'product#prices'
-
-  get 'products', to: 'product#index'
+  # get 'api/publico/precios', to: 'product#prices'
+  #
+  # get 'products', to: 'product#index'
 
 #######
 # Metodos manuales para dashboard #
