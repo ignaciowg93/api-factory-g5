@@ -386,7 +386,7 @@ class Warehouse < ApplicationRecord
     stock_minimo = 1000 #Stock minimo que debe haber de la materia prima
     # puts 'entrando al stock'
     puts stock
-    if stock <= stock_minimo #Si tenemos menos stock del que deberia haber
+    if stock < stock_minimo #Si tenemos menos stock del que deberia haber
       dif = stock_minimo - stock
       #lotes = dif/60 #Esto da un numero int (3/2 = 1)
       #Esto no es necesario porque lo hace dentro del produce
