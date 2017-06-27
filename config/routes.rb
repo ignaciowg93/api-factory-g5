@@ -85,5 +85,10 @@ Rails.application.routes.draw do
 
   get 'spree', to: redirect('https://stark-garden-87198.herokuapp.com/')
 
+  #Promos  SPREE -- API
+
+  put 'promo', to: 'promos#revisar_codigo'
+
+
 
 end
