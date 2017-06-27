@@ -126,6 +126,26 @@ class Invoice < ApplicationRecord
     end
   end
 
+  def self.ya_pagada(factura_id)
+    factura = ""
+    3.times do
+      factura = HTTP.headers(accept: "application/json").get(Rails.configuration.base_route_factura + factura_id)
+      if factura.code == 200
+        break
+      end
+    end
+    if factura.code == 200
+      oc_id = factura.parse[0]["oc"]
+      if Invoice.where(po_idtemp: oc_id, paid: true).count > 0
+        return true
+      else
+        return false
+      end
+    end
+    return true
+
+  end
+
   def self.atender_factura(factura, factura_id, cuenta_banco)
     oc_id = factura.parse[0]["oc"]
     oc = PurchaseOrder.find_by(_id: oc_id)

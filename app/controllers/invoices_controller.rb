@@ -39,6 +39,8 @@ class InvoicesController < ApplicationController
       puts("resp es #{resp}")
       if !resp
         render json:{error: "Factura no encontrada"} , status:400
+      elsif Invoice.ya_pagada(params[:id])
+        render json:{ok: "Ya se envió y pagó una factura para esta OC"} , status:403
       else
         render json:{ok: "Factura recibida exitosamente"} , status:200
         puts("Resp code es #{resp}")
