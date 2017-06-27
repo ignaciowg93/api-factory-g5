@@ -59,10 +59,10 @@ class Promo < ApplicationRecord
             if ((Time.zone.now - fin)>0)
                 render json: {:existe =>true, :precio=>promo.precio}, status: 200
             else
-                render json: {:existe=>false, :precio=>promo.precio}, status: 401
+                render json: {:existe=>false}, status: 401
             end
         else 
-            render json: {:existe=>false, :precio=>promo.precio}, status: 404
+            render json: {:existe=>false}, status: 404
         end
     end
 
