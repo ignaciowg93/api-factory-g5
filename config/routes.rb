@@ -87,7 +87,7 @@ Rails.application.routes.draw do
 
   #Promos  SPREE -- API
 
-  put 'promo', to: 'promos#revisar_codigo'
+  put 'promo', to: 'promo#revisar_codigo'
 
 
 

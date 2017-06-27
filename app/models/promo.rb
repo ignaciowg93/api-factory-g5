@@ -50,7 +50,7 @@ class Promo < ApplicationRecord
         conn.close
     end
 
-    def self.revisar_codigo(id)
+    def self.revisar_codigo()
         sku = params["sku"]
         codigo = params["code"]
         promo = Promo.find_by codigo: codigo
