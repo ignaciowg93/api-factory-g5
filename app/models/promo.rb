@@ -28,7 +28,7 @@ class Promo < ApplicationRecord
 
             product = (Product.find_by sku: payload["sku"])
             if product != nil # si el producto es nuestro se guarda
-                Promo.create(sku: payload["sku"], precio: payload["precio"], inicio: payload["inicio"], fin: payload["fin"], codigo: payload["codigo"])
+                Promo.create(sku: payload["sku"], precio: payload["precio"], inicio: Time.at(payload["inicio"]/1000), fin: Time.at(payload["fin"]/1000), codigo: payload["codigo"])
                 product = product.name
                 if payload["publicar"] # solo publicamos algunas ofertas
                   puts product
@@ -50,7 +50,7 @@ class Promo < ApplicationRecord
         conn.close
     end
 
-    def self.revisar_codigo(id)
+    def self.revisar_codigo()
         sku = params["sku"]
         codigo = params["code"]
         promo = Promo.find_by codigo: codigo
