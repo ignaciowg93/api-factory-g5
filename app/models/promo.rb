@@ -14,7 +14,7 @@ class Promo < ApplicationRecord
             config.access_token_secret = "kyewGgZ9KBqrjyF8eNH7viS7P3qDkdzST0Z24FkCjkJPP"
         end
         STDOUT.sync = true
-        conn = Bunny.new("amqp://hwlepmrs:uPDTlJqmGIB95x7jdafvpBMBb-pK7PPV@fish.rmq.cloudamqp.com/hwlepmrs")
+        conn = Bunny.new("#{Rails.configuration.cola_ofertas}")
         conn.start
 
         ch = conn.create_channel
@@ -36,7 +36,7 @@ class Promo < ApplicationRecord
                   to_publi = "Ahora+nuestro+#{product.split(' ').join('+')}+a+tan+solo+$#{payload["precio"]}.+Aprovecha+esta+oferta+con+el+codigo+#{payload["codigo"]}!"
                   publi = HTTP.post("https://graph.facebook.com/307193066399367/feed?message=#{to_publi}&link=#{link_fb_image}&access_token=EAADxlJnEikwBAMhlvuWmPkZAX6kWLDhZACdjf7O1QKfzHwd3UBMqZCD76yObHWGZCAhvWhGOG9hHe9Bz4nu4m8hspeCkt7I5zWmXm0IPzTmmiZAWNkpkSSLtyopmv3RjGEPk24ZCg6rD8kpO76oen3ZCkWhEj391bHXVXXvnxNvF8OcgVTtLzep")
                   to_publi_tweet = "Ahora nuestro #{product} a tan solo $#{payload["precio"]}. Aprovecha esta oferta con el codigo #{payload["codigo"]}!"
-                  publi_twitter = client.update_with_media(to_publi_tweet, File.new("app/assets/images#{payload["sku"]}.jpg"))
+                  publi_twitter = client.update_with_media(to_publi_tweet, File.new("app/assets/images/#{payload["sku"]}.jpg"))
                   #client.update_with_media("I'm tweeting with @gem!", File.new("/path/to/media.png"))
                   puts publi
                 end
@@ -61,7 +61,7 @@ class Promo < ApplicationRecord
             else
                 render json: {:existe=>false}, status: 401
             end
-        else 
+        else
             render json: {:existe=>false}, status: 404
         end
     end
