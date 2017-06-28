@@ -49,7 +49,7 @@ module ApiFactoryG5
     config.ftp_pass = 'ARBQm2M5EwZn4GD3'
     config.my_id = "5910c0910e42840004f6e684"
     config.time_zone = 'Santiago'
-    #config.cola_ofertas = "amqp://kjyuymto:xgbHFOEpYvNbS9Gxb-3pBAfqf7mD-Dmp@fish.rmq.cloudamqp.com/kjyuymto"
+    config.cola_ofertas = "amqp://kjyuymto:xgbHFOEpYvNbS9Gxb-3pBAfqf7mD-Dmp@fish.rmq.cloudamqp.com/kjyuymto"
 
 
     config.fb_images = {
@@ -94,7 +94,7 @@ module ApiFactoryG5
     # config.ftp_pass = 'jR4mgD9tb6BNk2WM'
     # config.my_id = "590baa00d6b4ec0004902466"
     # config.time_zone = 'Santiago'
-    config.cola_ofertas = "amqp://hwlepmrs:uPDTlJqmGIB95x7jdafvpBMBb-pK7PPV@fish.rmq.cloudamqp.com/hwlepmrs"
+    # config.cola_ofertas = "amqp://hwlepmrs:uPDTlJqmGIB95x7jdafvpBMBb-pK7PPV@fish.rmq.cloudamqp.com/hwlepmrs"
 
   end
 end
