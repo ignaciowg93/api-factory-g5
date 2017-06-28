@@ -44,13 +44,13 @@ every 220.minutes do
    runner "Warehouse.revisar_yogur", :enviroment => "production", :output => 'log/yogur.log'
 end
 
-every 105.minutes do
-   runner "Warehouse.revisar_leche", :enviroment => "production", :output => 'log/leche.log'
-end
-
-every 200.minutes do
-   runner "Warehouse.revisar_carne", :enviroment => "production", :output => 'log/carne.log'
-end
+# every 105.minutes do
+#    runner "Warehouse.revisar_leche", :enviroment => "production", :output => 'log/leche.log'
+# end
+#
+# every 200.minutes do
+#    runner "Warehouse.revisar_carne", :enviroment => "production", :output => 'log/carne.log'
+# end
 
 every 194.minutes do
    runner "Warehouse.revisar_margarina", :enviroment => "production", :output => 'log/margarina.log'
