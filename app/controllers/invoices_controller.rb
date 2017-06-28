@@ -43,9 +43,10 @@ class InvoicesController < ApplicationController
         render json:{ok: "Ya se envió y pagó una factura para esta OC"} , status:403
       else
         render json:{ok: "Factura recibida exitosamente"} , status:200
-        puts("Resp code es #{resp}")
+        # puts("Resp code es #{resp}")
         to_put = ""
         Thread.new do
+          sleep(1)
           to_put = Invoice.atender_factura(resp, params[:id], params[:bank_account])
           puts "dentro del thread: #{to_put}"
         end
@@ -68,6 +69,13 @@ class InvoicesController < ApplicationController
         #   #   render json:{error:"Falta algún parámetro"}, status: 422
         #  end
     end
+
+    # def probar_render
+    #   render json:{ok: "Factura recibida exitosamente"} , status:200
+    #   puts "hola"
+    #   sleep(5)
+    #   puts "chao"
+    # end
 
     def accepted
         begin

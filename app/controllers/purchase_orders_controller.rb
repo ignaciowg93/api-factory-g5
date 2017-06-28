@@ -132,6 +132,22 @@ class PurchaseOrdersController < ApplicationController
     elsif PurchaseOrder.check_purchase_order(params[:id],
                                              params[:id_store_reception])
       render(json: { success: 'Orden recibida exitosamente. Se procederá a despacho al momento de aceptar y notificar factura por enviar' }, status: 200)
+
+      Thread.new do
+        order = PurchaseOrder.find_by(_id: params[:id])
+        return unless order && order.can_be_served? && order.auto_responder?
+
+        PurchaseOrder.acceptPurchaseOrder(params[:id])
+        client = Client.find_by(name: order.client)
+        grupo = client.gnumber
+        HTTP.headers(accept: 'application/json').patch(group_route(grupo) + params[:id] + '/accepted')
+
+        factura_id = Invoice.create_invoice(params[:id], false)
+        # Notificar envio factura
+        if factura_id
+          HTTP.headers(:accept => 'application/json', 'X-ACCESS-TOKEN' => Rails.configuration.my_id.to_s).put("#{client.url}invoices/#{factura_id}", json: { bank_account: Rails.configuration.banco_id })
+        end
+      end
     else
       render(json: { error: 'Orden de compra inválida' }, status: 400)
     end

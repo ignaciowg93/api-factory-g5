@@ -101,6 +101,9 @@ class PurchaseOrder < ApplicationRecord
     false
   end
 
+  def auto_responder?
+  end
+
   def self.cotizar(proveedor, sku)
     route = proveedor.url + "products"
     @response = HTTP.headers("X-ACCESS-TOKEN" => "#{Rails.configuration.my_id}").get(route)
