@@ -151,19 +151,9 @@ require 'digest'
 # PurchaseOrder.find_by(_id: '594378cfab8042000470337f').update(delivered_qt: 70)
 # PurchaseOrder.find_by(_id: '594378cfab8042000470337f').update(status: 'finalizada')
 
-# ProductionOrder.destroy_all(sku: "17")
+
 # ProductionOrder.create(sku:"17", amount:1000, est_date:"2017-06-17T00:22:53.225Z")
 
-# Cambio de precio
 
-Product.find_by(sku: '3').update(sell_price: 140)
-Product.find_by(sku: '5').update(sell_price: 900)
-Product.find_by(sku: '7').update(sell_price: 348)
-Product.find_by(sku: '9').update(sell_price: 420)
-Product.find_by(sku: '11').update(sell_price: 675)
-Product.find_by(sku: '15').update(sell_price: 331)
-Product.find_by(sku: '17').update(sell_price: 1182)
-Product.find_by(sku: '22').update(sell_price: 891)
-Product.find_by(sku: '25').update(sell_price: 111)
-Product.find_by(sku: '52').update(sell_price: 784)
-Product.find_by(sku: '56').update(sell_price: 1022)
+Invoice.destroy_all(po_idtemp: "5951da6ea1251b0004a57101")
+Invoice.create(invoiceid: "5951dad5a1251b0004a57106", po_idtemp: "5951da6ea1251b0004a57101", paid: true, accepted: true, proveedor: "5910c0910e42840004f6e680", cliente: "5910c0910e42840004f6e684", total_price: 56927)

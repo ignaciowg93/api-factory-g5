@@ -50,8 +50,8 @@ panel "Órdenes de compras finalizadas (cantidad):" do
      # line_chart   Content.pluck("download").uniq.map { |c| { title: c, data: Content.where(download: c).group_by_day(:updated_at, format: "%B %d, %Y").count }  }, discrete: true
      # column_chart Content.group_by_hour_of_day(:updated_at, format: "%l %P").order(:download).count, {library: {title:'Downloads for all providers'}}
      # column_chart Content.group(:title).order('download DESC').limit(5).sum(:download)
-     incompletas = PurchaseOrder.where(status: 'rechazada', delivery_date: Date.parse("2017-04-26")..Date.today).count
-     completas = PurchaseOrder.where(status: 'finalizada', delivery_date: Date.parse("2017-04-26")..Date.today).count
+     incompletas = PurchaseOrder.where(status: 'rechazada').count
+     completas = PurchaseOrder.where(status: 'finalizada').count
      # monto1 = 0
      # PurchaseOrder.where(status: 'no_completada').each do |po_ord|
      #   monto1 += (po_ord.amount * po_ord.unit_price)
@@ -68,11 +68,11 @@ panel "Órdenes de compras finalizadas (cantidad):" do
        # column_chart Content.group_by_hour_of_day(:updated_at, format: "%l %P").order(:download).count, {library: {title:'Downloads for all providers'}}
        # column_chart Content.group(:title).order('download DESC').limit(5).sum(:download)
        monto1 = 0
-       PurchaseOrder.where(status: 'rechazada', delivery_date: Date.parse("2017-04-26")..Date.today).each do |po_ord|
+       PurchaseOrder.where(status: 'rechazada').each do |po_ord|
          monto1 += (po_ord.amount * po_ord.unit_price)
        end
        monto2 = 0
-       PurchaseOrder.where(status: 'finalizada', delivery_date: Date.parse("2017-04-26")..Date.today).each do |po_ord|
+       PurchaseOrder.where(status: 'finalizada').each do |po_ord|
          monto2 += (po_ord.amount * po_ord.unit_price)
        end
        column_chart({"Exitosas" => monto2, "No exitosas" => monto1})
@@ -114,7 +114,8 @@ panel "Órdenes de compras finalizadas (cantidad):" do
     columns do
           column do
             panel "Órdenes de producción" do
-              table_for ProductionOrder.all.order('created_at desc') do
+              # sólo mostramos las últimas 10
+              table_for ProductionOrder.order('created_at desc').last(10) do
                 column("ID") {|prod| prod.id }
                 column("SKU") {|prod| prod.sku}
                 column("AMOUNT") {|prod| prod.amount}
@@ -244,9 +245,9 @@ panel "Órdenes de compras finalizadas (cantidad):" do
         # line_chart   Content.pluck("download").uniq.map { |c| { title: c, data: Content.where(download: c).group_by_day(:updated_at, format: "%B %d, %Y").count }  }, discrete: true
         # column_chart Content.group_by_hour_of_day(:updated_at, format: "%l %P").order(:download).count, {library: {title:'Downloads for all providers'}}
         # column_chart Content.group(:title).order('download DESC').limit(5).sum(:download)
-        creadas = PurchaseOrder.where(status: ['creada', 'aceptada'], channel: "ftp", delivery_date: Date.parse("2017-04-26")..Date.today).count
-        completas = PurchaseOrder.where(status: 'finalizada', channel: "ftp", delivery_date: Date.parse("2017-04-26")..Date.today).count
-        rechazadas = PurchaseOrder.where(status: 'rechazada', channel: "ftp", delivery_date: Date.parse("2017-04-26")..Date.today).count
+        creadas = PurchaseOrder.where(status: ['creada', 'aceptada'], channel: "ftp").count
+        completas = PurchaseOrder.where(status: 'finalizada', channel: "ftp").count
+        rechazadas = PurchaseOrder.where(status: 'rechazada', channel: "ftp").count
        # monto1 = 0
         # PurchaseOrder.where(status: 'no_completada').each do |po_ord|
         #   monto1 += (po_ord.amount * po_ord.unit_price)
@@ -260,11 +261,11 @@ panel "Órdenes de compras finalizadas (cantidad):" do
     end
 
     columns do
-      creadas = [ PurchaseOrder.where(status: ['creada', 'aceptada'], channel: "ftp", delivery_date: Date.parse("2017-04-26")..Date.today).count,
+      creadas = [ PurchaseOrder.where(status: ['creada', 'aceptada'], channel: "ftp").count,
                  "Recibidas"]
-      completas = [ PurchaseOrder.where(status: 'finalizada', channel: "ftp", delivery_date: Date.parse("2017-04-26")..Date.today).count,
+      completas = [ PurchaseOrder.where(status: 'finalizada', channel: "ftp").count,
                    "Completadas"]
-      rechazadas = [ PurchaseOrder.where(status: 'rechazada', channel: "ftp", delivery_date: Date.parse("2017-04-26")..Date.today).count,
+      rechazadas = [ PurchaseOrder.where(status: 'rechazada', channel: "ftp").count,
                     "Rechazadas"]
       total = creadas[0] + completas[0] + rechazadas[0]
       ordenes_ftp = [creadas, completas, rechazadas]
@@ -282,7 +283,7 @@ panel "Órdenes de compras finalizadas (cantidad):" do
   columns do
         column do
           panel "Órdenes de Compra FTP Recibidas" do
-            table_for PurchaseOrder.where(status: ["creada", "aceptada"], channel: "ftp", delivery_date: Date.parse("2017-04-26")..Date.today).order('updated_at desc') do
+            table_for PurchaseOrder.where(status: ["creada", "aceptada"], channel: "ftp").order('updated_at desc').last(10) do
               column("ID") {|poid| poid._id }
               column("SKU") {|poid| poid.sku}
               column("AMOUNT") {|poid| poid.amount}
@@ -295,7 +296,7 @@ panel "Órdenes de compras finalizadas (cantidad):" do
       columns do
             column do
               panel "Órdenes de Compra FTP Rechazadas" do
-                table_for PurchaseOrder.where(status: "rechazada", channel: "ftp", delivery_date: Date.parse("2017-04-26")..Date.today).order('updated_at desc') do
+                table_for PurchaseOrder.where(status: "rechazada", channel: "ftp").order('updated_at desc').last(10) do
                   column("ID") {|poid| poid._id }
                   column("SKU") {|poid| poid.sku}
                   column("AMOUNT") {|poid| poid.amount}
@@ -311,7 +312,7 @@ panel "Órdenes de compras finalizadas (cantidad):" do
       columns do
             column do
               panel "Órdenes de Compra FTP Completadas" do
-                table_for PurchaseOrder.where(status: "finalizada", channel: "ftp", delivery_date: Date.parse("2017-04-26")..Date.today).order('updated_at desc') do
+                table_for PurchaseOrder.where(status: "finalizada", channel: "ftp").order('updated_at desc').last(10) do
                   column("ID") {|poid| poid._id }
                   column("SKU") {|poid| poid.sku}
                   column("AMOUNT") {|poid| poid.amount}

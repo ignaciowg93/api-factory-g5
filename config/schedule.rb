@@ -20,10 +20,6 @@
 # Learn more: http://github.com/javan/whenever
 env :PATH, ENV['PATH']
 
-# every 5.minutes do
-#    runner "Product.revisar_ofertas", :enviroment => "production", :output => 'log/ofertas.log'
-# end
-
 every 45.minutes do
    runner "Warehouse.vaciar_pulmon", :enviroment => "production", :output => 'log/pulmon.log'
 end
@@ -44,13 +40,13 @@ every 220.minutes do
    runner "Warehouse.revisar_yogur", :enviroment => "production", :output => 'log/yogur.log'
 end
 
-# every 105.minutes do
-#    runner "Warehouse.revisar_leche", :enviroment => "production", :output => 'log/leche.log'
-# end
-#
-# every 200.minutes do
-#    runner "Warehouse.revisar_carne", :enviroment => "production", :output => 'log/carne.log'
-# end
+every 105.minutes do
+   runner "Warehouse.revisar_leche", :enviroment => "production", :output => 'log/leche.log'
+end
+
+every 200.minutes do
+   runner "Warehouse.revisar_carne", :enviroment => "production", :output => 'log/carne.log'
+end
 
 every 194.minutes do
    runner "Warehouse.revisar_margarina", :enviroment => "production", :output => 'log/margarina.log'
@@ -80,6 +76,6 @@ every 101.minutes do
    runner "Warehouse.hamburguesas_pollo", :enviroment => "production", :output => 'log/hamburguesas_pollo.log'
 end
 
-# every 30.minutes do
-#    runner "Promo.revisar_ofertas", :environment => "production", :output => 'log/promo.log'
-# end
+every 20.minutes do
+   runner "Promo.revisar_ofertas", :environment => "production", :output => 'log/promo.log'
+end
