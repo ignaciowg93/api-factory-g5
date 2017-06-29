@@ -76,7 +76,7 @@ require 'digest'
 #
 # s11 = p11.supplies.create(sku: '4', requierment: 828, stock_reservado: 0)
 # # s11.sellers.create(seller: '8', time: 1.205)
-# # s11.sellers.create(seller: '6', time: 2.615)
+# # s11.sellers.create(seller: '6', time: 2.615)	
 # # s11.sellers.create(seller: '4', time: 2.713)
 #
 # s171 = p17.supplies.create(sku: '25', requierment: 360, stock_reservado: 0)

@@ -14,7 +14,7 @@ class Promo < ApplicationRecord
             config.access_token_secret = "kyewGgZ9KBqrjyF8eNH7viS7P3qDkdzST0Z24FkCjkJPP"
         end
         Rails.logger.debug "ESTE ES EL CLIENT DE TWITTER"   
-        Rails.logger.debug client
+        Rails.logger.debug clie
         STDOUT.sync = true
         conn = Bunny.new("#{Rails.configuration.cola_ofertas}")
         conn.start

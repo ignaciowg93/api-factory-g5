@@ -211,7 +211,7 @@ class PurchaseOrdersController < ApplicationController
       oc = HTTP.headers(accept: 'application/json').get(Rails.configuration.base_route_oc + 'obtener/' + params[:id])
       if oc.code == 200
         orden_compra = oc.parse
-        if orden_compra['estado'] == 'rechazada'
+        if orden_compra[0]['estado'] == 'rechazada'
           if @purchase_order
             @purchase_order.status = 'rechazada'
             if @purchase_order.save!
