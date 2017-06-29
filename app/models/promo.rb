@@ -18,6 +18,7 @@ class Promo < ApplicationRecord
         conn.start
 
         ch = conn.create_channel
+        puts ch
         q  = ch.queue("ofertas", :auto_delete => true)
         x  = ch.default_exchange
 

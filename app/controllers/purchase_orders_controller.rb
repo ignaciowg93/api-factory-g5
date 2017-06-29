@@ -235,7 +235,7 @@ class PurchaseOrdersController < ApplicationController
   end
 
   def purchase_order_params
-    params.permit(:purchase_order, :id, :payment_method, :payment_option, :rejection, :poid)
+    params.permit(:purchase_order, :id, :payment_method, :payment_option, :rejection, :poid, :direccion)
   end
 
   def set_purchase_order

@@ -28,10 +28,11 @@ form do |f|
       f.input :notes
       f.input :rejection
       f.input :anullment
+      f.input :direccion
     end
     f.actions
   end
 
-permit_params :_id, :client, :supplier, :sku,:delivery_date,:amount,:delivered_qt,:unit_price,:channel,:status,:notes,:rejection,:anullment
+permit_params :_id, :client, :supplier, :sku,:delivery_date,:amount,:delivered_qt,:unit_price,:channel,:status,:notes,:rejection,:anullment,:direccion
 
 end
