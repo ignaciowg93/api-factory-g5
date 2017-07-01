@@ -27,7 +27,7 @@ class Promo < ApplicationRecord
 
         cortar = 0
         q.subscribe do |delivery_info, metadata, payload|
-            puts payload
+            Rails.logger.debug payload
             payload = JSON.parse(payload)
 
             product = (Product.find_by sku: payload["sku"])
