@@ -1,6 +1,7 @@
 require 'bunny'
 require 'rubygems'
 require 'rest-client'
+require 'twitter'
 
 class Promo < ApplicationRecord
 
