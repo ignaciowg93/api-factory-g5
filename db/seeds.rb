@@ -76,7 +76,7 @@ require 'digest'
 #
 # s11 = p11.supplies.create(sku: '4', requierment: 828, stock_reservado: 0)
 # # s11.sellers.create(seller: '8', time: 1.205)
-# # s11.sellers.create(seller: '6', time: 2.615)	
+# # s11.sellers.create(seller: '6', time: 2.615)
 # # s11.sellers.create(seller: '4', time: 2.713)
 #
 # s171 = p17.supplies.create(sku: '25', requierment: 360, stock_reservado: 0)
@@ -155,5 +155,9 @@ require 'digest'
 # ProductionOrder.create(sku:"17", amount:1000, est_date:"2017-06-17T00:22:53.225Z")
 
 
-Invoice.destroy_all(po_idtemp: "5951da6ea1251b0004a57101")
-Invoice.create(invoiceid: "5951dad5a1251b0004a57106", po_idtemp: "5951da6ea1251b0004a57101", paid: true, accepted: true, proveedor: "5910c0910e42840004f6e680", cliente: "5910c0910e42840004f6e684", total_price: 56927)
+#Invoice.destroy_all(po_idtemp: "5951da6ea1251b0004a57101")
+#Invoice.create(invoiceid: "5951dad5a1251b0004a57106", po_idtemp: "5951da6ea1251b0004a57101", paid: true, accepted: true, proveedor: "5910c0910e42840004f6e680", cliente: "5910c0910e42840004f6e684", total_price: 56927)
+
+
+ProductionOrder.destroy_all(sku: "56")
+ProductionOrder.create(sku:"56", amount:620, est_date:"2017-07-01T18:08:14.003Z")
