@@ -15,7 +15,7 @@ class PurchaseOrdersController < ApplicationController
     cotizar = PurchaseOrder.cotizar(proveedor, params[:sku])
     # Si no se puede leer de la api, se asume que se reviso manualmente
     unless cotizar.nil? || cotizar[:stock] >= params[:cantidad].to_i
-      render(json: { error: "No disponen de stock suficiente. Stock: #{cotizar[:stock]}" },
+      return render(json: { error: "No disponen de stock suficiente. Stock: #{cotizar[:stock]}" },
              status: 400)
     end
 
@@ -34,7 +34,7 @@ class PurchaseOrdersController < ApplicationController
       }
     )
     unless response.code == 200
-      render(json: { error: 'No se pudo ingresar la orden en el sistema' },
+      return render(json: { error: 'No se pudo ingresar la orden en el sistema' },
              status: 400)
     end
 
