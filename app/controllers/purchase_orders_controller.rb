@@ -102,6 +102,7 @@ class PurchaseOrdersController < ApplicationController
                 PurchaseOrder.find_by(_id: poid)
 
         next unless order && order.can_be_served?
+        puts "aca"
         Invoice.create_invoice(poid, false)
         Warehouse.to_despacho_and_delivery(poid)
       end
@@ -194,39 +195,20 @@ class PurchaseOrdersController < ApplicationController
   end
 
   def rejected
-    if params.key?(:cause)
-      @causa = params[:cause]
-      if @causa == ''
-        render json: { error: 'Debe entregar una razón de rechazo' }, status: 400
-      else
-        if @causa.nil?
-          render json: { error: 'Debe entregar una causa distinta de nula' }, status: 400
-        end
-      end
-    else
-      render json: { error: 'Formato de body incorrecto' }, status: 400
-    end
+    return render({
+        json: { error: "Por favor entregar razón de rechazo 'cause:'" },
+          status: 400
+    }) if params[:cause].blank?
+
     @purchase_order = PurchaseOrder.find_by(_id: params[:id])
-    if @purchase_order.status == 'creada'
-      oc = HTTP.headers(accept: 'application/json').get(Rails.configuration.base_route_oc + 'obtener/' + params[:id])
-      if oc.code == 200
-        orden_compra = oc.parse
-        if orden_compra[0]['estado'] == 'rechazada'
-          if @purchase_order
-            @purchase_order.status = 'rechazada'
-            if @purchase_order.save!
-              render json: { ok: 'Resolución recibida exitosamente' }, status: 200
-            end
-          end
-        else
-          render json: { error: 'ORden de compra No se encuentra aceptada en el sistema' }, status: 400
-        end
-      else
-        render json: { error: 'Orden de compra no encontrada' }, status: 404
-      end
+    @purchase_order.update(status: "rechazada")
+    # Rechazar en el sistema, para asegurarse
+    notificacion_sistema = HTTP.headers(accept: 'application/json').post(Rails.configuration.base_route_oc + 'rechazar/' + poid,
+                                                                  json: { _id: params[:id], rechazo: params[:cause] })
+    if notificacion_sistema.code == 200
+      render json: { ok: 'Resolución recibida exitosamente' }, status: 200
     else
-      render json: { error: 'Orden de Compra ya resuelta' }, status: 403
-      # The provider rejects a PO created by us. Check its existance.
+      render json: { error: 'Favor rechazar en el sistema' }, status: 404
     end
   end
 
