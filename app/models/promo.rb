@@ -27,8 +27,8 @@ class Promo < ApplicationRecord
 
         cortar = 0
         q.subscribe do |delivery_info, metadata, payload|
-            Rails.logger.debug payload
             payload = JSON.parse(payload)
+            Rails.logger.debug payload
 
             product = (Product.find_by sku: payload["sku"])
             if product != nil # si el producto es nuestro se guarda
@@ -42,6 +42,8 @@ class Promo < ApplicationRecord
                   to_publi_tweet = "Ahora nuestro #{product} a tan solo $#{payload["precio"]}. Aprovecha esta oferta con el codigo #{payload["codigo"]}!"
                   #publi_twitter = client.update_with_media(to_publi_tweet, File.new("app/assets/images/#{payload["sku"]}.jpg"))
                   publi_twitter = client.update(to_publi_tweet)
+                  Rails.logger.debug "ESTA ES LA RESPUESTA DEL TWEET"
+                  Rails.logger.debug publi_twitter
                   #client.update_with_media("I'm tweeting with @gem!", File.new("/path/to/media.png"))
                   puts publi
                 end
