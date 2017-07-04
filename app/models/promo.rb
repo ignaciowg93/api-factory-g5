@@ -31,9 +31,10 @@ class Promo < ApplicationRecord
                   link_fb_image = Rails.configuration.fb_images["sku#{payload["sku"]}"]
                   to_publi = "Ahora+nuestro+#{product.split(' ').join('+')}+a+tan+solo+$#{payload["precio"]}.+Aprovecha+esta+oferta+con+el+codigo+#{payload["codigo"]}!"
                   publi = HTTP.post("https://graph.facebook.com/307193066399367/feed?message=#{to_publi}&link=#{link_fb_image}&access_token=EAADxlJnEikwBAMhlvuWmPkZAX6kWLDhZACdjf7O1QKfzHwd3UBMqZCD76yObHWGZCAhvWhGOG9hHe9Bz4nu4m8hspeCkt7I5zWmXm0IPzTmmiZAWNkpkSSLtyopmv3RjGEPk24ZCg6rD8kpO76oen3ZCkWhEj391bHXVXXvnxNvF8OcgVTtLzep")
-                  to_publi_tweet = "Ahora nuestro #{product} a tan solo $#{payload["precio"]}. Aprovecha esta oferta con el codigo #{payload["codigo"]}!"
-                  #publi_twitter = client.update_with_media(to_publi_tweet, File.new("app/assets/images/#{payload["sku"]}.jpg"))
+                  Rails.logger.debug "ESTA ES LA RESPUESTA DE FB"
+                  Rails.logger.debug publi
                   Rails.logger.debug "ESTE ES EL STRING DEL TWEET"
+                  to_publi_tweet = "Ahora nuestro #{product} a tan solo $#{payload["precio"]}. Aprovecha esta oferta con el codigo #{payload["codigo"]}!"
                   Rails.logger.debug to_publi_tweet
                   client = Twitter::REST::Client.new do |config|
                       config.consumer_key        = "iExeOPmt0NyO5Q5ftB0JSEuCi"
@@ -44,10 +45,9 @@ class Promo < ApplicationRecord
                   Rails.logger.debug "ESTE ES EL CLIENT DE TWITTER"
                   Rails.logger.debug client
                   Rails.logger.debug "ESTA ES LA RESPUESTA DEL TWEET"
-                  publi_twitter = client.update(to_publi_tweet)
+                  publi_twitter = client.update_with_media(to_publi_tweet, File.new("app/assets/images/#{payload["sku"]}.jpg"))
                   Rails.logger.debug publi_twitter
                   #client.update_with_media("I'm tweeting with @gem!", File.new("/path/to/media.png"))
-                  puts publi
                 end
             else # el producto no es nuestro, ignorar
               puts("Producto no es nuestro")
