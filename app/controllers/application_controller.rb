@@ -82,7 +82,7 @@ class ApplicationController < ActionController::Base
       end
     end
 
-    def check_status_update_log
+    def promo_log
       if File.exist? 'log/promo.log'
         @tail = `tail -n 200 log/promo.log`
       else
