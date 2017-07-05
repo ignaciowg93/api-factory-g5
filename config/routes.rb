@@ -89,6 +89,8 @@ Rails.application.routes.draw do
 
   put 'promo', to: 'promo#revisar_codigo'
 
+  get 'admin/promo' , to: 'application#promo_log'
+
 
 
 end
